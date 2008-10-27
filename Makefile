@@ -1,6 +1,6 @@
 CXXFLAGS = -O1 -fno-inline-functions -ggdb3 -Wall -Werror -Wextra -pedantic
 
-OBJS = $(subst .cpp,.o,$(wildcard *.cpp))
+OBJS = $(subst .cpp,.o,$(wildcard src/*.cpp))
 
 eir: $(OBJS)
 	g++ $(CXXFLAGS) -o $@ $^ -lboost_system
