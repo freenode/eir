@@ -6,16 +6,19 @@
 #include <tr1/memory>
 
 namespace eir {
+    class Bot;
+
     struct Message {
+        Bot *bot;
         std::string source;
-        std::string destination;
         std::string command;
+        std::string destination;
         std::vector<std::string> args;
 
-        Message(std::string s, std::string d, std::string c)
-            : source(s), destination(d), command(c)
+        Message(Bot *b, std::string s, std::string c, std::string d)
+            : bot(b), source(s), command(c), destination(d)
         { }
-        Message() { }
+        Message(Bot *b) : bot(b) { }
     };
 }
 

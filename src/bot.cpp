@@ -1,4 +1,5 @@
 #include "bot.h"
+#include "command.h"
 
 using namespace eir;
 
@@ -16,18 +17,31 @@ Bot::~Bot()
 
 void Bot::handle_message(std::string line)
 {
-    Message m;
+    Message m(this);
     std::string::size_type p1, p2;
 
     std::string::iterator e = line.end();
     if (*--e == '\r')
         line.erase(e);
 
+    /*
     p1 = line[0] == ':' ? 1 : 0;
     p2 = line.find(' ');
     m.source = line.substr(p1, p2 - p1);
+    */
+    if (line[0] == ':')
+    {
+        p1 = 1;
+        p2 = line.find(' ');
+        m.source = line.substr(p1, p2 - p1);
+        p1 = p2 + 1;
+    }
+    else
+    {
+        m.source = "";
+        p1 = 0;
+    }
 
-    p1 = p2 + 1;
     p2 = line.find(' ', p1);
     m.command = line.substr(p1, p2 - p1);
 
@@ -47,15 +61,15 @@ void Bot::handle_message(std::string line)
         m.args.push_back(line.substr(p1, p2 - p1));
     }
 
-    _dispatcher.dispatch(m);
+    CommandRegistry::get_instance()->dispatch(&m);
 }
 
 void Bot::run()
 {
     _server.connect(_host, _port);
 
-    Message m("", "", "on_connect");
-    _dispatcher.dispatch(m);
+    Message m(this, "", "on_connect", "");
+    CommandRegistry::get_instance()->dispatch(&m);
 
     if (_pass.length() > 0)
         _server.send("PASS " + _pass);
@@ -64,4 +78,9 @@ void Bot::run()
     _server.send("USER eir * * :eir version 0.0.1");
 
     _server.run();
+}
+
+void Bot::send(std::string line)
+{
+    _server.send(line);
 }

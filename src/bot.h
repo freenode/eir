@@ -4,7 +4,6 @@
 #include <string>
 
 #include "server.h"
-#include "command.h"
 
 namespace eir {
 
@@ -13,15 +12,14 @@ namespace eir {
         public:
             Bot(std::string host, std::string port, std::string nick, std::string pass);
 
-            Dispatcher *dispatcher() { return &_dispatcher; }
-
             void run();
+
+            void send(std::string);
 
             Bot();
             ~Bot();
 
         private:
-            Dispatcher _dispatcher;
             Server _server;
             std::string _host, _port, _nick, _pass;
 

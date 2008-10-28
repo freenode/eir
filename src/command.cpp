@@ -4,7 +4,7 @@
 
 using namespace eir;
 
-bool Dispatcher::IrcStringCmp::operator() (std::string s1, std::string s2)
+bool CommandRegistry::IrcStringCmp::operator() (std::string s1, std::string s2)
 {
     std::string::iterator i1 = s1.begin(), e1 = s1.end(), i2 = s2.begin(), e2 = s2.end();
     int res = 0;
@@ -20,26 +20,39 @@ bool Dispatcher::IrcStringCmp::operator() (std::string s1, std::string s2)
     }
 }
 
-void Dispatcher::dispatch(const Message& m)
+void CommandRegistry::dispatch(const Message *m)
 {
-    HandlerMap::iterator it = _handlers.find(m.command);
+    HandlerMap::iterator it = _handlers.find(m->command);
     if (it != _handlers.end())
     {
         HandlerList & l = (*it).second;
         for ( HandlerList::iterator i2 = l.begin(), i2_e = l.end(); i2 != i2_e; ++i2)
         {
-            (*i2)(m);
+            (*i2).second(m);
         }
     }
 }
 
-void Dispatcher::add_handler(std::string s, const Dispatcher::handler & h)
+CommandRegistry::id CommandRegistry::add_handler(std::string s, const CommandRegistry::handler & h)
 {
+    static uintptr_t next_id = 0;
+
     HandlerMap::iterator mi = _handlers.find(s);
     if (mi == _handlers.end())
     {
         mi = _handlers.insert(std::make_pair(s, HandlerList())).first;
     }
     HandlerList& l = (*mi).second;
-    l.push_back(h);
+    l.insert(make_pair(id(++next_id), h));
+    return id(next_id);
 }
+
+void CommandRegistry::remove_handler(id h)
+{
+    HandlerMap::iterator mi = _handlers.begin(), me = _handlers.end();
+    for ( ; mi != me; ++mi)
+    {
+        (*mi).second.erase(h);
+    }
+}
+
