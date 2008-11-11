@@ -10,19 +10,25 @@ bool CommandRegistry::IrcStringCmp::operator() (std::string s1, std::string s2)
     int res = 0;
     while(true)
     {
-        res = *i1++ - *i2++;
-        if(res != 0)
-            return res < 0;
         if(i1 == e1)
             return i2 != e2;
         if(i2 == e2)
             return false;
+        res = *i1++ - *i2++;
+        if(res != 0)
+            return res < 0;
     }
 }
 
 void CommandRegistry::dispatch(const Message *m)
 {
-    HandlerMap::iterator it = _handlers.find(m->command);
+    _dispatch(_handlers.find(m->command), m);
+    _dispatch(_handlers.find(""), m);
+}
+
+
+void CommandRegistry::_dispatch(HandlerMap::iterator it, const Message *m)
+{
     if (it != _handlers.end())
     {
         HandlerList & l = (*it).second;

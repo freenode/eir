@@ -27,6 +27,7 @@ namespace eir
             typedef std::map<id, handler> HandlerList;
             typedef std::map<std::string, HandlerList, IrcStringCmp> HandlerMap;
             HandlerMap _handlers;
+            void _dispatch(HandlerMap::iterator, const Message *);
     };
 }
 
