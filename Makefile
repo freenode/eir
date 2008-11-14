@@ -1,4 +1,4 @@
-CXXFLAGS = -O1 -fno-inline-functions -ggdb3 -I. -Wall -Werror -Wextra -pedantic
+CXXFLAGS = -O0 -fno-inline-functions -ggdb3 -I. -Wall -Werror -Wextra -pedantic
 LDFLAGS = -Wl,-export-dynamic
 
 mod_INCLUDES = -I. -Isrc

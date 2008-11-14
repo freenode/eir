@@ -3,10 +3,12 @@
 #include <iostream>
 #include <boost/asio.hpp>
 
+#include <paludis/util/private_implementation_pattern-impl.hh>
+
 using namespace eir;
 using boost::asio::ip::tcp;
 
-namespace eir
+namespace paludis
 {
     template<>
     struct Implementation<eir::Server> {
@@ -25,7 +27,7 @@ namespace eir
 }
 
 Server::Server(const Handler& handler)
-    : util::Pimpl<Server>(new Implementation<Server>(handler))
+    : paludis::PrivateImplementationPattern<Server>(new paludis::Implementation<Server>(handler))
 {
 }
 
@@ -60,8 +62,6 @@ void Server::send(std::string line)
 
     _imp->_stream << line;
 }
-
-
 
 void Server::run()
 {

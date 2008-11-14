@@ -24,6 +24,8 @@ void Bot::handle_message(std::string line)
     if (*--e == '\r')
         line.erase(e);
 
+    m.raw = line;
+
     /*
     p1 = line[0] == ':' ? 1 : 0;
     p2 = line.find(' ');
@@ -49,14 +51,11 @@ void Bot::handle_message(std::string line)
         ClientIterator c = find_client(nick);
         if (c != _clients.end())
             m.source.client = c->second;
-        else
-            m.source.client = 0;
 
         m.source.name = nick;
     }
     else
     {
-        m.source.client = 0;
         m.source.name = m.source.raw;
     }
 
@@ -67,7 +66,13 @@ void Bot::handle_message(std::string line)
     p2 = line.find(' ', p1);
     std::string destination = line.substr(p1, p2 - p1);
 
-    if (destination[0] == '#' || destination[0] == '&')
+    if(destination[0] == ':')
+    {
+        destination = line.substr(p1 + 1);
+        p2 = std::string::npos;
+    }
+
+    if (destination.find_first_of("#&") != std::string::npos)
     {
         m.source.in_channel = true;
         m.source.channel = destination;
@@ -90,6 +95,16 @@ void Bot::handle_message(std::string line)
     CommandRegistry::get_instance()->dispatch(&m);
 }
 
+void Bot::_init_me(const Message *m)
+{
+    _nick = m->source.destination;
+    Client::ptr c(new Client(_nick, "", ""));
+    _me = c;
+    _clients.insert(make_pair(_nick, _me));
+    send("USERHOST " + _nick);
+}
+
+
 void Bot::run()
 {
     _server.connect(_host, _port);
@@ -110,51 +125,4 @@ void Bot::send(std::string line)
 {
     _server.send(line);
 }
-
-void Bot::_handle_join(const Message *m)
-{
-    Client *c = m->source.client;
-
-    if (!c)
-    {
-        ClientIterator cli = _clients.find(m->source.nick);
-        if (cli != _clients.end())
-            c = cli->second;
-    }
-    if(!c)
-    {
-        // We don't know anything about this client. Make a new client struct and join it.
-        std::string nick, user, host;
-        std::string::size_type bang, at;
-        bang = m->source.raw.find('!');
-        if(bang == std::string::npos)
-        {
-            // What? Something that's not a user just joined a channel.
-            throw std::exception("Something that's not a user just joined a channel. I'm confused.");
-        }
-        nick = m->source.raw.substr(bang);
-        at = m->source.raw.find('@', bang + 1);
-        user = m->source.raw.substr(bang + 1, at - bang - 1);
-        host = m->source.raw.substr(at + 1, std::string::npos);
-
-        c = new Client(nick, user, host);
-        _clients.insert(nick, c);
-    }
-
-    Channel *ch = 0;
-    ChannelIterator chi = _channels.find(m->source.channel);
-    if (chi != _channels.end())
-    {
-        ch = chi->second;
-    }
-    else
-    {
-        ch = new Channel(m->source.channel);
-        _channels.insert(m->source.channel, ch);
-    }
-
-    c->join_chan(ch);
-}
-
-
 

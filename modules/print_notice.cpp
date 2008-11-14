@@ -5,7 +5,7 @@
 #include <iterator>
 
 using namespace std::tr1::placeholders;
-
+/*
 struct notice_printer{
     void print(const eir::Message * m)
     {
@@ -23,4 +23,4 @@ struct notice_printer{
 };
 
 notice_printer p;
-
+*/

@@ -2,12 +2,11 @@
 #define server_h
 
 #include <tr1/functional>
-
-#include "pimpl.h"
+#include <paludis/util/private_implementation_pattern.hh>
 
 namespace eir
 {
-    class Server : private util::Pimpl<Server>
+    class Server : private paludis::PrivateImplementationPattern<Server>
     {
         public:
             typedef std::tr1::function<void(std::string)> Handler;

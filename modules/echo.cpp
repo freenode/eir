@@ -3,7 +3,7 @@
 
 using namespace eir;
 using namespace std::tr1::placeholders;
-
+/*
 struct echo {
     void do_echo(const Message *m)
     {
@@ -18,3 +18,4 @@ struct echo {
 };
 
 echo e;
+*/
