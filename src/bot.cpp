@@ -64,18 +64,18 @@ void Bot::handle_message(std::string line)
 
     p1 = p2 + 1;
     p2 = line.find(' ', p1);
-    std::string destination = line.substr(p1, p2 - p1);
+    m.source.destination = line.substr(p1, p2 - p1);
 
-    if(destination[0] == ':')
+    if(m.source.destination[0] == ':')
     {
-        destination = line.substr(p1 + 1);
+        m.source.destination = line.substr(p1 + 1);
         p2 = std::string::npos;
     }
 
-    if (destination.find_first_of("#&") != std::string::npos)
+    if (m.source.destination.find_first_of("#&") != std::string::npos)
     {
         m.source.in_channel = true;
-        m.source.channel = destination;
+        m.source.channel = m.source.destination;
     }
     else
         m.source.in_channel = false;

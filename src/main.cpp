@@ -25,6 +25,7 @@ int main()
     //eir::CommandRegistry::get_instance()->add_handler("NOTICE", print);
     //eir::ModuleRegistry::get_instance()->load("modules/print_notice.so");
     eir::ModuleRegistry::get_instance()->load("modules/channel.so");
+    eir::ModuleRegistry::get_instance()->load("modules/ping.so");
     eir::ModuleRegistry::get_instance()->load("modules/echo.so");
     eir::CommandRegistry::get_instance()->add_handler("001", on_connect);
     eir::CommandRegistry::get_instance()->add_handler("", print);
