@@ -47,7 +47,7 @@ void Bot::handle_message(std::string line)
     std::string::size_type bang = m.source.raw.find('!');
     if (bang != std::string::npos)
     {
-        std::string nick = m.source.raw.substr(bang);
+        std::string nick = m.source.raw.substr(0, bang);
         ClientIterator c = find_client(nick);
         if (c != _clients.end())
             m.source.client = c->second;
