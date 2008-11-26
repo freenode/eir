@@ -19,6 +19,8 @@ namespace paludis
 
         std::set<Channel::ptr> channels;
 
+        PrivilegeSet privs;
+
         Implementation(std::string n, std::string u, std::string h)
             : nick(n), user(u), host(h)
         { }
@@ -69,6 +71,11 @@ void Client::leave_chan(Channel::ptr c)
 {
     c->remove_member(shared_from_this());
     _imp->channels.erase(c);
+}
+
+PrivilegeSet& Client::privs()
+{
+    return _imp->privs;
 }
 
 Client::Client(std::string n, std::string u, std::string h)

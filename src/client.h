@@ -1,6 +1,8 @@
 #ifndef client_h
 #define client_h
 
+#include "privilege.h"
+
 #include <string>
 #include <tr1/memory>
 
@@ -39,6 +41,8 @@ namespace eir
         typedef paludis::WrappedForwardIterator<ChannelIteratorTag, const ChannelPtr> ChannelIterator;
         ChannelIterator begin_channels();
         ChannelIterator end_channels();
+
+        PrivilegeSet& privs();
 
         typedef std::tr1::shared_ptr<Client> ptr;
     };
