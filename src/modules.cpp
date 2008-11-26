@@ -1,8 +1,12 @@
 #include "modules.h"
 
+#include <paludis/util/instantiation_policy-impl.hh>
+
 #include <dlfcn.h>
 
 using namespace eir;
+
+template class paludis::InstantiationPolicy<ModuleRegistry, paludis::instantiation_method::SingletonTag>;
 
 void ModuleRegistry::load(std::string name) throw(ModuleError)
 {

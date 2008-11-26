@@ -3,7 +3,8 @@
 
 #include <string>
 #include <map>
-#include "singleton.h"
+#include <paludis/util/exception.hh>
+#include <paludis/util/instantiation_policy.hh>
 
 namespace eir {
 
@@ -19,7 +20,7 @@ namespace eir {
         ~ModuleError() throw() { }
     };
 
-    class ModuleRegistry : public util::Singleton<ModuleRegistry>
+    class ModuleRegistry : public paludis::InstantiationPolicy<ModuleRegistry, paludis::instantiation_method::SingletonTag>
     {
         public:
             void load(std::string) throw(ModuleError);

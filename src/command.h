@@ -5,11 +5,12 @@
 #include <list>
 #include <tr1/functional>
 #include "message.h"
-#include "singleton.h"
+#include <paludis/util/instantiation_policy.hh>
 
 namespace eir
 {
-    class CommandRegistry : public util::Singleton<CommandRegistry>
+    class CommandRegistry :
+        public paludis::InstantiationPolicy<CommandRegistry, paludis::instantiation_method::SingletonTag>
     {
         public:
             typedef std::tr1::function<void(const Message *)> handler;

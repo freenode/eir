@@ -1,8 +1,11 @@
 #include "command.h"
 
+#include <paludis/util/instantiation_policy-impl.hh>
 #include <cstring>
 
 using namespace eir;
+
+template class paludis::InstantiationPolicy<CommandRegistry, paludis::instantiation_method::SingletonTag>;
 
 bool CommandRegistry::IrcStringCmp::operator() (std::string s1, std::string s2)
 {
