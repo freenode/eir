@@ -51,6 +51,11 @@ Bot::~Bot()
 {
 }
 
+static void notice_to(Bot *b, std::string dest, std::string text)
+{
+    b->send("NOTICE " + dest + " :" + text);
+}
+
 void paludis::Implementation<Bot>::handle_message(std::string line)
 {
     Message m(bot);
@@ -109,12 +114,9 @@ void paludis::Implementation<Bot>::handle_message(std::string line)
     }
 
     if (m.source.destination.find_first_of("#&") != std::string::npos)
-    {
-        m.source.in_channel = true;
-        m.source.channel = m.source.destination;
-    }
+        m.source.reply_func = std::tr1::bind(notice_to, bot, m.source.destination, _1);
     else
-        m.source.in_channel = false;
+        m.source.reply_func = std::tr1::bind(notice_to, bot, m.source.name, _1);
 
     while(p2 != std::string::npos)
     {

@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <tr1/memory>
+#include <tr1/functional>
 
 #include "client.h"
 
@@ -28,16 +29,17 @@ namespace eir {
         Client::ptr client;
         std::string name;
 
-        // if in_channel is true, channel is the name of said channel.
-        // else it was in private.
-        bool in_channel;
-        std::string channel;
-
         // The raw source string that the server sent us
         std::string raw;
 
         // The raw destination string.
         std::string destination;
+
+        // Function to send a reply to this.
+        std::tr1::function<void(std::string)> reply_func;
+        void reply(std::string text) const {
+            if(reply_func) reply_func(text);
+        }
     };
 
     struct Message {

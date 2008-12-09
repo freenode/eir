@@ -108,7 +108,7 @@ namespace
 
     Channel::ptr find_or_create_channel(const Message *m)
     {
-        return find_or_create_channel(m->bot, m->source.channel);
+        return find_or_create_channel(m->bot, m->source.destination);
     }
 }
 
@@ -146,7 +146,7 @@ void ChannelHandler::handle_part(const Message *m)
     if (!c)
         return;
 
-    Bot::ChannelIterator chi = b->find_channel(m->source.channel);
+    Bot::ChannelIterator chi = b->find_channel(m->source.destination);
     if(chi == b->end_channels())
         return;
 
