@@ -9,26 +9,83 @@
 #include <iostream>
 #include <iterator>
 
-void on_connect(const eir::Message *m)
+#include <fstream>
+#include <paludis/util/tokeniser.hh>
+
+using namespace eir;
+
+void print_cerr(std::string s)
 {
-    m->bot->send("JOIN #asdfdsa");
+    std::cerr << s << std::endl;
 }
 
-void print(const eir::Message *m)
+static Bot *bot = 0;
+
+static void set_servername(const Message *m)
 {
-    std::cerr << m->raw << std::endl;
+    std::string host, port, nick, pass;
+
+    if(bot)
+    {
+        m->source.reply("Can't create more than one bot.");
+        return;
+    }
+
+    if(m->args.size() < 3)
+    {
+        m->source.reply("Not enough arguments to set_servername. Need 3 or 4.");
+        return;
+    }
+
+    host = m->args[0];
+    port = m->args[1];
+    nick = m->args[2];
+
+    if(m->args.size() > 3)
+        pass = m->args[3];
+
+    bot = new Bot(host, port, nick, pass);
 }
 
 int main()
 {
-    eir::Bot b("testnet.freenode.net", "9002", "eir", "");
-    //eir::CommandRegistry::get_instance()->add_handler("NOTICE", print);
-    //eir::ModuleRegistry::get_instance()->load("modules/print_notice.so");
-    eir::ModuleRegistry::get_instance()->load("modules/channel.so");
-    eir::ModuleRegistry::get_instance()->load("modules/ping.so");
-    eir::ModuleRegistry::get_instance()->load("modules/echo.so");
-    eir::CommandRegistry::get_instance()->add_handler("001", on_connect);
-    eir::CommandRegistry::get_instance()->add_handler("", print);
-    b.run();
+    std::ifstream fs("eir.conf");
+    std::string line;
+
+    eir::CommandRegistry::get_instance()->add_handler("server", set_servername);
+
+    try
+    {
+        while(std::getline(fs, line))
+        {
+            std::list<std::string> tokens;
+            paludis::tokenise_whitespace_quoted(line, std::back_inserter(tokens));
+
+            Message m(0, *tokens.begin());
+
+            tokens.pop_front();
+            std::copy(tokens.begin(), tokens.end(), std::back_inserter(m.args));
+
+            m.source.reply_func = print_cerr;
+
+            m.source.special = sourceinfo::ConfigFile;
+
+            m.raw = line;
+
+            CommandRegistry::get_instance()->dispatch(&m);
+        }
+    }
+    catch(paludis::Exception & e)
+    {
+        std::cerr << paludis::Context::backtrace("\n") << std::endl;
+    }
+    if(bot)
+        bot->run();
+    else
+    {
+        std::cerr << "You didn't create a bot. Bad you." << std::endl;
+        return 1;
+    }
+
     return 0;
 }

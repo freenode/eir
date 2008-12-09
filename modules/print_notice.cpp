@@ -5,13 +5,11 @@
 #include <iterator>
 
 using namespace std::tr1::placeholders;
-/*
+
 struct notice_printer{
     void print(const eir::Message * m)
     {
-        std::cout << m->source << " " << m->command << " " << m->destination << " ";
-        std::copy(m->args.begin(), m->args.end(), std::ostream_iterator<std::string>(std::cout, " "));
-        std::cout << std::endl;
+        std::cout << m->raw << std::endl;
     }
     notice_printer() {
         _id = eir::CommandRegistry::get_instance()->add_handler("", std::tr1::bind(std::tr1::mem_fn(&notice_printer::print), this, _1));
@@ -23,4 +21,4 @@ struct notice_printer{
 };
 
 notice_printer p;
-*/
+
