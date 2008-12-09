@@ -18,10 +18,10 @@ namespace eir {
 
         // Possible values for the above
         enum {
-            ConfigFileSource = 1,
-            SystemConsoleSource,
-            SignalSource,
-            InternalSource
+            ConfigFile = 1,
+            SystemConsole,
+            Signal,
+            Internal
         };
 
         // If client is null, source was a server or doesn't share
