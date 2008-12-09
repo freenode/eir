@@ -54,8 +54,9 @@ namespace eir
             unsigned long remove_setting(std::string n);
             void remove_setting(SettingsIterator it);
 
-            Bot();
             ~Bot();
+        private:
+            Bot();
    };
 }
 
