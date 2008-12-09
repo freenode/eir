@@ -9,6 +9,10 @@ using namespace eir;
 using namespace std::tr1::placeholders;
 using paludis::Implementation;
 
+template class paludis::WrappedForwardIterator<Bot::ClientIteratorTag, const std::pair<const std::string, Client::ptr> >;
+template class paludis::WrappedForwardIterator<Bot::ChannelIteratorTag, const std::pair<const std::string, Channel::ptr> >;
+template class paludis::WrappedForwardIterator<Bot::SettingsIteratorTag, const std::pair<const std::string, std::string> >;
+
 namespace paludis
 {
     template <>
