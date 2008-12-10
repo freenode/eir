@@ -77,7 +77,7 @@ int main()
     }
     catch(paludis::Exception & e)
     {
-        std::cerr << paludis::Context::backtrace("\n") << std::endl;
+        std::cerr << e.backtrace("\n") << std::endl;
     }
     if(bot)
         bot->run();
