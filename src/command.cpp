@@ -1,4 +1,5 @@
 #include "command.h"
+#include "exceptions.h"
 
 #include <paludis/util/instantiation_policy-impl.hh>
 #include <cstring>
@@ -25,6 +26,8 @@ bool CommandRegistry::IrcStringCmp::operator() (std::string s1, std::string s2)
 
 void CommandRegistry::dispatch(const Message *m)
 {
+    Context ctx("Processing handlers for command " + m->command);
+
     _dispatch(_handlers.find(m->command), m);
     _dispatch(_handlers.find(""), m);
 }
@@ -45,6 +48,8 @@ void CommandRegistry::_dispatch(HandlerMap::iterator it, const Message *m)
 CommandRegistry::id CommandRegistry::add_handler(std::string s, const CommandRegistry::handler & h)
 {
     static uintptr_t next_id = 0;
+
+    Context ctx("Registering new handler for command " + s);
 
     HandlerMap::iterator mi = _handlers.find(s);
     if (mi == _handlers.end())

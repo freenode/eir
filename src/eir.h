@@ -5,5 +5,7 @@
 #include "bot.h"
 #include "command.h"
 #include "modules.h"
+#include "exceptions.h"
+#include "match.h"
 
 #endif

@@ -14,6 +14,8 @@ struct Modloader : public CommandHandlerBase<Modloader>
         if(m->source.special != sourceinfo::ConfigFile)
             return;
 
+        Context ctx("Processing MODLOAD " + m->args[0]);
+
         try
         {
             ModuleRegistry::get_instance()->load(m->args[0]);
@@ -29,6 +31,8 @@ struct Modloader : public CommandHandlerBase<Modloader>
         if(m->source.special != sourceinfo::ConfigFile)
             return;
 
+        Context ctx("Processing MODUNLOAD " + m->args[0]);
+
         try
         {
             ModuleRegistry::get_instance()->unload(m->args[0]);
@@ -43,6 +47,8 @@ struct Modloader : public CommandHandlerBase<Modloader>
     {
         if(m->source.special != sourceinfo::ConfigFile)
             return;
+
+        Context ctx("Processing MODRELOAD " + m->args[0]);
 
         if (ModuleRegistry::get_instance()->is_loaded(m->args[0]))
         {

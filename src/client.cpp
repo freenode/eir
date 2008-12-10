@@ -1,4 +1,5 @@
 #include "client.h"
+#include "exceptions.h"
 
 #include <map>
 #include <set>
@@ -63,12 +64,14 @@ Client::ChannelIterator Client::end_channels()
 
 void Client::join_chan(Channel::ptr c)
 {
+    Context ctx("Adding client " + _imp->nick + " to channel " + c->name());
     if(c->add_member(shared_from_this()))
         _imp->channels.insert(c);
 }
 
 void Client::leave_chan(Channel::ptr c)
 {
+    Context ctx("Removing client " + _imp->nick + "from channel " + c->name());
     c->remove_member(shared_from_this());
     _imp->channels.erase(c);
 }

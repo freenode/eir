@@ -1,5 +1,6 @@
 #include "bot.h"
 #include "command.h"
+#include "exceptions.h"
 
 #include <paludis/util/wrapped_forward_iterator-impl.hh>
 #include <paludis/util/private_implementation_pattern-impl.hh>
@@ -62,6 +63,8 @@ static void notice_to(Bot *b, std::string dest, std::string text)
 
 void paludis::Implementation<Bot>::handle_message(std::string line)
 {
+    Context c("Parsing message " + line);
+
     Message m(bot);
     std::string::size_type p1, p2;
 
@@ -187,11 +190,13 @@ Bot::ClientIterator Bot::find_client(std::string nick)
 
 std::pair<Bot::ClientIterator, bool> Bot::add_client(Client::ptr c)
 {
+    Context ctx("Adding client " + c->nick());
     return _imp->_clients.insert(make_pair(c->nick(), c));
 }
 
 unsigned long Bot::remove_client(Client::ptr c)
 {
+    Context ctx("Removing client " + c->nick());
     return _imp->_clients.erase(c->nick());
 }
 
@@ -214,16 +219,19 @@ Bot::ChannelIterator Bot::find_channel(std::string name)
 
 std::pair<Bot::ChannelIterator, bool> Bot::add_channel(Channel::ptr c)
 {
+    Context ctx("Adding channel " + c->name());
     return _imp->_channels.insert(make_pair(c->name(), c));
 }
 
 unsigned long Bot::remove_channel(Channel::ptr c)
 {
+    Context ctx("Removing channel " + c->name());
     return _imp->_channels.erase(c->name());
 }
 
 void Bot::remove_channel(Bot::ChannelIterator c)
 {
+    Context ctx("Removing channel " + c->second->name());
     _imp->_channels.erase(c.underlying_iterator<Implementation<Bot>::ChannelMap::iterator>());
 }
 
@@ -246,15 +254,18 @@ Bot::SettingsIterator Bot::find_setting(std::string name)
 
 std::pair<Bot::SettingsIterator, bool> Bot::add_setting(std::string n, std::string s)
 {
+    Context ctx("Adding setting " + n + "(" + s + ")");
     return _imp->_settings.insert(make_pair(n, s));
 }
 
 unsigned long Bot::remove_setting(std::string n)
 {
+    Context ctx("Removing setting " + n);
     return _imp->_settings.erase(n);
 }
 
 void Bot::remove_setting(Bot::SettingsIterator it)
 {
+    Context ctx("Removing setting " + it->first);
     _imp->_settings.erase(it.underlying_iterator<Implementation<Bot>::SettingsMap::iterator>());
 }

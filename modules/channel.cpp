@@ -114,6 +114,8 @@ namespace
 
 void ChannelHandler::handle_join(const Message *m)
 {
+    Context ctx("Processing join for " + m->source.name + " to " + m->source.destination);
+
     Client::ptr c = find_or_create_client(m);
     Channel::ptr ch = find_or_create_channel(m);
 
@@ -124,6 +126,8 @@ void ChannelHandler::handle_names_reply(const Message *m)
 {
     std::string chname = m->args[1];
     std::vector<std::string> nicks;
+
+    Context ctx("Processing NAMES reply for " + chname);
 
     paludis::tokenise_whitespace(m->args[2], std::back_inserter(nicks));
 
@@ -139,6 +143,8 @@ void ChannelHandler::handle_names_reply(const Message *m)
 
 void ChannelHandler::handle_part(const Message *m)
 {
+    Context ctx("Processing part for " + m->source.name + " from " + m->source.destination);
+
     Client::ptr c = m->source.client;
     Bot *b = m->bot;
 
@@ -166,6 +172,8 @@ void ChannelHandler::handle_part(const Message *m)
 
 void ChannelHandler::handle_quit(const Message *m)
 {
+    Context ctx("Handling quit from " + m->source.name);
+
     Client::ptr c = m->source.client;
     Bot *b = m->bot;
 

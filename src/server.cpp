@@ -1,4 +1,5 @@
 #include "server.h"
+#include "exceptions.h"
 
 #include <iostream>
 #include <boost/asio.hpp>
@@ -47,6 +48,7 @@ void Server::disconnect()
 
 void Server::send(std::string line)
 {
+    Context c("Sending line " + line);
     std::string::size_type p;
 
     p = line.rfind("\r\n");
@@ -65,6 +67,8 @@ void Server::send(std::string line)
 
 void Server::run()
 {
+    Context c("In main message loop");
+
     std::string line;
     while(std::getline(_imp->_stream, line))
     {
