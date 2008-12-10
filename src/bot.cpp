@@ -38,6 +38,8 @@ namespace paludis
 
         void _init_me(const Message *);
 
+        void handle_set(const Message *);
+
         Implementation(Bot *b, std::string host, std::string port, std::string nick, std::string pass)
             : bot(b), _server(std::tr1::bind(&Implementation<Bot>::handle_message, this, _1)),
               _host(host), _port(port), _nick(nick), _pass(pass)
@@ -149,6 +151,16 @@ void paludis::Implementation<Bot>::_init_me(const Message *m)
     bot->send("USERHOST " + _nick);
 }
 
+void paludis::Implementation<Bot>::handle_set(const Message *m)
+{
+    if (m->source.special != sourceinfo::ConfigFile)
+        return;
+
+    if (m->args.size() < 2)
+        m->source.reply("Not enough parameters to SET -- need two");
+
+    _settings[m->args[0]] = m->args[1];
+}
 
 void Bot::run()
 {
