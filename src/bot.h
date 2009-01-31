@@ -6,7 +6,7 @@
 #include <paludis/util/wrapped_forward_iterator.hh>
 #include <paludis/util/private_implementation_pattern.hh>
 
-#include "server.h"
+#include "supported.h"
 #include "client.h"
 #include "message.h"
 
@@ -17,9 +17,9 @@ namespace eir
         public:
             Bot(std::string host, std::string port, std::string nick, std::string pass);
 
-            const std::string& nick();
+            const std::string& nick() const;
 
-            const Client::ptr me();
+            const Client::ptr me() const;
 
             void run();
 
@@ -53,6 +53,8 @@ namespace eir
             std::pair<SettingsIterator, bool> add_setting(std::string n, std::string s);
             unsigned long remove_setting(std::string n);
             void remove_setting(SettingsIterator it);
+
+            const ISupport *supported() const;
 
             ~Bot();
         private:

@@ -2,6 +2,8 @@
 #include "command.h"
 #include "exceptions.h"
 
+#include "server.h"
+
 #include <paludis/util/wrapped_forward_iterator-impl.hh>
 #include <paludis/util/private_implementation_pattern-impl.hh>
 
@@ -34,16 +36,22 @@ namespace paludis
         ChannelMap _channels;
         SettingsMap _settings;
 
+        ISupport _supported;
+
         void handle_message(std::string);
 
+        CommandRegistry::id init_handler;
         void _init_me(const Message *);
 
+        CommandRegistry::id set_handler;
         void handle_set(const Message *);
 
         Implementation(Bot *b, std::string host, std::string port, std::string nick, std::string pass)
             : bot(b), _server(std::tr1::bind(&Implementation<Bot>::handle_message, this, _1)),
               _host(host), _port(port), _nick(nick), _pass(pass)
         {
+            set_handler = CommandRegistry::get_instance()->add_handler("set",
+                    std::tr1::bind(&Implementation<Bot>::handle_set, this, _1));
         }
     };
 }
@@ -157,9 +165,22 @@ void paludis::Implementation<Bot>::handle_set(const Message *m)
         return;
 
     if (m->args.size() < 2)
+    {
         m->source.reply("Not enough parameters to SET -- need two");
+        return;
+    }
 
     _settings[m->args[0]] = m->args[1];
+}
+
+const std::string& Bot::nick() const
+{
+    return _imp->_nick;
+}
+
+const Client::ptr Bot::me() const
+{
+    return _imp->_me;
 }
 
 void Bot::run()
@@ -280,4 +301,9 @@ void Bot::remove_setting(Bot::SettingsIterator it)
 {
     Context ctx("Removing setting " + it->first);
     _imp->_settings.erase(it.underlying_iterator<Implementation<Bot>::SettingsMap::iterator>());
+}
+
+const ISupport* Bot::supported() const
+{
+    return &_imp->_supported;
 }

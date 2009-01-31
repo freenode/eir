@@ -6,6 +6,8 @@
 #include "modules.h"
 #include "command.h"
 
+#include "exceptions.h"
+
 #include <iostream>
 #include <iterator>
 
@@ -77,7 +79,10 @@ int main()
     }
     catch(paludis::Exception & e)
     {
-        std::cerr << e.backtrace("\n") << std::endl;
+        std::cerr << "Error loading config file:" << std::endl
+                  << e.backtrace("\n  * ")
+                  << e.message() << " (" << e.what() << ")" << std::endl;
+        return 1;
     }
     if(bot)
         bot->run();

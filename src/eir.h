@@ -7,5 +7,6 @@
 #include "modules.h"
 #include "exceptions.h"
 #include "match.h"
+#include "handler.h"
 
 #endif

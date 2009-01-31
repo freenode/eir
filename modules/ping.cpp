@@ -12,7 +12,6 @@ struct Ponger
     void pong(const eir::Message *m)
     {
         std::string response("PONG :" + m->source.destination);
-        std::cerr << "--> " << response << std::endl;
         m->bot->send(response);
     }
 

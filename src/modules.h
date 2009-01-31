@@ -3,20 +3,15 @@
 
 #include <string>
 #include <map>
-#include <paludis/util/exception.hh>
+#include "exceptions.h"
 #include <paludis/util/instantiation_policy.hh>
 
 namespace eir {
 
-    struct ModuleError : public std::exception
+    struct ModuleError : public paludis::Exception
     {
-        std::string m;
-        virtual const char *what() const throw ()
-        {
-            return m.c_str();
-        }
-        ModuleError(const char *s) : m(s) { }
-        ModuleError(const std::string & s) : m(s) { }
+        ModuleError(const char *s) : paludis::Exception(s) { }
+        ModuleError(const std::string & s) : paludis::Exception(s) { }
         ~ModuleError() throw() { }
     };
 

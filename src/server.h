@@ -17,6 +17,8 @@ namespace eir
 
             void send(std::string);
 
+            void purge();
+
             void disconnect();
 
             void run();

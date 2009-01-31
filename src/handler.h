@@ -1,3 +1,6 @@
+#ifndef handler_h
+#define handler_h
+
 #include "command.h"
 #include <functional>
 
@@ -21,4 +24,4 @@ namespace eir
     };
 }
 
-
+#endif

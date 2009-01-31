@@ -23,6 +23,8 @@ struct Modloader : public CommandHandlerBase<Modloader>
         catch(ModuleError &e)
         {
             m->source.reply("Failed to load " + m->args[0] + ": " + e.what());
+            if(m->source.special == sourceinfo::ConfigFile)
+                throw;
         }
     }
 
@@ -40,6 +42,8 @@ struct Modloader : public CommandHandlerBase<Modloader>
         catch(ModuleError &e)
         {
             m->source.reply("Failed to unload " + m->args[0] + ": " + e.what());
+            if(m->source.special == sourceinfo::ConfigFile)
+                throw;
         }
      }
 
@@ -59,6 +63,8 @@ struct Modloader : public CommandHandlerBase<Modloader>
             catch(ModuleError &e)
             {
                 m->source.reply("Failed to unload " + m->args[0] + ": " + e.what());
+                if(m->source.special == sourceinfo::ConfigFile)
+                    throw;
                 return;
             }
         }
@@ -69,6 +75,8 @@ struct Modloader : public CommandHandlerBase<Modloader>
         catch(ModuleError &e)
         {
             m->source.reply("Failed to load " + m->args[0] + ": " + e.what());
+            if(m->source.special == sourceinfo::ConfigFile)
+                throw;
         }
      }
 

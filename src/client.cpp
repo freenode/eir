@@ -18,7 +18,7 @@ namespace paludis
 
         std::map<std::string, std::string> attributes;
 
-        std::set<Channel::ptr> channels;
+        std::set<Membership::ptr> channels;
 
         PrivilegeSet privs;
 
@@ -65,15 +65,31 @@ Client::ChannelIterator Client::end_channels()
 void Client::join_chan(Channel::ptr c)
 {
     Context ctx("Adding client " + _imp->nick + " to channel " + c->name());
-    if(c->add_member(shared_from_this()))
-        _imp->channels.insert(c);
+    Membership::ptr m(new Membership(shared_from_this(), c));
+    if(c->add_member(m))
+        _imp->channels.insert(m);
 }
 
 void Client::leave_chan(Channel::ptr c)
 {
     Context ctx("Removing client " + _imp->nick + "from channel " + c->name());
-    c->remove_member(shared_from_this());
-    _imp->channels.erase(c);
+    Membership::ptr m;
+    for(std::set<Membership::ptr>::iterator it = _imp->channels.begin(), ite = _imp->channels.end();
+            it != ite; ++it)
+        if((*it)->channel == c)
+            m = *it;
+
+    if (m)
+        leave_chan(m);
+}
+
+void Client::leave_chan(Membership::ptr m)
+{
+    if (m->client.get() != this)
+        return;
+
+    m->channel->remove_member(m);
+    _imp->channels.erase(m);
 }
 
 PrivilegeSet& Client::privs()
@@ -108,8 +124,8 @@ namespace paludis
     {
         std::string name;
 
-        typedef std::set<Client::ptr, ClientComparator>::iterator MemberIterator;
-        std::set<Client::ptr, ClientComparator> members;
+        typedef std::set<Membership::ptr>::iterator MemberIterator;
+        std::set<Membership::ptr> members;
 
         Implementation(std::string n) : name(n)
         { }
@@ -131,14 +147,14 @@ Channel::MemberIterator Channel::end_members()
     return Channel::MemberIterator(_imp->members.end());
 }
 
-bool Channel::add_member(Client::ptr c)
+bool Channel::add_member(Membership::ptr m)
 {
-    return _imp->members.insert(c).second;
+    return _imp->members.insert(m).second;
 }
 
-bool Channel::remove_member(Client::ptr c)
+bool Channel::remove_member(Membership::ptr m)
 {
-    return _imp->members.erase(c) != 0;
+    return _imp->members.erase(m) != 0;
 }
 
 Channel::Channel(std::string n)
@@ -150,4 +166,4 @@ Channel::~Channel()
 {
 }
 
-template class paludis::WrappedForwardIterator<eir::Client::ChannelIteratorTag, std::tr1::shared_ptr<eir::Channel> const>;
+template class paludis::WrappedForwardIterator<eir::Client::ChannelIteratorTag, std::tr1::shared_ptr<eir::Membership> const>;
