@@ -8,6 +8,25 @@
 
 namespace eir {
     using paludis::Context;
+
+    struct DieException : public paludis::Exception
+    {
+        DieException(std::string who) : paludis::Exception("Shut down by " + who)
+        { }
+    };
+
+    struct RestartException : public paludis::Exception
+    {
+        RestartException() : paludis::Exception("Restarting...")
+        { }
+    };
+
+    struct NotConnectedException : public paludis::Exception
+    {
+        NotConnectedException() : paludis::Exception("Not connected to server")
+        { }
+    };
+
 }
 
 #endif

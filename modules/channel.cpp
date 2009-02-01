@@ -1,4 +1,5 @@
 #include "eir.h"
+#include "handler.h"
 
 #include <functional>
 
@@ -9,38 +10,38 @@
 using namespace eir;
 using namespace std::tr1::placeholders;
 
-struct ChannelHandler
+struct ChannelHandler : public CommandHandlerBase<ChannelHandler>
 {
     void handle_join(const Message *);
     void handle_part(const Message *);
     void handle_quit(const Message *);
     void handle_names_reply(const Message *);
+    void handle_nick(const Message *);
 
     ChannelHandler();
     ~ChannelHandler();
 
-    CommandRegistry::id join_id, part_id, quit_id, names_id;
+    CommandRegistry::id join_id, part_id, quit_id, names_id, nick_id;
 };
 
 ChannelHandler handles_channels;
 
 ChannelHandler::ChannelHandler()
 {
-    CommandRegistry *r = CommandRegistry::get_instance();
-
-    join_id = r->add_handler("JOIN", std::tr1::bind(std::tr1::mem_fn(&ChannelHandler::handle_join), this, _1));
-    part_id = r->add_handler("PART", std::tr1::bind(std::tr1::mem_fn(&ChannelHandler::handle_part), this, _1));
-    quit_id = r->add_handler("QUIT", std::tr1::bind(std::tr1::mem_fn(&ChannelHandler::handle_quit), this, _1));
-    names_id = r->add_handler("353", std::tr1::bind(std::tr1::mem_fn(&ChannelHandler::handle_names_reply), this, _1));
+    join_id = add_handler("JOIN", sourceinfo::RawIrc, &ChannelHandler::handle_join);
+    part_id = add_handler("PART", sourceinfo::RawIrc, &ChannelHandler::handle_part);
+    quit_id = add_handler("QUIT", sourceinfo::RawIrc, &ChannelHandler::handle_quit);
+    names_id = add_handler("353", sourceinfo::RawIrc, &ChannelHandler::handle_names_reply);
+    nick_id = add_handler("NICK", sourceinfo::RawIrc, &ChannelHandler::handle_nick);
 }
 
 ChannelHandler::~ChannelHandler()
 {
-    CommandRegistry *r = CommandRegistry::get_instance();
-    r->remove_handler(join_id);
-    r->remove_handler(part_id);
-    r->remove_handler(quit_id);
-    r->remove_handler(names_id);
+    remove_handler(join_id);
+    remove_handler(part_id);
+    remove_handler(quit_id);
+    remove_handler(names_id);
+    remove_handler(nick_id);
 }
 
 namespace
@@ -187,5 +188,14 @@ void ChannelHandler::handle_quit(const Message *m)
     b->remove_client(c);
 
     std::cerr << "QUIT: " << c->nick() << std::endl;
+}
+
+void ChannelHandler::handle_nick(const Message *m)
+{
+    Context ctx("Handling nick change from " + m->source.name);
+
+    if(!m->source.client)
+        return;
+    m->source.client->change_nick(m->args[0]);
 }
 

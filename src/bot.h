@@ -23,6 +23,10 @@ namespace eir
 
             void run();
 
+            void disconnect(std::string);
+
+            bool connected() const;
+
             void send(std::string);
 
             struct ClientIteratorTag;
@@ -50,6 +54,7 @@ namespace eir
             SettingsIterator begin_settings();
             SettingsIterator end_settings();
             SettingsIterator find_setting(std::string name);
+            std::string get_setting(std::string name);
             std::pair<SettingsIterator, bool> add_setting(std::string n, std::string s);
             unsigned long remove_setting(std::string n);
             void remove_setting(SettingsIterator it);

@@ -40,12 +40,19 @@ void CommandRegistry::_dispatch(HandlerMap::iterator it, const Message *m)
         HandlerList & l = (*it).second;
         for ( HandlerList::iterator i2 = l.begin(), i2_e = l.end(); i2 != i2_e; ++i2)
         {
-            (*i2).second(m);
+            if (i2->second.first & m->source.type)
+                i2->second.second(m);
         }
     }
 }
 
 CommandRegistry::id CommandRegistry::add_handler(std::string s, const CommandRegistry::handler & h)
+{
+    return add_handler(s, sourceinfo::Any, h);
+}
+
+CommandRegistry::id CommandRegistry::add_handler(std::string s, unsigned int type,
+                                                 const CommandRegistry::handler & h)
 {
     static uintptr_t next_id = 0;
 
@@ -57,7 +64,7 @@ CommandRegistry::id CommandRegistry::add_handler(std::string s, const CommandReg
         mi = _handlers.insert(std::make_pair(s, HandlerList())).first;
     }
     HandlerList& l = (*mi).second;
-    l.insert(make_pair(id(++next_id), h));
+    l.insert(make_pair(id(++next_id), make_pair(type, h)));
     return id(next_id);
 }
 

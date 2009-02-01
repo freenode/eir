@@ -36,6 +36,8 @@ namespace paludis
         ChannelMap _channels;
         SettingsMap _settings;
 
+        bool _connected;
+
         ISupport _supported;
 
         void handle_message(std::string);
@@ -48,7 +50,7 @@ namespace paludis
 
         Implementation(Bot *b, std::string host, std::string port, std::string nick, std::string pass)
             : bot(b), _server(std::tr1::bind(&Implementation<Bot>::handle_message, this, _1)),
-              _host(host), _port(port), _nick(nick), _pass(pass)
+              _host(host), _port(port), _nick(nick), _pass(pass), _connected(false)
         {
             set_handler = CommandRegistry::get_instance()->add_handler("set",
                     std::tr1::bind(&Implementation<Bot>::handle_set, this, _1));
@@ -84,11 +86,6 @@ void paludis::Implementation<Bot>::handle_message(std::string line)
 
     m.raw = line;
 
-    /*
-    p1 = line[0] == ':' ? 1 : 0;
-    p2 = line.find(' ');
-    m.source = line.substr(p1, p2 - p1);
-    */
     if (line[0] == ':')
     {
         p1 = 1;
@@ -116,6 +113,8 @@ void paludis::Implementation<Bot>::handle_message(std::string line)
     {
         m.source.name = m.source.raw;
     }
+
+    m.source.type = sourceinfo::RawIrc;
 
     p2 = line.find(' ', p1);
     m.command = line.substr(p1, p2 - p1);
@@ -161,7 +160,8 @@ void paludis::Implementation<Bot>::_init_me(const Message *m)
 
 void paludis::Implementation<Bot>::handle_set(const Message *m)
 {
-    if (m->source.special != sourceinfo::ConfigFile)
+    if (m->source.type != sourceinfo::ConfigFile &&
+            (!m->source.client || !m->source.client->privs().has_privilege("admin")))
         return;
 
     if (m->args.size() < 2)
@@ -183,6 +183,19 @@ const Client::ptr Bot::me() const
     return _imp->_me;
 }
 
+bool Bot::connected() const
+{
+    return _imp->_connected;
+}
+
+void Bot::disconnect(std::string reason)
+{
+    _imp->_server.purge();
+    _imp->_server.send("QUIT :" + reason);
+    _imp->_server.disconnect();
+    _imp->_connected = false;
+}
+
 void Bot::run()
 {
     _imp->_server.connect(_imp->_host, _imp->_port);
@@ -196,11 +209,16 @@ void Bot::run()
     _imp->_server.send("NICK " + _imp->_nick);
     _imp->_server.send("USER eir * * :eir version 0.0.1");
 
+    _imp->_connected = true;
+
     _imp->_server.run();
 }
 
 void Bot::send(std::string line)
 {
+    if (!_imp->_connected)
+        throw NotConnectedException();
+
     _imp->_server.send(line);
 }
 
@@ -224,12 +242,24 @@ Bot::ClientIterator Bot::find_client(std::string nick)
 std::pair<Bot::ClientIterator, bool> Bot::add_client(Client::ptr c)
 {
     Context ctx("Adding client " + c->nick());
-    return _imp->_clients.insert(make_pair(c->nick(), c));
+
+    std::pair<ClientIterator, bool> res = _imp->_clients.insert(make_pair(c->nick(), c));
+    if (res.second)
+    {
+        Message m(this, "new_client", sourceinfo::Internal, c);
+        CommandRegistry::get_instance()->dispatch(&m);
+    }
+
+    return res;
 }
 
 unsigned long Bot::remove_client(Client::ptr c)
 {
     Context ctx("Removing client " + c->nick());
+
+    Message m(this, "client_remove", sourceinfo::Internal, c);
+    CommandRegistry::get_instance()->dispatch(&m);
+
     return _imp->_clients.erase(c->nick());
 }
 
@@ -283,6 +313,14 @@ Bot::SettingsIterator Bot::end_settings()
 Bot::SettingsIterator Bot::find_setting(std::string name)
 {
     return _imp->_settings.find(name);
+}
+
+std::string Bot::get_setting(std::string name)
+{
+    SettingsIterator it = find_setting(name);
+    if(it == end_settings())
+        return "";
+    return it->second;
 }
 
 std::pair<Bot::SettingsIterator, bool> Bot::add_setting(std::string n, std::string s)

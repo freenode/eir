@@ -22,8 +22,11 @@ namespace paludis
 
         PrivilegeSet privs;
 
+        mutable std::string nuh_cache;
+        mutable bool nuh_cached;
+
         Implementation(std::string n, std::string u, std::string h)
-            : nick(n), user(u), host(h)
+            : nick(n), user(u), host(h), nuh_cached(false)
         { }
     };
 }
@@ -31,6 +34,23 @@ namespace paludis
 const std::string& Client::nick() const { return _imp->nick; }
 const std::string& Client::user() const { return _imp->user; }
 const std::string& Client::host() const { return _imp->host; }
+
+const std::string& Client::nuh() const
+{
+    if(_imp->nuh_cached)
+        return _imp->nuh_cache;
+
+    _imp->nuh_cache = _imp->nick + "!" + _imp->user + "@" + _imp->host;
+    _imp->nuh_cached = true;
+
+    return _imp->nuh_cache;
+}
+
+void Client::change_nick(std::string newnick)
+{
+    _imp->nick = newnick;
+    _imp->nuh_cached = false;
+}
 
 Client::AttributeIterator Client::attr_begin()
 {

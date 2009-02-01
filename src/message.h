@@ -14,15 +14,16 @@ namespace eir {
     struct sourceinfo {
         // If non-zero, this message came from somewhere other than the server,
         // and the value tells us where.
-        int special;
-
-        // Possible values for the above
         enum {
-            ConfigFile = 1,
-            SystemConsole,
-            Signal,
-            Internal
+            RawIrc        = 0x01,
+            ConfigFile    = 0x02,
+            SystemConsole = 0x04,
+            Signal        = 0x08,
+            Internal      = 0x10,
+            IrcCommand    = 0x20,
+            Any           = 0xff
         };
+        unsigned int type;
 
         // If client is null, source was a server or doesn't share
         // any channels with us.
@@ -40,6 +41,11 @@ namespace eir {
         void reply(std::string text) const {
             if(reply_func) reply_func(text);
         }
+
+        sourceinfo(unsigned int t, Client::ptr c)
+            : type(t), client(c), name(c->nick())
+        { }
+        sourceinfo() { };
     };
 
     struct Message {
@@ -52,6 +58,9 @@ namespace eir {
 
         Message(Bot *b) : bot(b) { }
         Message(Bot *b, std::string c) : bot(b), command(c) { }
+        Message(Bot *b, std::string cmd, unsigned int t, Client::ptr cl)
+            : bot(b), source(t, cl), command(cmd)
+        { }
     };
 }
 

@@ -91,6 +91,8 @@ void Server::purge()
 {
     while (! _imp->_send_queue.empty())
         _imp->_send_queue.pop();
+    _imp->_lines_since_sync = 0;
+    _imp->_last_sync_cookie = 0;
 }
 
 void Server::send(std::string line)

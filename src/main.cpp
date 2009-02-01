@@ -49,7 +49,7 @@ static void set_servername(const Message *m)
     bot = new Bot(host, port, nick, pass);
 }
 
-int main()
+int main(int, char **argv)
 {
     std::ifstream fs("eir.conf");
     std::string line;
@@ -63,6 +63,9 @@ int main()
             std::list<std::string> tokens;
             paludis::tokenise_whitespace_quoted(line, std::back_inserter(tokens));
 
+            if(tokens.empty())
+                continue;
+
             Message m(0, *tokens.begin());
 
             tokens.pop_front();
@@ -70,7 +73,7 @@ int main()
 
             m.source.reply_func = print_cerr;
 
-            m.source.special = sourceinfo::ConfigFile;
+            m.source.type = sourceinfo::ConfigFile;
 
             m.raw = line;
 
@@ -85,7 +88,16 @@ int main()
         return 1;
     }
     if(bot)
-        bot->run();
+    {
+        try
+        {
+            bot->run();
+        }
+        catch (RestartException &e)
+        {
+            execv(argv[0], argv);
+        }
+    }
     else
     {
         std::cerr << "You didn't create a bot. Bad you." << std::endl;

@@ -11,7 +11,7 @@ struct Modloader : public CommandHandlerBase<Modloader>
 
     void do_modload(const eir::Message *m)
     {
-        if(m->source.special != sourceinfo::ConfigFile)
+        if(m->source.type != sourceinfo::ConfigFile)
             return;
 
         Context ctx("Processing MODLOAD " + m->args[0]);
@@ -23,14 +23,14 @@ struct Modloader : public CommandHandlerBase<Modloader>
         catch(ModuleError &e)
         {
             m->source.reply("Failed to load " + m->args[0] + ": " + e.what());
-            if(m->source.special == sourceinfo::ConfigFile)
+            if(m->source.type == sourceinfo::ConfigFile)
                 throw;
         }
     }
 
     void do_modunload(const eir::Message *m)
     {
-        if(m->source.special != sourceinfo::ConfigFile)
+        if(m->source.type != sourceinfo::ConfigFile)
             return;
 
         Context ctx("Processing MODUNLOAD " + m->args[0]);
@@ -42,14 +42,14 @@ struct Modloader : public CommandHandlerBase<Modloader>
         catch(ModuleError &e)
         {
             m->source.reply("Failed to unload " + m->args[0] + ": " + e.what());
-            if(m->source.special == sourceinfo::ConfigFile)
+            if(m->source.type == sourceinfo::ConfigFile)
                 throw;
         }
      }
 
     void do_modreload(const eir::Message *m)
     {
-        if(m->source.special != sourceinfo::ConfigFile)
+        if(m->source.type != sourceinfo::ConfigFile)
             return;
 
         Context ctx("Processing MODRELOAD " + m->args[0]);
@@ -63,7 +63,7 @@ struct Modloader : public CommandHandlerBase<Modloader>
             catch(ModuleError &e)
             {
                 m->source.reply("Failed to unload " + m->args[0] + ": " + e.what());
-                if(m->source.special == sourceinfo::ConfigFile)
+                if(m->source.type == sourceinfo::ConfigFile)
                     throw;
                 return;
             }
@@ -75,7 +75,7 @@ struct Modloader : public CommandHandlerBase<Modloader>
         catch(ModuleError &e)
         {
             m->source.reply("Failed to load " + m->args[0] + ": " + e.what());
-            if(m->source.special == sourceinfo::ConfigFile)
+            if(m->source.type == sourceinfo::ConfigFile)
                 throw;
         }
      }

@@ -19,13 +19,14 @@ namespace eir
             void dispatch(const Message *);
 
             id add_handler(std::string, const handler &);
+            id add_handler(std::string, unsigned int, const handler &);
             void remove_handler(id);
 
         private:
             struct IrcStringCmp {
                 bool operator() (std::string, std::string);
             };
-            typedef std::map<id, handler> HandlerList;
+            typedef std::map<id, std::pair<unsigned int, handler> > HandlerList;
             typedef std::map<std::string, HandlerList, IrcStringCmp> HandlerMap;
             HandlerMap _handlers;
             void _dispatch(HandlerMap::iterator, const Message *);
