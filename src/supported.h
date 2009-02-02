@@ -23,13 +23,27 @@ namespace eir
             std::string _oneparam_modes;
             std::string _oneparam_modes_2;
 
+            std::string _prefixes, _prefix_modes;
+
+            std::string _chantypes;
+
             void _populate(const Message *m);
+            void _populate_prefix_modes(std::string);
             void _populate_chanmodes(std::string);
 
             CommandRegistry::id _handler_id;
 
         public:
             typedef std::set<std::string>::const_iterator simple_iterator;
+
+            enum ModeType {
+                simple_mode,
+                list_mode,
+                oneparam_mode,
+                oneparam2_mode,
+                prefix_mode,
+                unknown_mode
+            };
 
             simple_iterator begin_simple_tokens() const { return simple_tokens.begin(); }
             simple_iterator end_simple_tokens() const { return simple_tokens.end(); }
@@ -51,8 +65,16 @@ namespace eir
             std::string list_modes() const { return _list_modes; }
             std::string simple_modes() const { return _simple_modes; }
             std::string oneparam_modes() const { return _oneparam_modes; }
+            std::string prefix_modes() const { return _prefix_modes; }
+
+            char get_prefix_mode(char prefix) const;
+            char get_mode_prefix(char mode) const;
+
+            ModeType get_mode_type(char c) const;
 
             bool mode_has_param(char modeletter, bool adding = true) const;
+
+            bool is_channel_name(std::string) const;
 
             ISupport();
             ~ISupport();

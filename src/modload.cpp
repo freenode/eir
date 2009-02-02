@@ -11,7 +11,8 @@ struct Modloader : public CommandHandlerBase<Modloader>
 
     void do_modload(const eir::Message *m)
     {
-        if(m->source.type != sourceinfo::ConfigFile)
+        if(m->source.type != sourceinfo::ConfigFile &&
+                !(m->source.client && m->source.client->privs().has_privilege("admin")))
             return;
 
         Context ctx("Processing MODLOAD " + m->args[0]);
@@ -19,10 +20,11 @@ struct Modloader : public CommandHandlerBase<Modloader>
         try
         {
             ModuleRegistry::get_instance()->load(m->args[0]);
+            m->source.reply("Loaded " + m->args[0]);
         }
         catch(ModuleError &e)
         {
-            m->source.reply("Failed to load " + m->args[0] + ": " + e.what());
+            m->source.reply("Failed to load " + m->args[0] + ": " + e.message());
             if(m->source.type == sourceinfo::ConfigFile)
                 throw;
         }
@@ -30,7 +32,8 @@ struct Modloader : public CommandHandlerBase<Modloader>
 
     void do_modunload(const eir::Message *m)
     {
-        if(m->source.type != sourceinfo::ConfigFile)
+        if(m->source.type != sourceinfo::ConfigFile &&
+                !(m->source.client && m->source.client->privs().has_privilege("admin")))
             return;
 
         Context ctx("Processing MODUNLOAD " + m->args[0]);
@@ -38,10 +41,11 @@ struct Modloader : public CommandHandlerBase<Modloader>
         try
         {
             ModuleRegistry::get_instance()->unload(m->args[0]);
+            m->source.reply("Unloaded " + m->args[0]);
         }
         catch(ModuleError &e)
         {
-            m->source.reply("Failed to unload " + m->args[0] + ": " + e.what());
+            m->source.reply("Failed to unload " + m->args[0] + ": " + e.message());
             if(m->source.type == sourceinfo::ConfigFile)
                 throw;
         }
@@ -49,7 +53,8 @@ struct Modloader : public CommandHandlerBase<Modloader>
 
     void do_modreload(const eir::Message *m)
     {
-        if(m->source.type != sourceinfo::ConfigFile)
+        if(m->source.type != sourceinfo::ConfigFile &&
+                !(m->source.client && m->source.client->privs().has_privilege("admin")))
             return;
 
         Context ctx("Processing MODRELOAD " + m->args[0]);
@@ -58,11 +63,12 @@ struct Modloader : public CommandHandlerBase<Modloader>
         {
             try
             {
-                ModuleRegistry::get_instance()->load(m->args[0]);
+                ModuleRegistry::get_instance()->unload(m->args[0]);
+                m->source.reply("Unloaded " + m->args[0]);
             }
             catch(ModuleError &e)
             {
-                m->source.reply("Failed to unload " + m->args[0] + ": " + e.what());
+                m->source.reply("Failed to unload " + m->args[0] + ": " + e.message());
                 if(m->source.type == sourceinfo::ConfigFile)
                     throw;
                 return;
@@ -71,10 +77,11 @@ struct Modloader : public CommandHandlerBase<Modloader>
         try
         {
             ModuleRegistry::get_instance()->load(m->args[0]);
+            m->source.reply("Loaded " + m->args[0]);
         }
         catch(ModuleError &e)
         {
-            m->source.reply("Failed to load " + m->args[0] + ": " + e.what());
+            m->source.reply("Failed to load " + m->args[0] + ": " + e.message());
             if(m->source.type == sourceinfo::ConfigFile)
                 throw;
         }

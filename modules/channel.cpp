@@ -5,6 +5,8 @@
 
 #include <paludis/util/tokeniser.hh>
 
+#include <paludis/util/wrapped_forward_iterator-impl.hh>
+
 #include <iostream>
 
 using namespace eir;
@@ -17,11 +19,12 @@ struct ChannelHandler : public CommandHandlerBase<ChannelHandler>
     void handle_quit(const Message *);
     void handle_names_reply(const Message *);
     void handle_nick(const Message *);
+    void handle_who_reply(const Message *);
 
     ChannelHandler();
     ~ChannelHandler();
 
-    CommandRegistry::id join_id, part_id, quit_id, names_id, nick_id;
+    CommandRegistry::id join_id, part_id, quit_id, names_id, nick_id, who_id;
 };
 
 ChannelHandler handles_channels;
@@ -31,8 +34,9 @@ ChannelHandler::ChannelHandler()
     join_id = add_handler("JOIN", sourceinfo::RawIrc, &ChannelHandler::handle_join);
     part_id = add_handler("PART", sourceinfo::RawIrc, &ChannelHandler::handle_part);
     quit_id = add_handler("QUIT", sourceinfo::RawIrc, &ChannelHandler::handle_quit);
-    names_id = add_handler("353", sourceinfo::RawIrc, &ChannelHandler::handle_names_reply);
+    //names_id = add_handler("353", sourceinfo::RawIrc, &ChannelHandler::handle_names_reply);
     nick_id = add_handler("NICK", sourceinfo::RawIrc, &ChannelHandler::handle_nick);
+    who_id = add_handler("352", sourceinfo::RawIrc, &ChannelHandler::handle_who_reply);
 }
 
 ChannelHandler::~ChannelHandler()
@@ -46,13 +50,22 @@ ChannelHandler::~ChannelHandler()
 
 namespace
 {
+    Client::ptr find_or_create_client(Bot *b, std::string nick, std::string user, std::string host)
+    {
+        Client::ptr c = b->find_client(nick);
+
+        if(!c)
+        {
+            c.reset(new Client(b, nick, user, host));
+            b->add_client(c);
+        }
+
+        return c;
+    }
+
     Client::ptr find_or_create_client(Bot *b, std::string name, std::string nuh)
     {
-        Client::ptr c;
-
-        Bot::ClientIterator cli = b->find_client(name);
-        if (cli != b->end_clients())
-            c = cli->second;
+        Client::ptr c = b->find_client(name);
 
         if(!c)
         {
@@ -75,7 +88,7 @@ namespace
                 host = nuh.substr(at + 1, std::string::npos);
             }
 
-            c.reset(new Client(nick, user, host));
+            c.reset(new Client(b, nick, user, host));
             b->add_client(c);
         }
 
@@ -93,13 +106,9 @@ namespace
 
     Channel::ptr find_or_create_channel(Bot *b, std::string name)
     {
-        Channel::ptr ch;
-        Bot::ChannelIterator chi = b->find_channel(name);
-        if (chi != b->end_channels())
-        {
-            ch = chi->second;
-        }
-        else
+        Channel::ptr ch = b->find_channel(name);
+
+        if (!ch)
         {
             ch.reset(new Channel(name));
             b->add_channel(ch);
@@ -121,10 +130,16 @@ void ChannelHandler::handle_join(const Message *m)
     Channel::ptr ch = find_or_create_channel(m);
 
     c->join_chan(ch);
+
+    if (m->source.name == m->bot->nick())
+        m->bot->send("WHO " + m->source.destination);
 }
 
 void ChannelHandler::handle_names_reply(const Message *m)
 {
+    if (m->args.size() < 2)
+        return;
+
     std::string chname = m->args[1];
     std::vector<std::string> nicks;
 
@@ -142,6 +157,22 @@ void ChannelHandler::handle_names_reply(const Message *m)
     }
 }
 
+void ChannelHandler::handle_who_reply(const Message *m)
+{
+    if (m->args.size() != 7) return;
+
+    std::string chname = m->args[0],
+                user = m->args[1],
+                hostname = m->args[2],
+                /* server = m->args[3], */
+                nick = m->args[4];
+
+    Context ctx("Processing WHO reply for " + chname + " (" + nick + ")");
+    Client::ptr c = find_or_create_client(m->bot, nick, user, hostname);
+    Channel::ptr ch = find_or_create_channel(m->bot, chname);
+    c->join_chan(ch);
+}
+
 void ChannelHandler::handle_part(const Message *m)
 {
     Context ctx("Processing part for " + m->source.name + " from " + m->source.destination);
@@ -153,11 +184,9 @@ void ChannelHandler::handle_part(const Message *m)
     if (!c)
         return;
 
-    Bot::ChannelIterator chi = b->find_channel(m->source.destination);
-    if(chi == b->end_channels())
+    Channel::ptr ch = b->find_channel(m->source.destination);
+    if(!ch)
         return;
-
-    Channel::ptr ch = chi->second;
 
     c->leave_chan(ch);
 
@@ -196,6 +225,7 @@ void ChannelHandler::handle_nick(const Message *m)
 
     if(!m->source.client)
         return;
-    m->source.client->change_nick(m->args[0]);
+    std::string newnick(m->source.destination);
+    m->source.client->change_nick(newnick);
 }
 

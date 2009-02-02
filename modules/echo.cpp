@@ -1,20 +1,20 @@
-#include "bot.h"
-#include "command.h"
+#include "eir.h"
+#include "handler.h"
 
 using namespace eir;
 using namespace std::tr1::placeholders;
 
-struct echo {
+struct echo : public CommandHandlerBase<echo>
+{
     void do_echo(const Message *m)
     {
-        if (m->source.destination != m->bot->nick())
-            return;
-        if (m->args[0].substr(0, 4) == "echo")
-            m->source.reply(m->args[0].substr(4));
+        m->source.reply(m->args.at(0));
     }
-    echo() { _id = CommandRegistry::get_instance()->add_handler("PRIVMSG", std::tr1::bind(std::tr1::mem_fn(&echo::do_echo), this, _1)); }
-    ~echo() { CommandRegistry::get_instance()->remove_handler(_id); }
+
     CommandRegistry::id _id;
+
+    echo() { _id = add_handler("echo", sourceinfo::IrcCommand, &echo::do_echo); }
+    ~echo() { remove_handler(_id); }
 };
 
 echo e;

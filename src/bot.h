@@ -30,20 +30,18 @@ namespace eir
             void send(std::string);
 
             struct ClientIteratorTag;
-            typedef paludis::WrappedForwardIterator<ClientIteratorTag,
-                                        const std::pair<const std::string, Client::ptr> > ClientIterator;
+            typedef paludis::WrappedForwardIterator<ClientIteratorTag, Client::ptr const> ClientIterator;
             ClientIterator begin_clients();
             ClientIterator end_clients();
-            ClientIterator find_client(std::string nick);
+            Client::ptr find_client(std::string nick);
             std::pair<ClientIterator, bool> add_client(Client::ptr c);
             unsigned long remove_client(Client::ptr c);
 
             struct ChannelIteratorTag;
-            typedef paludis::WrappedForwardIterator<ChannelIteratorTag,
-                                        const std::pair<const std::string, Channel::ptr> > ChannelIterator;
+            typedef paludis::WrappedForwardIterator<ChannelIteratorTag, Channel::ptr const> ChannelIterator;
             ChannelIterator begin_channels();
             ChannelIterator end_channels();
-            ChannelIterator find_channel(std::string name);
+            Channel::ptr find_channel(std::string name);
             std::pair<ChannelIterator, bool> add_channel(Channel::ptr c);
             unsigned long remove_channel(Channel::ptr c);
             void remove_channel(ChannelIterator c);

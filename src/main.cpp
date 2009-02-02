@@ -87,20 +87,30 @@ int main(int, char **argv)
                   << e.message() << " (" << e.what() << ")" << std::endl;
         return 1;
     }
-    if(bot)
-    {
-        try
-        {
-            bot->run();
-        }
-        catch (RestartException &e)
-        {
-            execv(argv[0], argv);
-        }
-    }
-    else
+    if (! bot)
     {
         std::cerr << "You didn't create a bot. Bad you." << std::endl;
+        return 1;
+    }
+
+    try
+    {
+        bot->run();
+    }
+    catch (RestartException &e)
+    {
+        execv(argv[0], argv);
+    }
+    catch (DieException &e)
+    {
+        std::cerr << "Shutting down. " << e.message() << std::endl;
+        return 0;
+    }
+    catch (paludis::Exception & e)
+    {
+        std::cerr << "Aborting due to exception:" << std::endl
+                  << e.backtrace("\n  * ")
+                  << e.message() << " (" << e.what() << ")" << std::endl;
         return 1;
     }
 

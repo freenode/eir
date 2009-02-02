@@ -9,22 +9,39 @@
 namespace eir {
     using paludis::Context;
 
-    struct DieException : public paludis::Exception
+    struct Exception : public paludis::Exception
     {
-        DieException(std::string who) : paludis::Exception("Shut down by " + who)
+        private:
+            bool _fatal;
+        public:
+            Exception(std::string m, bool fatal = false)
+                : paludis::Exception(m), _fatal(fatal)
+            { }
+
+            bool fatal() const { return _fatal; }
+    };
+
+    struct DieException : public Exception
+    {
+        DieException(std::string who) : Exception("Shut down by " + who, true)
         { }
     };
 
-    struct RestartException : public paludis::Exception
+    struct RestartException : public Exception
     {
-        RestartException() : paludis::Exception("Restarting...")
+        RestartException() : Exception("Restarting...", true)
         { }
     };
 
-    struct NotConnectedException : public paludis::Exception
+    struct NotConnectedException : public Exception
     {
-        NotConnectedException() : paludis::Exception("Not connected to server")
+        NotConnectedException() : Exception("Not connected to server")
         { }
+    };
+
+    struct ModuleError : public Exception
+    {
+        ModuleError(std::string s) : Exception(s, true) { }
     };
 
 }

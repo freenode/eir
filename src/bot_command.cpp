@@ -31,6 +31,11 @@ struct BotCommandHandler : public CommandHandlerBase<BotCommandHandler>
             line = m->args[0].substr(1);
             reply_dest = m->source.destination;
         }
+        else if (m->args[0].substr(0, m->args[0].find_first_of(",: ")) == m->bot->nick())
+        {
+            line = m->args[0].substr(m->args[0].find_first_of(",: ") + 1);
+            reply_dest = m->source.destination;
+        }
         else
             return;
 
@@ -40,13 +45,10 @@ struct BotCommandHandler : public CommandHandlerBase<BotCommandHandler>
         if(tokens.empty())
             return;
 
-        Message m2(m->bot, *tokens.begin());
+        Message m2(*m, sourceinfo::IrcCommand, *tokens.begin());
 
         tokens.pop_front();
         std::copy(tokens.begin(), tokens.end(), std::back_inserter(m2.args));
-
-        m2.source = m->source;
-        m2.source.type = sourceinfo::IrcCommand;
 
         m2.raw = line;
 

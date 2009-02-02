@@ -11,6 +11,8 @@
 
 namespace eir
 {
+    class Bot;
+
     struct Channel;
     typedef std::tr1::shared_ptr<Channel> ChannelPtr;
     struct Client;
@@ -39,7 +41,7 @@ namespace eir
         std::string attr(const std::string &);
         void set_attr(const std::string &, const std::string &);
 
-        Client(std::string, std::string, std::string);
+        Client(Bot *, std::string, std::string, std::string);
         ~Client();
 
         void join_chan(ChannelPtr);
@@ -50,6 +52,8 @@ namespace eir
         typedef paludis::WrappedForwardIterator<ChannelIteratorTag, const MembershipPtr> ChannelIterator;
         ChannelIterator begin_channels();
         ChannelIterator end_channels();
+        MembershipPtr find_membership(std::string channel);
+        const MembershipPtr find_membership(std::string channel) const;
 
         PrivilegeSet& privs();
 
@@ -80,15 +84,10 @@ namespace eir
     {
         Client::ptr client;
         Channel::ptr channel;
-        int flags;
 
-        enum {
-            op = 1,
-            voice = 2
-        };
+        std::string modes;
 
-        bool is_op() { return (flags & op) != 0; }
-        bool is_voice() { return (flags & voice) != 0; }
+        bool has_mode(char m) { return modes.find(m) != std::string::npos; }
 
         typedef std::tr1::shared_ptr<Membership> ptr;
 

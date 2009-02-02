@@ -41,7 +41,23 @@ void CommandRegistry::_dispatch(HandlerMap::iterator it, const Message *m)
         for ( HandlerList::iterator i2 = l.begin(), i2_e = l.end(); i2 != i2_e; ++i2)
         {
             if (i2->second.first & m->source.type)
-                i2->second.second(m);
+            {
+                try
+                {
+                    i2->second.second(m);
+                }
+                catch (Exception &e)
+                {
+                    if (e.fatal())
+                        throw;
+                    m->source.reply("Error processing message " + m->command + ": " +
+                            e.message() + " (" + e.what() + ")");
+                }
+                catch (std::exception &e)
+                {
+                    m->source.reply("Unknown error processing message " + m->command + ": " + e.what());
+                }
+            }
         }
     }
 }

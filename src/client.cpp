@@ -1,10 +1,12 @@
 #include "client.h"
 #include "exceptions.h"
+#include "bot.h"
 
 #include <map>
 #include <set>
 
 #include <paludis/util/wrapped_forward_iterator-impl.hh>
+#include <paludis/util/member_iterator-impl.hh>
 #include <paludis/util/private_implementation_pattern-impl.hh>
 
 using namespace eir;
@@ -14,19 +16,21 @@ namespace paludis
     template <>
     struct Implementation<Client>
     {
+        Bot *bot;
+
         std::string nick, user, host;
 
         std::map<std::string, std::string> attributes;
 
-        std::set<Membership::ptr> channels;
+        std::map<std::string, Membership::ptr> channels;
 
         PrivilegeSet privs;
 
         mutable std::string nuh_cache;
         mutable bool nuh_cached;
 
-        Implementation(std::string n, std::string u, std::string h)
-            : nick(n), user(u), host(h), nuh_cached(false)
+        Implementation(Bot *b, std::string n, std::string u, std::string h)
+            : bot(b), nick(n), user(u), host(h), nuh_cached(false)
         { }
     };
 }
@@ -50,6 +54,9 @@ void Client::change_nick(std::string newnick)
 {
     _imp->nick = newnick;
     _imp->nuh_cached = false;
+    _imp->bot->remove_client(shared_from_this());
+    _imp->bot->add_client(shared_from_this());
+
 }
 
 Client::AttributeIterator Client::attr_begin()
@@ -74,31 +81,38 @@ void Client::set_attr(const std::string &name, const std::string &value)
 
 Client::ChannelIterator Client::begin_channels()
 {
-    return _imp->channels.begin();
+    return second_iterator(_imp->channels.begin());
 }
 
 Client::ChannelIterator Client::end_channels()
 {
-    return _imp->channels.end();
+    return second_iterator(_imp->channels.end());
+}
+
+Membership::ptr Client::find_membership(std::string chname)
+{
+    std::map<std::string, Membership::ptr>::iterator it = _imp->channels.find(chname);
+    if (it == _imp->channels.end())
+        return Membership::ptr();
+    return it->second;
 }
 
 void Client::join_chan(Channel::ptr c)
 {
     Context ctx("Adding client " + _imp->nick + " to channel " + c->name());
     Membership::ptr m(new Membership(shared_from_this(), c));
+
+    if (find_membership(c->name()))
+        return;
+
     if(c->add_member(m))
-        _imp->channels.insert(m);
+        _imp->channels.insert(make_pair(c->name(), m));
 }
 
 void Client::leave_chan(Channel::ptr c)
 {
     Context ctx("Removing client " + _imp->nick + "from channel " + c->name());
-    Membership::ptr m;
-    for(std::set<Membership::ptr>::iterator it = _imp->channels.begin(), ite = _imp->channels.end();
-            it != ite; ++it)
-        if((*it)->channel == c)
-            m = *it;
-
+    Membership::ptr m = find_membership(c->name());
     if (m)
         leave_chan(m);
 }
@@ -109,7 +123,7 @@ void Client::leave_chan(Membership::ptr m)
         return;
 
     m->channel->remove_member(m);
-    _imp->channels.erase(m);
+    _imp->channels.erase(m->channel->name());
 }
 
 PrivilegeSet& Client::privs()
@@ -117,8 +131,8 @@ PrivilegeSet& Client::privs()
     return _imp->privs;
 }
 
-Client::Client(std::string n, std::string u, std::string h)
-    : paludis::PrivateImplementationPattern<Client>(new paludis::Implementation<Client>(n, u, h))
+Client::Client(Bot *b, std::string n, std::string u, std::string h)
+    : paludis::PrivateImplementationPattern<Client>(new paludis::Implementation<Client>(b, n, u, h))
 {
 }
 
@@ -186,4 +200,5 @@ Channel::~Channel()
 {
 }
 
-template class paludis::WrappedForwardIterator<eir::Client::ChannelIteratorTag, std::tr1::shared_ptr<eir::Membership> const>;
+template class paludis::WrappedForwardIterator<eir::Client::ChannelIteratorTag, eir::Membership::ptr const>;
+template class paludis::WrappedForwardIterator<eir::Channel::MemberIteratorTag, eir::Membership::ptr const>;

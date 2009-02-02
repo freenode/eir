@@ -5,6 +5,7 @@
 #include "server.h"
 
 #include <paludis/util/wrapped_forward_iterator-impl.hh>
+#include <paludis/util/member_iterator-impl.hh>
 #include <paludis/util/private_implementation_pattern-impl.hh>
 
 using namespace eir;
@@ -12,8 +13,8 @@ using namespace eir;
 using namespace std::tr1::placeholders;
 using paludis::Implementation;
 
-template class paludis::WrappedForwardIterator<Bot::ClientIteratorTag, const std::pair<const std::string, Client::ptr> >;
-template class paludis::WrappedForwardIterator<Bot::ChannelIteratorTag, const std::pair<const std::string, Channel::ptr> >;
+template class paludis::WrappedForwardIterator<Bot::ClientIteratorTag, const Client::ptr>;
+template class paludis::WrappedForwardIterator<Bot::ChannelIteratorTag, const Channel::ptr>;
 template class paludis::WrappedForwardIterator<Bot::SettingsIteratorTag, const std::pair<const std::string, std::string> >;
 
 namespace paludis
@@ -103,7 +104,7 @@ void paludis::Implementation<Bot>::handle_message(std::string line)
     if (bang != std::string::npos)
     {
         std::string nick = m.source.raw.substr(0, bang);
-        Bot::ClientIterator c = bot->find_client(nick);
+        ClientMap::iterator c = _clients.find(nick);
         if (c != _clients.end())
             m.source.client = c->second;
 
@@ -152,7 +153,7 @@ void paludis::Implementation<Bot>::handle_message(std::string line)
 void paludis::Implementation<Bot>::_init_me(const Message *m)
 {
     _nick = m->source.destination;
-    Client::ptr c(new Client(_nick, "", ""));
+    Client::ptr c(new Client(m->bot, _nick, "", ""));
     _me = c;
     _clients.insert(make_pair(_nick, _me));
     bot->send("USERHOST " + _nick);
@@ -226,31 +227,34 @@ void Bot::send(std::string line)
 
 Bot::ClientIterator Bot::begin_clients()
 {
-    return _imp->_clients.begin();
+    return second_iterator(_imp->_clients.begin());
 }
 
 Bot::ClientIterator Bot::end_clients()
 {
-    return _imp->_clients.end();
+    return second_iterator(_imp->_clients.end());
 }
 
-Bot::ClientIterator Bot::find_client(std::string nick)
+Client::ptr Bot::find_client(std::string nick)
 {
-    return _imp->_clients.find(nick);
+    paludis::Implementation<Bot>::ClientMap::iterator it = _imp->_clients.find(nick);
+    if (it == _imp->_clients.end())
+        return Client::ptr();
+    return it->second;
 }
 
 std::pair<Bot::ClientIterator, bool> Bot::add_client(Client::ptr c)
 {
     Context ctx("Adding client " + c->nick());
 
-    std::pair<ClientIterator, bool> res = _imp->_clients.insert(make_pair(c->nick(), c));
+    std::pair<Implementation<Bot>::ClientMap::iterator, bool> res = _imp->_clients.insert(make_pair(c->nick(), c));
     if (res.second)
     {
         Message m(this, "new_client", sourceinfo::Internal, c);
         CommandRegistry::get_instance()->dispatch(&m);
     }
 
-    return res;
+    return std::make_pair(ClientIterator(second_iterator(res.first)), res.second);
 }
 
 unsigned long Bot::remove_client(Client::ptr c)
@@ -267,23 +271,27 @@ unsigned long Bot::remove_client(Client::ptr c)
 
 Bot::ChannelIterator Bot::begin_channels()
 {
-    return _imp->_channels.begin();
+    return second_iterator(_imp->_channels.begin());
 }
 
 Bot::ChannelIterator Bot::end_channels()
 {
-    return _imp->_channels.end();
+    return second_iterator(_imp->_channels.end());
 }
 
-Bot::ChannelIterator Bot::find_channel(std::string name)
+Channel::ptr Bot::find_channel(std::string name)
 {
-    return _imp->_channels.find(name);
+    paludis::Implementation<Bot>::ChannelMap::iterator it = _imp->_channels.find(name);
+    if (it == _imp->_channels.end())
+        return Channel::ptr();
+    return it->second;
 }
 
 std::pair<Bot::ChannelIterator, bool> Bot::add_channel(Channel::ptr c)
 {
     Context ctx("Adding channel " + c->name());
-    return _imp->_channels.insert(make_pair(c->name(), c));
+    std::pair<Implementation<Bot>::ChannelMap::iterator, bool> res = _imp->_channels.insert(make_pair(c->name(), c));
+    return make_pair(second_iterator(res.first), res.second);
 }
 
 unsigned long Bot::remove_channel(Channel::ptr c)
@@ -294,7 +302,7 @@ unsigned long Bot::remove_channel(Channel::ptr c)
 
 void Bot::remove_channel(Bot::ChannelIterator c)
 {
-    Context ctx("Removing channel " + c->second->name());
+    Context ctx("Removing channel " + (*c)->name());
     _imp->_channels.erase(c.underlying_iterator<Implementation<Bot>::ChannelMap::iterator>());
 }
 

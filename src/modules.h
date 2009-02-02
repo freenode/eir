@@ -8,13 +8,6 @@
 
 namespace eir {
 
-    struct ModuleError : public paludis::Exception
-    {
-        ModuleError(const char *s) : paludis::Exception(s) { }
-        ModuleError(const std::string & s) : paludis::Exception(s) { }
-        ~ModuleError() throw() { }
-    };
-
     class ModuleRegistry : public paludis::InstantiationPolicy<ModuleRegistry, paludis::instantiation_method::SingletonTag>
     {
         public:
