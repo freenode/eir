@@ -72,6 +72,8 @@ namespace eir
 
             ModeType get_mode_type(char c) const;
 
+            bool is_mode_prefix(char c) const;
+
             bool mode_has_param(char modeletter, bool adding = true) const;
 
             bool is_channel_name(std::string) const;

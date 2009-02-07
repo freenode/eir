@@ -11,7 +11,7 @@
 using namespace eir;
 
 using namespace std::tr1::placeholders;
-using paludis::Implementation;
+using namespace paludis;
 
 template class paludis::WrappedForwardIterator<Bot::ClientIteratorTag, const Client::ptr>;
 template class paludis::WrappedForwardIterator<Bot::ChannelIteratorTag, const Channel::ptr>;
@@ -28,7 +28,7 @@ namespace paludis
 
         Bot *bot;
 
-        Server _server;
+        std::tr1::shared_ptr<Server> _server;
         std::string _host, _port, _nick, _pass;
 
         Client::ptr _me;
@@ -49,9 +49,17 @@ namespace paludis
         CommandRegistry::id set_handler;
         void handle_set(const Message *);
 
-        Implementation(Bot *b, std::string host, std::string port, std::string nick, std::string pass)
-            : bot(b), _server(std::tr1::bind(&Implementation<Bot>::handle_message, this, _1)),
-              _host(host), _port(port), _nick(nick), _pass(pass), _connected(false)
+        void connect(std::string host, std::string port, std::string nick, std::string pass)
+        {
+            _server.reset(new Server(std::tr1::bind(&Implementation<Bot>::handle_message, this, _1)));
+            _host = host;
+            _port = port;
+            _nick = nick;
+            _pass = pass;
+        }
+
+        Implementation(Bot *b)
+            : bot(b), _connected(false)
         {
             set_handler = CommandRegistry::get_instance()->add_handler("set",
                     std::tr1::bind(&Implementation<Bot>::handle_set, this, _1));
@@ -59,10 +67,14 @@ namespace paludis
     };
 }
 
-
-Bot::Bot(std::string host, std::string port, std::string nick, std::string pass)
-    : paludis::PrivateImplementationPattern<Bot>(new paludis::Implementation<Bot>(this, host, port, nick, pass))
+Bot::Bot()
+    : PrivateImplementationPattern<Bot>(new Implementation<Bot> (this))
 {
+}
+
+void Bot::connect(std::string host, std::string port, std::string nick, std::string pass)
+{
+    _imp->connect(host, port, nick, pass);
 }
 
 Bot::~Bot()
@@ -161,6 +173,9 @@ void paludis::Implementation<Bot>::_init_me(const Message *m)
 
 void paludis::Implementation<Bot>::handle_set(const Message *m)
 {
+    if (m->bot != bot)
+        return;
+
     if (m->source.type != sourceinfo::ConfigFile &&
             (!m->source.client || !m->source.client->privs().has_privilege("admin")))
         return;
@@ -191,28 +206,29 @@ bool Bot::connected() const
 
 void Bot::disconnect(std::string reason)
 {
-    _imp->_server.purge();
-    _imp->_server.send("QUIT :" + reason);
-    _imp->_server.disconnect();
+    _imp->_server->disconnect(reason);
     _imp->_connected = false;
 }
 
 void Bot::run()
 {
-    _imp->_server.connect(_imp->_host, _imp->_port);
+    if ( _imp->_host.empty() || _imp->_port.empty() || _imp->_nick.empty())
+        throw ConfigurationError("No server specified");
+
+    _imp->_server->connect(_imp->_host, _imp->_port);
 
     Message m(this, "on_connect");
     CommandRegistry::get_instance()->dispatch(&m);
 
     if (_imp->_pass.length() > 0)
-        _imp->_server.send("PASS " + _imp->_pass);
+        _imp->_server->send("PASS " + _imp->_pass);
 
-    _imp->_server.send("NICK " + _imp->_nick);
-    _imp->_server.send("USER eir * * :eir version 0.0.1");
+    _imp->_server->send("NICK " + _imp->_nick);
+    _imp->_server->send("USER eir * * :eir version 0.0.1");
 
     _imp->_connected = true;
 
-    _imp->_server.run();
+    _imp->_server->run();
 }
 
 void Bot::send(std::string line)
@@ -220,7 +236,7 @@ void Bot::send(std::string line)
     if (!_imp->_connected)
         throw NotConnectedException();
 
-    _imp->_server.send(line);
+    _imp->_server->send(line);
 }
 
 // Client stuff

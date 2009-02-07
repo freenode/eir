@@ -3,6 +3,7 @@
 
 #include <tr1/functional>
 #include <paludis/util/private_implementation_pattern.hh>
+#include <ctime>
 
 namespace eir
 {
@@ -19,7 +20,7 @@ namespace eir
 
             void purge();
 
-            void disconnect();
+            void disconnect(std::string message);
 
             void run();
 

@@ -105,6 +105,11 @@ char ISupport::get_mode_prefix(char m) const
     return _prefixes[i];
 }
 
+bool ISupport::is_mode_prefix(char p) const
+{
+    return _prefixes.find(p) != std::string::npos;
+}
+
 void ISupport::_populate_chanmodes(std::string value)
 {
     Context c("Populating channel mode types from " + value);

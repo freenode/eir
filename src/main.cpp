@@ -21,17 +21,11 @@ void print_cerr(std::string s)
     std::cerr << s << std::endl;
 }
 
-static Bot *bot = 0;
+static Bot bot;
 
 static void set_servername(const Message *m)
 {
     std::string host, port, nick, pass;
-
-    if(bot)
-    {
-        m->source.reply("Can't create more than one bot.");
-        return;
-    }
 
     if(m->args.size() < 3)
     {
@@ -46,7 +40,7 @@ static void set_servername(const Message *m)
     if(m->args.size() > 3)
         pass = m->args[3];
 
-    bot = new Bot(host, port, nick, pass);
+    bot.connect(host, port, nick, pass);
 }
 
 int main(int, char **argv)
@@ -66,7 +60,7 @@ int main(int, char **argv)
             if(tokens.empty())
                 continue;
 
-            Message m(0, *tokens.begin());
+            Message m(&bot, *tokens.begin());
 
             tokens.pop_front();
             std::copy(tokens.begin(), tokens.end(), std::back_inserter(m.args));
@@ -87,15 +81,10 @@ int main(int, char **argv)
                   << e.message() << " (" << e.what() << ")" << std::endl;
         return 1;
     }
-    if (! bot)
-    {
-        std::cerr << "You didn't create a bot. Bad you." << std::endl;
-        return 1;
-    }
 
     try
     {
-        bot->run();
+        bot.run();
     }
     catch (RestartException &e)
     {

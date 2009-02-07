@@ -97,16 +97,20 @@ Membership::ptr Client::find_membership(std::string chname)
     return it->second;
 }
 
-void Client::join_chan(Channel::ptr c)
+Membership::ptr Client::join_chan(Channel::ptr c)
 {
     Context ctx("Adding client " + _imp->nick + " to channel " + c->name());
-    Membership::ptr m(new Membership(shared_from_this(), c));
+    Membership::ptr m;
 
-    if (find_membership(c->name()))
-        return;
+    if (m = find_membership(c->name()))
+        return m;
+
+    m.reset(new Membership(shared_from_this(), c));
 
     if(c->add_member(m))
         _imp->channels.insert(make_pair(c->name(), m));
+
+    return m;
 }
 
 void Client::leave_chan(Channel::ptr c)

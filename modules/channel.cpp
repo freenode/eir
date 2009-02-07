@@ -165,12 +165,20 @@ void ChannelHandler::handle_who_reply(const Message *m)
                 user = m->args[1],
                 hostname = m->args[2],
                 /* server = m->args[3], */
-                nick = m->args[4];
+                nick = m->args[4],
+                flags = m->args[5];
 
     Context ctx("Processing WHO reply for " + chname + " (" + nick + ")");
     Client::ptr c = find_or_create_client(m->bot, nick, user, hostname);
     Channel::ptr ch = find_or_create_channel(m->bot, chname);
-    c->join_chan(ch);
+    Membership::ptr member = c->join_chan(ch);
+
+    for (std::string::iterator ch = flags.begin(); ch != flags.end(); ++ch)
+    {
+        char c = m->bot->supported()->get_prefix_mode(*ch);
+        if (c && !member->has_mode(c))
+            member->modes += c;
+    }
 }
 
 void ChannelHandler::handle_part(const Message *m)

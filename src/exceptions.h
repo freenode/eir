@@ -39,9 +39,20 @@ namespace eir {
         { }
     };
 
+    struct ConnectionError : public Exception
+    {
+        ConnectionError(std::string s) : Exception(s)
+        { }
+    };
+
     struct ModuleError : public Exception
     {
         ModuleError(std::string s) : Exception(s, true) { }
+    };
+
+    struct ConfigurationError : public Exception
+    {
+        ConfigurationError(std::string s) : Exception(s) { }
     };
 
 }

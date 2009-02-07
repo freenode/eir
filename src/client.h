@@ -44,7 +44,7 @@ namespace eir
         Client(Bot *, std::string, std::string, std::string);
         ~Client();
 
-        void join_chan(ChannelPtr);
+        MembershipPtr join_chan(ChannelPtr);
         void leave_chan(ChannelPtr);
         void leave_chan(MembershipPtr);
 
