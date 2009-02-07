@@ -20,7 +20,7 @@ all: eir modules libpaludisutil.so
 eir: libpaludisutil.so
 
 eir: $(eir_OBJS)
-	g++ $(LDFLAGS) -o $@ $(eir_OBJS) -lboost_system -ldl -lpaludisutil -L. -Wl,--rpath `pwd`
+	g++ $(LDFLAGS) -o $@ $(eir_OBJS) -ldl -lpaludisutil -L. -Wl,--rpath `pwd`
 
 .PHONY: modules
 

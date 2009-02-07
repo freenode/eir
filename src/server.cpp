@@ -3,7 +3,6 @@
 #include "event_internal.h"
 
 #include <iostream>
-#include <boost/asio.hpp>
 
 #include <paludis/util/private_implementation_pattern-impl.hh>
 
@@ -14,11 +13,12 @@
 #include <sys/select.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <netdb.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <string.h>
 
 using namespace eir;
-using boost::asio::ip::tcp;
 using paludis::Implementation;
 
 #include <iostream>
