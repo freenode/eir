@@ -146,7 +146,8 @@ void Implementation<Server>::maybe_send_stuff()
 
 void Implementation<Server>::io_event()
 {
-    --_burst;
+    if (_burst > 0)
+        --_burst;
     maybe_send_stuff();
 }
 
