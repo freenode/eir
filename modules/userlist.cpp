@@ -29,15 +29,11 @@ struct UserLister : public CommandHandlerBase<UserLister>
         m->source.reply(reply);
     }
 
-    CommandRegistry::id _id;
+    CommandHolder _id;
 
     UserLister()
     {
         _id = add_handler("names", sourceinfo::IrcCommand, &UserLister::list);
-    }
-    ~UserLister()
-    {
-        remove_handler(_id);
     }
 } lister;
 

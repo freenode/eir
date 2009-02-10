@@ -22,9 +22,8 @@ struct ChannelHandler : public CommandHandlerBase<ChannelHandler>
     void handle_who_reply(const Message *);
 
     ChannelHandler();
-    ~ChannelHandler();
 
-    CommandRegistry::id join_id, part_id, quit_id, names_id, nick_id, who_id;
+    CommandHolder join_id, part_id, quit_id, names_id, nick_id, who_id;
 };
 
 ChannelHandler handles_channels;
@@ -37,15 +36,6 @@ ChannelHandler::ChannelHandler()
     //names_id = add_handler("353", sourceinfo::RawIrc, &ChannelHandler::handle_names_reply);
     nick_id = add_handler("NICK", sourceinfo::RawIrc, &ChannelHandler::handle_nick);
     who_id = add_handler("352", sourceinfo::RawIrc, &ChannelHandler::handle_who_reply);
-}
-
-ChannelHandler::~ChannelHandler()
-{
-    remove_handler(join_id);
-    remove_handler(part_id);
-    remove_handler(quit_id);
-    remove_handler(names_id);
-    remove_handler(nick_id);
 }
 
 namespace

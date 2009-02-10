@@ -72,15 +72,11 @@ struct ModeParser : public CommandHandlerBase<ModeParser>
         }
     }
 
-    CommandRegistry::id mode_id;
+    CommandHolder mode_id;
 
     ModeParser()
     {
         mode_id = add_handler("MODE", sourceinfo::RawIrc, &ModeParser::parse_mode);
-    }
-    ~ModeParser()
-    {
-        remove_handler(mode_id);
     }
 } mode_parser;
 

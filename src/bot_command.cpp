@@ -16,7 +16,7 @@ namespace {
 
 struct BotCommandHandler : public CommandHandlerBase<BotCommandHandler>
 {
-    CommandRegistry::id _id;
+    CommandHolder _id;
 
     void handle_privmsg(const Message *m)
     {
@@ -58,10 +58,6 @@ struct BotCommandHandler : public CommandHandlerBase<BotCommandHandler>
     BotCommandHandler()
     {
         _id = add_handler("PRIVMSG", sourceinfo::RawIrc, &BotCommandHandler::handle_privmsg);
-    }
-    ~BotCommandHandler()
-    {
-        remove_handler(_id);
     }
 } bot_command_handler;
 

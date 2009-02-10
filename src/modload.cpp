@@ -7,7 +7,7 @@ using namespace eir;
 
 struct Modloader : public CommandHandlerBase<Modloader>
 {
-    eir::CommandRegistry::id modload_id, modunload_id, modreload_id;
+    eir::CommandHolder modload_id, modunload_id, modreload_id;
 
     void do_modload(const eir::Message *m)
     {
@@ -59,12 +59,6 @@ struct Modloader : public CommandHandlerBase<Modloader>
         modload_id = add_handler("modload", &Modloader::do_modload);
         modunload_id = add_handler("modunload", &Modloader::do_modunload);
         modreload_id = add_handler("modreload", &Modloader::do_modreload);
-    }
-
-    ~Modloader() {
-        remove_handler(modload_id);
-        remove_handler(modunload_id);
-        remove_handler(modreload_id);
     }
 };
 

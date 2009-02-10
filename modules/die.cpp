@@ -26,17 +26,12 @@ struct Die : public CommandHandlerBase<Die>
         }
     }
 
-    CommandRegistry::id die_id, restart_id;
+    CommandHolder die_id, restart_id;
 
     Die()
     {
         die_id = add_handler("die", sourceinfo::IrcCommand, &Die::die);
         restart_id = add_handler("restart", sourceinfo::IrcCommand, &Die::restart);
-    }
-    ~Die()
-    {
-        remove_handler(die_id);
-        remove_handler(restart_id);
     }
 } dieer;
 

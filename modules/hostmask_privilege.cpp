@@ -102,7 +102,7 @@ struct HostmaskPrivilege : public CommandHandlerBase<HostmaskPrivilege>
             (*it)->privs().clear();
     }
 
-    CommandRegistry::id add_id, remove_id, client_id, clear_id;
+    CommandHolder add_id, remove_id, client_id, clear_id;
 
     HostmaskPrivilege()
     {
@@ -110,12 +110,5 @@ struct HostmaskPrivilege : public CommandHandlerBase<HostmaskPrivilege>
         add_id = add_handler("host_privilege", &HostmaskPrivilege::add_privilege_entry);
         remove_id = add_handler("del_host_privilege", &HostmaskPrivilege::remove_privilege_entry);
         clear_id = add_handler("clear_privileges", sourceinfo::ConfigFile, &HostmaskPrivilege::clear_host_privileges);
-    }
-
-    ~HostmaskPrivilege()
-    {
-        remove_handler(client_id);
-        remove_handler(add_id);
-        remove_handler(remove_id);
     }
 } host_priv;

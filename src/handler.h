@@ -23,11 +23,6 @@ namespace eir
             return eir::CommandRegistry::get_instance()->add_handler(s, t,
                     std::tr1::bind(f, static_cast<T_*>(this), std::tr1::placeholders::_1));
         }
-
-        void remove_handler(CommandRegistry::id i)
-        {
-            eir::CommandRegistry::get_instance()->remove_handler(i);
-        }
     };
 }
 

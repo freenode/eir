@@ -26,7 +26,6 @@ struct Dumper : public CommandHandlerBase<Dumper>
 
     }
     Dumper() { _id = add_handler("isupport", sourceinfo::IrcCommand, &Dumper::do_dump); }
-    ~Dumper() { remove_handler(_id); }
-    CommandRegistry::id _id;
+    CommandHolder _id;
 } cd;
 

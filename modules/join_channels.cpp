@@ -44,7 +44,7 @@ struct JoinChannels : public CommandHandlerBase<JoinChannels>
         }
     }
 
-    CommandRegistry::id addch_id, join_id, rmch_id, part_id, conn_id;
+    CommandHolder addch_id, join_id, rmch_id, part_id, conn_id;
 
     JoinChannels()
     {
@@ -52,14 +52,6 @@ struct JoinChannels : public CommandHandlerBase<JoinChannels>
         join_id = add_handler("join", sourceinfo::IrcCommand, &JoinChannels::add_channel);
         part_id = add_handler("part", sourceinfo::IrcCommand, &JoinChannels::remove_channel);
         conn_id = add_handler("001", sourceinfo::RawIrc, &JoinChannels::on_connect);
-    }
-
-    ~JoinChannels()
-    {
-        remove_handler(addch_id);
-        remove_handler(join_id);
-        remove_handler(part_id);
-        remove_handler(conn_id);
     }
 } joiner;
 

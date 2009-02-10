@@ -8,8 +8,6 @@ using namespace std::tr1::placeholders;
 
 struct Whoami : public CommandHandlerBase<Whoami>
 {
-    CommandRegistry::id _id;
-
     void whoami(const Message *m)
     {
         if (!m->source.client)
@@ -29,13 +27,11 @@ struct Whoami : public CommandHandlerBase<Whoami>
             m->source.reply("You have privileges " + privbuf);
     }
 
+    CommandHolder _id;
+
     Whoami()
     {
         _id = add_handler("whoami", sourceinfo::IrcCommand, &Whoami::whoami);
-    }
-    ~Whoami()
-    {
-        remove_handler(_id);
     }
 } whoami;
 

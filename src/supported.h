@@ -31,7 +31,7 @@ namespace eir
             void _populate_prefix_modes(std::string);
             void _populate_chanmodes(std::string);
 
-            CommandRegistry::id _handler_id;
+            CommandHolder _handler_id;
 
         public:
             typedef std::set<std::string>::const_iterator simple_iterator;
@@ -79,7 +79,6 @@ namespace eir
             bool is_channel_name(std::string) const;
 
             ISupport();
-            ~ISupport();
     };
 }
 

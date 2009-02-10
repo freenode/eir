@@ -47,7 +47,7 @@ namespace paludis
 
         void handle_message(std::string);
 
-        CommandRegistry::id set_handler;
+        CommandHolder set_handler;
         void handle_set(const Message *);
 
         void connect(std::string host, std::string port, std::string nick, std::string pass)
@@ -62,7 +62,7 @@ namespace paludis
         void set_server(const Message *m);
 
         std::string config_filename;
-        CommandRegistry::id rehash_handler;
+        CommandHolder rehash_handler;
         void load_config(std::tr1::function<void(std::string)>, bool cold = false);
         void rehash(const Message *m);
 
@@ -71,12 +71,6 @@ namespace paludis
         {
             set_handler = add_handler("set", &Implementation<Bot>::handle_set);
             rehash_handler = add_handler("rehash", &Implementation<Bot>::rehash);
-        }
-
-        ~Implementation()
-        {
-            remove_handler(set_handler);
-            remove_handler(rehash_handler);
         }
     };
 }
@@ -115,50 +109,37 @@ void Implementation<Bot>::set_server(const Message *m)
 
 void Implementation<Bot>::load_config(std::tr1::function<void(std::string)> reply_func, bool cold /* = false */)
 {
-    CommandRegistry::id server_id;
+    CommandHolder server_id;
 
-    try
+    if (cold)
+        server_id = add_handler("server", sourceinfo::ConfigFile, &Implementation<Bot>::set_server);
+
+    std::ifstream fs(config_filename.c_str());
+    std::string line;
+
+    while(std::getline(fs, line))
     {
-        if (cold)
-            server_id = CommandRegistry::get_instance()->add_handler("server", sourceinfo::ConfigFile,
-                    std::tr1::bind(&Implementation<Bot>::set_server, this, _1));
+        std::list<std::string> tokens;
+        paludis::tokenise_whitespace_quoted(line, std::back_inserter(tokens));
 
-        std::ifstream fs(config_filename.c_str());
-        std::string line;
+        if(tokens.empty())
+            continue;
 
-        while(std::getline(fs, line))
-        {
-            std::list<std::string> tokens;
-            paludis::tokenise_whitespace_quoted(line, std::back_inserter(tokens));
+        Message m(bot, *tokens.begin());
 
-            if(tokens.empty())
-                continue;
-
-            Message m(bot, *tokens.begin());
-
-            tokens.pop_front();
-            std::copy(tokens.begin(), tokens.end(), std::back_inserter(m.args));
-
-            if (cold)
-                m.source.reply_func = reply_func;
-
-            m.source.error_func = reply_func;
-
-            m.source.type = sourceinfo::ConfigFile;
-
-            m.raw = line;
-
-            CommandRegistry::get_instance()->dispatch(&m, true);
-        }
+        tokens.pop_front();
+        std::copy(tokens.begin(), tokens.end(), std::back_inserter(m.args));
 
         if (cold)
-            CommandRegistry::get_instance()->remove_handler(server_id);
-    }
-    catch (Exception & e)
-    {
-        if (cold)
-            CommandRegistry::get_instance()->remove_handler(server_id);
-        throw;
+            m.source.reply_func = reply_func;
+
+        m.source.error_func = reply_func;
+
+        m.source.type = sourceinfo::ConfigFile;
+
+        m.raw = line;
+
+        CommandRegistry::get_instance()->dispatch(&m, true);
     }
 }
 

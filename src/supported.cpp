@@ -133,8 +133,3 @@ ISupport::ISupport()
     _handler_id = CommandRegistry::get_instance()->add_handler("005", std::tr1::bind(&ISupport::_populate, this, _1));
 }
 
-ISupport::~ISupport()
-{
-    CommandRegistry::get_instance()->remove_handler(_handler_id);
-}
-

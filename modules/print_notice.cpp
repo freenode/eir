@@ -16,10 +16,7 @@ struct NoticePrinter : public CommandHandlerBase<NoticePrinter>
     NoticePrinter() {
         _id = add_handler("server_incoming", &NoticePrinter::print);
     }
-    ~NoticePrinter() {
-        remove_handler(_id);
-    }
-    eir::CommandRegistry::id _id;
+    CommandHolder _id;
 };
 
 NoticePrinter p;

@@ -8,8 +8,6 @@ using namespace std::tr1::placeholders;
 
 struct Identifier : public CommandHandlerBase<Identifier>
 {
-    eir::CommandRegistry::id _id;
-
     void identify(const Message *m)
     {
         Bot::SettingsIterator it = m->bot->find_setting("nickserv_pass");
@@ -26,12 +24,10 @@ struct Identifier : public CommandHandlerBase<Identifier>
         m->bot->send("NS IDENTIFY " + user + " " + pass);
     }
 
+    CommandHolder _id;
+
     Identifier() {
         _id = add_handler("001", &Identifier::identify);
-    }
-
-    ~Identifier() {
-        remove_handler(_id);
     }
 };
 
