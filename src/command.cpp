@@ -24,16 +24,15 @@ bool CommandRegistry::IrcStringCmp::operator() (std::string s1, std::string s2)
     }
 }
 
-void CommandRegistry::dispatch(const Message *m)
+void CommandRegistry::dispatch(const Message *m, bool fatal_errors /* = false */)
 {
     Context ctx("Processing handlers for command " + m->command);
 
-    _dispatch(_handlers.find(m->command), m);
-    _dispatch(_handlers.find(""), m);
+    _dispatch(_handlers.find(m->command), m, fatal_errors);
 }
 
 
-void CommandRegistry::_dispatch(HandlerMap::iterator it, const Message *m)
+void CommandRegistry::_dispatch(HandlerMap::iterator it, const Message *m, bool fatal_errors)
 {
     if (it != _handlers.end())
     {
@@ -48,14 +47,14 @@ void CommandRegistry::_dispatch(HandlerMap::iterator it, const Message *m)
                 }
                 catch (Exception &e)
                 {
-                    if (e.fatal())
+                    if (e.fatal() || fatal_errors)
                         throw;
-                    m->source.reply("Error processing message " + m->command + ": " +
+                    m->source.error("Error processing message " + m->command + ": " +
                             e.message() + " (" + e.what() + ")");
                 }
                 catch (std::exception &e)
                 {
-                    m->source.reply("Unknown error processing message " + m->command + ": " + e.what());
+                    m->source.error("Unknown error processing message " + m->command + ": " + e.what());
                 }
             }
         }

@@ -16,7 +16,7 @@ namespace eir
             typedef std::tr1::function<void(const Message *)> handler;
             typedef struct _id { } *id;
 
-            void dispatch(const Message *);
+            void dispatch(const Message *, bool = false);
 
             id add_handler(std::string, const handler &);
             id add_handler(std::string, unsigned int, const handler &);
@@ -29,7 +29,7 @@ namespace eir
             typedef std::map<id, std::pair<unsigned int, handler> > HandlerList;
             typedef std::map<std::string, HandlerList, IrcStringCmp> HandlerMap;
             HandlerMap _handlers;
-            void _dispatch(HandlerMap::iterator, const Message *);
+            void _dispatch(HandlerMap::iterator, const Message *, bool);
     };
 }
 

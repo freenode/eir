@@ -9,10 +9,6 @@
 #include "exceptions.h"
 
 #include <iostream>
-#include <iterator>
-
-#include <fstream>
-#include <paludis/util/tokeniser.hh>
 
 using namespace eir;
 
@@ -21,69 +17,16 @@ void print_cerr(std::string s)
     std::cerr << s << std::endl;
 }
 
-static Bot bot;
-
-static void set_servername(const Message *m)
-{
-    std::string host, port, nick, pass;
-
-    if(m->args.size() < 3)
-    {
-        m->source.reply("Not enough arguments to set_servername. Need 3 or 4.");
-        return;
-    }
-
-    host = m->args[0];
-    port = m->args[1];
-    nick = m->args[2];
-
-    if(m->args.size() > 3)
-        pass = m->args[3];
-
-    bot.connect(host, port, nick, pass);
-}
-
 int main(int, char **argv)
 {
-    std::ifstream fs("eir.conf");
-    std::string line;
+    std::string filename("eir.conf");
 
-    eir::CommandRegistry::get_instance()->add_handler("server", set_servername);
-
-    try
-    {
-        while(std::getline(fs, line))
-        {
-            std::list<std::string> tokens;
-            paludis::tokenise_whitespace_quoted(line, std::back_inserter(tokens));
-
-            if(tokens.empty())
-                continue;
-
-            Message m(&bot, *tokens.begin());
-
-            tokens.pop_front();
-            std::copy(tokens.begin(), tokens.end(), std::back_inserter(m.args));
-
-            m.source.reply_func = print_cerr;
-
-            m.source.type = sourceinfo::ConfigFile;
-
-            m.raw = line;
-
-            CommandRegistry::get_instance()->dispatch(&m);
-        }
-    }
-    catch(paludis::Exception & e)
-    {
-        std::cerr << "Error loading config file:" << std::endl
-                  << e.backtrace("\n  * ")
-                  << e.message() << " (" << e.what() << ")" << std::endl;
-        return 1;
-    }
+    if (argv[1] && argv[1][0])
+        filename = argv[1];
 
     try
     {
+        Bot bot(filename);
         bot.run();
     }
     catch (RestartException &e)

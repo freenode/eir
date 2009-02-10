@@ -22,12 +22,6 @@ struct JoinChannels : public CommandHandlerBase<JoinChannels>
 
     void remove_channel(const Message *m)
     {
-        if (! m->bot->supported()->is_channel_name(m->args[0]))
-        {
-            m->source.reply(m->args[0] + " isn't a channel name.");
-            return;
-        }
-
         for (std::list<std::string>::iterator it = bot_channels.begin();
                 it != bot_channels.end(); ++it)
         {

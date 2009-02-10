@@ -18,7 +18,6 @@ struct HostmaskPrivilege : public CommandHandlerBase<HostmaskPrivilege>
         if (m->source.type != sourceinfo::ConfigFile &&
                 ( !m->source.client || !m->source.client->privs().has_privilege("admin")))
         {
-            m->source.reply("Nope.");
             return;
         }
 
@@ -32,13 +31,12 @@ struct HostmaskPrivilege : public CommandHandlerBase<HostmaskPrivilege>
         if (m->source.type != sourceinfo::ConfigFile &&
                 ( !m->source.client || !m->source.client->privs().has_privilege("admin")))
         {
-            m->source.reply("Nope.");
             return;
         }
 
         if (m->args.size() < 2)
         {
-            m->source.reply("Error: need two arguments for " + m->command);
+            m->source.error("Need two arguments for " + m->command);
             return;
         }
 
@@ -58,13 +56,12 @@ struct HostmaskPrivilege : public CommandHandlerBase<HostmaskPrivilege>
         if (m->source.type != sourceinfo::ConfigFile &&
                 ( !m->source.client || !m->source.client->privs().has_privilege("admin")))
         {
-            m->source.reply("Nope.");
             return;
         }
 
         if (m->args.size() < 2)
         {
-            m->source.reply("Error: need two arguments for " + m->command);
+            m->source.error("Need two arguments for " + m->command);
             return;
         }
 

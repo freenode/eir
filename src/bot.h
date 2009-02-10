@@ -15,7 +15,8 @@ namespace eir
     class Bot : public paludis::PrivateImplementationPattern<Bot>
     {
         public:
-            Bot();
+            Bot(std::string config);
+
             void connect(std::string host, std::string port, std::string nick, std::string pass);
 
             const std::string& nick() const;

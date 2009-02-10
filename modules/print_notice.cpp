@@ -1,24 +1,26 @@
 #include "bot.h"
-#include "command.h"
+#include "handler.h"
 
 #include <iostream>
 #include <iterator>
 
 using namespace std::tr1::placeholders;
+using namespace eir;
 
-struct notice_printer{
+struct NoticePrinter : public CommandHandlerBase<NoticePrinter>
+{
     void print(const eir::Message * m)
     {
         std::cout << m->raw << std::endl;
     }
-    notice_printer() {
-        _id = eir::CommandRegistry::get_instance()->add_handler("", std::tr1::bind(std::tr1::mem_fn(&notice_printer::print), this, _1));
+    NoticePrinter() {
+        _id = add_handler("server_incoming", &NoticePrinter::print);
     }
-    ~notice_printer() {
-        eir::CommandRegistry::get_instance()->remove_handler(_id);
+    ~NoticePrinter() {
+        remove_handler(_id);
     }
     eir::CommandRegistry::id _id;
 };
 
-notice_printer p;
+NoticePrinter p;
 

@@ -1,12 +1,16 @@
 #include "bot.h"
 #include "command.h"
 #include "exceptions.h"
+#include "handler.h"
 
 #include "server.h"
 
 #include <paludis/util/wrapped_forward_iterator-impl.hh>
 #include <paludis/util/member_iterator-impl.hh>
 #include <paludis/util/private_implementation_pattern-impl.hh>
+#include <paludis/util/tokeniser.hh>
+
+#include <fstream>
 
 using namespace eir;
 
@@ -20,7 +24,7 @@ template class paludis::WrappedForwardIterator<Bot::SettingsIteratorTag, const s
 namespace paludis
 {
     template <>
-    struct Implementation<Bot>
+    struct Implementation<Bot> : public CommandHandlerBase<Implementation<Bot> >
     {
         typedef std::map<std::string, Client::ptr> ClientMap;
         typedef std::map<std::string, Channel::ptr> ChannelMap;
@@ -43,9 +47,6 @@ namespace paludis
 
         void handle_message(std::string);
 
-        CommandRegistry::id init_handler;
-        void _init_me(const Message *);
-
         CommandRegistry::id set_handler;
         void handle_set(const Message *);
 
@@ -58,18 +59,39 @@ namespace paludis
             _pass = pass;
         }
 
-        Implementation(Bot *b)
-            : bot(b), _connected(false)
+        void set_server(const Message *m);
+
+        std::string config_filename;
+        CommandRegistry::id rehash_handler;
+        void load_config(std::tr1::function<void(std::string)>, bool cold = false);
+        void rehash(const Message *m);
+
+        Implementation(Bot *b, std::string conf)
+            : bot(b), _connected(false), config_filename(conf)
         {
-            set_handler = CommandRegistry::get_instance()->add_handler("set",
-                    std::tr1::bind(&Implementation<Bot>::handle_set, this, _1));
+            set_handler = add_handler("set", &Implementation<Bot>::handle_set);
+            rehash_handler = add_handler("rehash", &Implementation<Bot>::rehash);
+        }
+
+        ~Implementation()
+        {
+            remove_handler(set_handler);
+            remove_handler(rehash_handler);
         }
     };
 }
 
-Bot::Bot()
-    : PrivateImplementationPattern<Bot>(new Implementation<Bot> (this))
+#include <iostream>
+
+static void print_cerr(std::string s)
 {
+    std::cerr << s << std::endl;
+}
+
+Bot::Bot(std::string configfilename)
+    : PrivateImplementationPattern<Bot>(new Implementation<Bot> (this, configfilename))
+{
+    _imp->load_config(print_cerr, true);
 }
 
 void Bot::connect(std::string host, std::string port, std::string nick, std::string pass)
@@ -81,17 +103,87 @@ Bot::~Bot()
 {
 }
 
+void Implementation<Bot>::set_server(const Message *m)
+{
+    if (m->args.size() < 3)
+        throw ConfigurationError("server needs three arguments.");
+
+    std::string pass = m->args.size() > 3 ? m->args[3] : "";
+
+    connect(m->args[0], m->args[1], m->args[2], pass);
+}
+
+void Implementation<Bot>::load_config(std::tr1::function<void(std::string)> reply_func, bool cold /* = false */)
+{
+    CommandRegistry::id server_id;
+
+    try
+    {
+        if (cold)
+            server_id = CommandRegistry::get_instance()->add_handler("server", sourceinfo::ConfigFile,
+                    std::tr1::bind(&Implementation<Bot>::set_server, this, _1));
+
+        std::ifstream fs(config_filename.c_str());
+        std::string line;
+
+        while(std::getline(fs, line))
+        {
+            std::list<std::string> tokens;
+            paludis::tokenise_whitespace_quoted(line, std::back_inserter(tokens));
+
+            if(tokens.empty())
+                continue;
+
+            Message m(bot, *tokens.begin());
+
+            tokens.pop_front();
+            std::copy(tokens.begin(), tokens.end(), std::back_inserter(m.args));
+
+            if (cold)
+                m.source.reply_func = reply_func;
+
+            m.source.error_func = reply_func;
+
+            m.source.type = sourceinfo::ConfigFile;
+
+            m.raw = line;
+
+            CommandRegistry::get_instance()->dispatch(&m, true);
+        }
+
+        if (cold)
+            CommandRegistry::get_instance()->remove_handler(server_id);
+    }
+    catch (Exception & e)
+    {
+        if (cold)
+            CommandRegistry::get_instance()->remove_handler(server_id);
+        throw;
+    }
+}
+
+void Implementation<Bot>::rehash(const Message *m)
+{
+    if (! m->source.client || !m->source.client->privs().has_privilege("admin"))
+        return;
+
+    load_config(m->source.reply_func);
+
+    m->source.reply("Done.");
+}
+
 static void notice_to(Bot *b, std::string dest, std::string text)
 {
     b->send("NOTICE " + dest + " :" + text);
 }
 
-void paludis::Implementation<Bot>::handle_message(std::string line)
+void Implementation<Bot>::handle_message(std::string line)
 {
     Context c("Parsing message " + line);
 
     Message m(bot);
     std::string::size_type p1, p2;
+    std::string command;
 
     std::string::iterator e = line.end();
     if (*--e == '\r')
@@ -130,7 +222,7 @@ void paludis::Implementation<Bot>::handle_message(std::string line)
     m.source.type = sourceinfo::RawIrc;
 
     p2 = line.find(' ', p1);
-    m.command = line.substr(p1, p2 - p1);
+    command = line.substr(p1, p2 - p1);
 
     p1 = p2 + 1;
     p2 = line.find(' ', p1);
@@ -147,6 +239,8 @@ void paludis::Implementation<Bot>::handle_message(std::string line)
     else
         m.source.reply_func = std::tr1::bind(notice_to, bot, m.source.name, _1);
 
+    m.source.error_func = m.source.reply_func;
+
     while(p2 != std::string::npos)
     {
         p1 = p2 + 1;
@@ -159,19 +253,13 @@ void paludis::Implementation<Bot>::handle_message(std::string line)
         m.args.push_back(line.substr(p1, p2 - p1));
     }
 
+    m.command = "server_incoming";
+    CommandRegistry::get_instance()->dispatch(&m);
+    m.command = command;
     CommandRegistry::get_instance()->dispatch(&m);
 }
 
-void paludis::Implementation<Bot>::_init_me(const Message *m)
-{
-    _nick = m->source.destination;
-    Client::ptr c(new Client(m->bot, _nick, "", ""));
-    _me = c;
-    _clients.insert(make_pair(_nick, _me));
-    bot->send("USERHOST " + _nick);
-}
-
-void paludis::Implementation<Bot>::handle_set(const Message *m)
+void Implementation<Bot>::handle_set(const Message *m)
 {
     if (m->bot != bot)
         return;
@@ -182,7 +270,7 @@ void paludis::Implementation<Bot>::handle_set(const Message *m)
 
     if (m->args.size() < 2)
     {
-        m->source.reply("Not enough parameters to SET -- need two");
+        m->source.error("Not enough parameters to SET -- need two");
         return;
     }
 
@@ -253,7 +341,7 @@ Bot::ClientIterator Bot::end_clients()
 
 Client::ptr Bot::find_client(std::string nick)
 {
-    paludis::Implementation<Bot>::ClientMap::iterator it = _imp->_clients.find(nick);
+    Implementation<Bot>::ClientMap::iterator it = _imp->_clients.find(nick);
     if (it == _imp->_clients.end())
         return Client::ptr();
     return it->second;
@@ -297,7 +385,7 @@ Bot::ChannelIterator Bot::end_channels()
 
 Channel::ptr Bot::find_channel(std::string name)
 {
-    paludis::Implementation<Bot>::ChannelMap::iterator it = _imp->_channels.find(name);
+    Implementation<Bot>::ChannelMap::iterator it = _imp->_channels.find(name);
     if (it == _imp->_channels.end())
         return Channel::ptr();
     return it->second;

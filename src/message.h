@@ -37,9 +37,12 @@ namespace eir {
         std::string destination;
 
         // Function to send a reply to this.
-        std::tr1::function<void(std::string)> reply_func;
+        std::tr1::function<void(std::string)> reply_func, error_func;
         void reply(std::string text) const {
             if(reply_func) reply_func(text);
+        }
+        void error(std::string text) const {
+            if(error_func) error_func(text);
         }
 
         sourceinfo(unsigned int t, Client::ptr c)

@@ -17,17 +17,13 @@ struct Modloader : public CommandHandlerBase<Modloader>
 
         Context ctx("Processing MODLOAD " + m->args[0]);
 
-        try
+        if (ModuleRegistry::get_instance()->is_loaded(m->args[0]))
         {
-            ModuleRegistry::get_instance()->load(m->args[0]);
-            m->source.reply("Loaded " + m->args[0]);
+            m->source.reply(m->args[0] + " is already loaded.");
         }
-        catch(ModuleError &e)
-        {
-            m->source.reply("Failed to load " + m->args[0] + ": " + e.message());
-            if(m->source.type == sourceinfo::ConfigFile)
-                throw;
-        }
+
+        ModuleRegistry::get_instance()->load(m->args[0]);
+        m->source.reply("Loaded " + m->args[0]);
     }
 
     void do_modunload(const eir::Message *m)
@@ -38,17 +34,8 @@ struct Modloader : public CommandHandlerBase<Modloader>
 
         Context ctx("Processing MODUNLOAD " + m->args[0]);
 
-        try
-        {
-            ModuleRegistry::get_instance()->unload(m->args[0]);
-            m->source.reply("Unloaded " + m->args[0]);
-        }
-        catch(ModuleError &e)
-        {
-            m->source.reply("Failed to unload " + m->args[0] + ": " + e.message());
-            if(m->source.type == sourceinfo::ConfigFile)
-                throw;
-        }
+        ModuleRegistry::get_instance()->unload(m->args[0]);
+        m->source.reply("Unloaded " + m->args[0]);
      }
 
     void do_modreload(const eir::Message *m)
@@ -61,30 +48,11 @@ struct Modloader : public CommandHandlerBase<Modloader>
 
         if (ModuleRegistry::get_instance()->is_loaded(m->args[0]))
         {
-            try
-            {
-                ModuleRegistry::get_instance()->unload(m->args[0]);
-                m->source.reply("Unloaded " + m->args[0]);
-            }
-            catch(ModuleError &e)
-            {
-                m->source.reply("Failed to unload " + m->args[0] + ": " + e.message());
-                if(m->source.type == sourceinfo::ConfigFile)
-                    throw;
-                return;
-            }
+            ModuleRegistry::get_instance()->unload(m->args[0]);
+            m->source.reply("Unloaded " + m->args[0]);
         }
-        try
-        {
-            ModuleRegistry::get_instance()->load(m->args[0]);
-            m->source.reply("Loaded " + m->args[0]);
-        }
-        catch(ModuleError &e)
-        {
-            m->source.reply("Failed to load " + m->args[0] + ": " + e.message());
-            if(m->source.type == sourceinfo::ConfigFile)
-                throw;
-        }
+        ModuleRegistry::get_instance()->load(m->args[0]);
+        m->source.reply("Loaded " + m->args[0]);
      }
 
     Modloader() {

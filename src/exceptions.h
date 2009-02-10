@@ -47,7 +47,7 @@ namespace eir {
 
     struct ModuleError : public Exception
     {
-        ModuleError(std::string s) : Exception(s, true) { }
+        ModuleError(std::string s) : Exception(s, false) { }
     };
 
     struct ConfigurationError : public Exception
