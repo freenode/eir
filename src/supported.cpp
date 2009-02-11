@@ -1,8 +1,46 @@
 #include "supported.h"
 #include "exceptions.h"
-#include "message.h"
+#include "handler.h"
+
+#include <paludis/util/private_implementation_pattern-impl.hh>
+#include <cstdlib>
 
 using namespace eir;
+using namespace paludis;
+
+namespace paludis
+{
+    template <>
+    struct Implementation<ISupport> : public CommandHandlerBase<Implementation<ISupport> >
+    {
+        std::set<std::string> simple_tokens;
+        std::map<std::string, std::string> kv_tokens;
+        int _max_modes;
+
+        std::string _list_modes;
+        std::string _simple_modes;
+        std::string _oneparam_modes;
+        std::string _oneparam_modes_2;
+
+        std::string _prefixes, _prefix_modes;
+
+        std::string _chantypes;
+
+        void _populate(const Message *m);
+        void _populate_prefix_modes(std::string);
+        void _populate_chanmodes(std::string);
+
+        CommandHolder _handler_id;
+
+        Implementation()
+        {
+            _handler_id = add_handler("005", &Implementation<ISupport>::_populate);
+        }
+        ~Implementation()
+        {
+        }
+    };
+}
 
 bool ISupport::mode_has_param(char mode_letter, bool adding /*= true*/) const
 {
@@ -23,25 +61,25 @@ bool ISupport::mode_has_param(char mode_letter, bool adding /*= true*/) const
 
 bool ISupport::is_channel_name(std::string name) const
 {
-    return _chantypes.find(name[0]) != std::string::npos;
+    return _imp->_chantypes.find(name[0]) != std::string::npos;
 }
 
 ISupport::ModeType ISupport::get_mode_type(char mode_letter) const
 {
-    if(_list_modes.find(mode_letter) != std::string::npos)
+    if(_imp->_list_modes.find(mode_letter) != std::string::npos)
         return list_mode;
-    if(_simple_modes.find(mode_letter) != std::string::npos)
+    if(_imp->_simple_modes.find(mode_letter) != std::string::npos)
         return simple_mode;
-    if(_oneparam_modes.find(mode_letter) != std::string::npos)
+    if(_imp->_oneparam_modes.find(mode_letter) != std::string::npos)
         return oneparam_mode;
-    if(_oneparam_modes_2.find(mode_letter) != std::string::npos)
+    if(_imp->_oneparam_modes_2.find(mode_letter) != std::string::npos)
         return oneparam2_mode;
-    if(_prefix_modes.find(mode_letter) != std::string::npos)
+    if(_imp->_prefix_modes.find(mode_letter) != std::string::npos)
         return prefix_mode;
     return unknown_mode;
 }
 
-void ISupport::_populate(const eir::Message *m)
+void Implementation<ISupport>::_populate(const eir::Message *m)
 {
     Context c("Populating ISUPPORT values");
 
@@ -65,6 +103,8 @@ void ISupport::_populate(const eir::Message *m)
                 _chantypes = value;
             else if (name == "PREFIX")
                 _populate_prefix_modes(value);
+            else if (name == "MODES")
+                _max_modes = atoi(value.c_str());
 
             kv_tokens[name] = value;
         }
@@ -75,7 +115,7 @@ void ISupport::_populate(const eir::Message *m)
     }
 }
 
-void ISupport::_populate_prefix_modes(std::string value)
+void Implementation<ISupport>::_populate_prefix_modes(std::string value)
 {
     if (value[0] != '(')
         return;
@@ -91,26 +131,26 @@ void ISupport::_populate_prefix_modes(std::string value)
 
 char ISupport::get_prefix_mode(char m) const
 {
-    std::string::size_type i = _prefixes.find(m);
+    std::string::size_type i = _imp->_prefixes.find(m);
     if (i == std::string::npos)
         return 0;
-    return _prefix_modes[i];
+    return _imp->_prefix_modes[i];
 }
 
 char ISupport::get_mode_prefix(char m) const
 {
-    std::string::size_type i = _prefix_modes.find(m);
+    std::string::size_type i = _imp->_prefix_modes.find(m);
     if (i == std::string::npos)
         return 0;
-    return _prefixes[i];
+    return _imp->_prefixes[i];
 }
 
 bool ISupport::is_mode_prefix(char p) const
 {
-    return _prefixes.find(p) != std::string::npos;
+    return _imp->_prefixes.find(p) != std::string::npos;
 }
 
-void ISupport::_populate_chanmodes(std::string value)
+void Implementation<ISupport>::_populate_chanmodes(std::string value)
 {
     Context c("Populating channel mode types from " + value);
     std::string::size_type begin = 0, end = 0;
@@ -126,10 +166,54 @@ void ISupport::_populate_chanmodes(std::string value)
     _simple_modes = value.substr(begin);
 }
 
-using namespace std::tr1::placeholders;
+ISupport::simple_iterator ISupport::begin_simple_tokens() const
+{
+    return _imp->simple_tokens.begin();
+}
+
+ISupport::simple_iterator ISupport::end_simple_tokens() const
+{
+    return _imp->simple_tokens.end();
+}
+
+ISupport::simple_iterator ISupport::find_simple_token(std::string s) const
+{
+    return _imp->simple_tokens.find(s);
+}
+
+bool ISupport::supports(std::string s) const
+{
+    return _imp->simple_tokens.find(s) != _imp->simple_tokens.end();
+}
+
+ISupport::kv_iterator ISupport::begin_kv() const
+{
+    return _imp->kv_tokens.begin();
+}
+
+ISupport::kv_iterator ISupport::end_kv() const
+{
+    return _imp->kv_tokens.end();
+}
+
+ISupport::kv_iterator ISupport::find_kv(std::string s) const
+{
+    return _imp->kv_tokens.find(s);
+}
+
+std::string ISupport::list_modes() const { return _imp->_list_modes; }
+std::string ISupport::simple_modes() const { return _imp->_simple_modes; }
+std::string ISupport::oneparam_modes() const { return _imp->_oneparam_modes; }
+std::string ISupport::prefix_modes() const { return _imp->_prefix_modes; }
+
+int ISupport::max_modes() const { return _imp->_max_modes; }
 
 ISupport::ISupport()
+    : PrivateImplementationPattern<ISupport>(new Implementation<ISupport>)
 {
-    _handler_id = CommandRegistry::get_instance()->add_handler("005", std::tr1::bind(&ISupport::_populate, this, _1));
+}
+
+ISupport::~ISupport()
+{
 }
 
