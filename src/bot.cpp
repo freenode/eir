@@ -419,6 +419,14 @@ std::string Bot::get_setting(std::string name)
     return it->second;
 }
 
+std::string Bot::get_setting_with_default(std::string name, std::string _default)
+{
+    SettingsIterator it = find_setting(name);
+    if(it == end_settings())
+        return _default;
+    return it->second;
+}
+
 std::pair<Bot::SettingsIterator, bool> Bot::add_setting(std::string n, std::string s)
 {
     Context ctx("Adding setting " + n + "(" + s + ")");

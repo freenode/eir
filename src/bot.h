@@ -55,6 +55,7 @@ namespace eir
             SettingsIterator end_settings();
             SettingsIterator find_setting(std::string name);
             std::string get_setting(std::string name);
+            std::string get_setting_with_default(std::string name, std::string _default);
             std::pair<SettingsIterator, bool> add_setting(std::string n, std::string s);
             unsigned long remove_setting(std::string n);
             void remove_setting(SettingsIterator it);
