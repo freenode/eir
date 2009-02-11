@@ -167,6 +167,9 @@ void Implementation<Bot>::handle_message(std::string line)
     std::string command;
 
     std::string::iterator e = line.end();
+    if (*--e == '\n')
+        line.erase(e);
+    e = line.end();
     if (*--e == '\r')
         line.erase(e);
 
