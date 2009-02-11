@@ -24,6 +24,25 @@ namespace eir
                     std::tr1::bind(f, static_cast<T_*>(this), std::tr1::placeholders::_1));
         }
     };
+
+    class CommandHolder :
+        public paludis::InstantiationPolicy<CommandHolder, paludis::instantiation_method::NonCopyableTag>
+    {
+        private:
+            CommandRegistry::id _id;
+
+            void _release() { if (_id) CommandRegistry::get_instance()->remove_handler(_id); _id = 0; }
+
+        public:
+            CommandHolder() : _id(0)
+            { }
+            CommandHolder(CommandRegistry::id id) : _id(id)
+            { }
+            const CommandHolder & operator= (CommandRegistry::id id)
+            { _release(); _id = id; return *this; }
+
+            ~CommandHolder() { _release(); }
+    };
 }
 
 #endif
