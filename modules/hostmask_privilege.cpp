@@ -109,6 +109,6 @@ struct HostmaskPrivilege : public CommandHandlerBase<HostmaskPrivilege>
         client_id = add_handler("new_client", &HostmaskPrivilege::set_client_privileges);
         add_id = add_handler("host_privilege", &HostmaskPrivilege::add_privilege_entry);
         remove_id = add_handler("del_host_privilege", &HostmaskPrivilege::remove_privilege_entry);
-        clear_id = add_handler("clear_privileges", sourceinfo::ConfigFile, &HostmaskPrivilege::clear_host_privileges);
+        clear_id = add_handler("clear_lists", sourceinfo::ConfigFile, &HostmaskPrivilege::clear_host_privileges);
     }
 } host_priv;
