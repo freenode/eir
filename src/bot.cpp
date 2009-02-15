@@ -8,6 +8,7 @@
 #include <paludis/util/wrapped_forward_iterator-impl.hh>
 #include <paludis/util/member_iterator-impl.hh>
 #include <paludis/util/private_implementation_pattern-impl.hh>
+#include <paludis/util/instantiation_policy-impl.hh>
 #include <paludis/util/tokeniser.hh>
 
 #include <fstream>
@@ -24,6 +25,13 @@ template class paludis::WrappedForwardIterator<Bot::SettingsIteratorTag, const s
 namespace paludis
 {
     template <>
+    struct Implementation<BotManager>
+    {
+        typedef std::map<std::string, Bot*> BotMap;
+        BotMap bots;
+    };
+
+    template <>
     struct Implementation<Bot> : public CommandHandlerBase<Implementation<Bot> >
     {
         typedef std::map<std::string, Client::ptr> ClientMap;
@@ -31,6 +39,8 @@ namespace paludis
         typedef std::map<std::string, std::string> SettingsMap;
 
         Bot *bot;
+
+        std::string _name;
 
         std::tr1::shared_ptr<Server> _server;
         std::string _host, _port, _nick, _pass;
@@ -66,9 +76,10 @@ namespace paludis
         void load_config(std::tr1::function<void(std::string)>, bool cold = false);
         void rehash(const Message *m);
 
-        Implementation(Bot *b, std::string conf)
-            : bot(b), _connected(false), config_filename(conf)
+        Implementation(Bot *b, std::string n)
+            : bot(b), _name(n), _connected(false)
         {
+            config_filename = _name + ".conf";
             set_handler = add_handler("set", &Implementation<Bot>::handle_set);
             rehash_handler = add_handler("rehash", &Implementation<Bot>::rehash);
         }
@@ -82,9 +93,15 @@ static void print_cerr(std::string s)
     std::cerr << s << std::endl;
 }
 
-Bot::Bot(std::string configfilename)
-    : PrivateImplementationPattern<Bot>(new Implementation<Bot> (this, configfilename))
+Bot::Bot(std::string botname)
+    : PrivateImplementationPattern<Bot>(new Implementation<Bot> (this, botname))
 {
+    Implementation<BotManager>::BotMap::iterator it = BotManager::get_instance()->_imp->bots.find(botname);
+    if (it != BotManager::get_instance()->_imp->bots.end())
+        throw InternalError("There's already a bot called " + botname);
+
+    BotManager::get_instance()->_imp->bots.insert(make_pair(botname, this));
+
     _imp->load_config(print_cerr, true);
 }
 
@@ -266,6 +283,11 @@ const std::string& Bot::nick() const
     return _imp->_nick;
 }
 
+const std::string& Bot::name() const
+{
+    return _imp->_name;
+}
+
 const Client::ptr Bot::me() const
 {
     return _imp->_me;
@@ -278,13 +300,15 @@ bool Bot::connected() const
 
 void Bot::disconnect(std::string reason)
 {
-    _imp->_server->disconnect(reason);
+    if (_imp->_server)
+        _imp->_server->disconnect(reason);
+
     _imp->_connected = false;
 }
 
 void Bot::run()
 {
-    if ( _imp->_host.empty() || _imp->_port.empty() || _imp->_nick.empty())
+    if ( ! _imp->_server)
         throw ConfigurationError("No server specified");
 
     _imp->_server->connect(_imp->_host, _imp->_port);
@@ -305,7 +329,7 @@ void Bot::run()
 
 void Bot::send(std::string line)
 {
-    if (!_imp->_connected)
+    if (!_imp->_connected || !_imp->_server)
         throw NotConnectedException();
 
     _imp->_server->send(line);
@@ -448,4 +472,20 @@ void Bot::remove_setting(Bot::SettingsIterator it)
 const ISupport* Bot::supported() const
 {
     return &_imp->_supported;
+}
+
+BotManager::BotManager() : PrivateImplementationPattern<BotManager>(new Implementation<BotManager>)
+{
+}
+
+BotManager::~BotManager()
+{
+}
+
+Bot *BotManager::find(std::string name)
+{
+    Implementation<BotManager>::BotMap::iterator it = _imp->bots.find(name);
+    if (it != _imp->bots.end())
+        return it->second;
+    return 0;
 }

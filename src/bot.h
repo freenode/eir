@@ -4,6 +4,7 @@
 #include <string>
 
 #include <paludis/util/wrapped_forward_iterator.hh>
+#include <paludis/util/instantiation_policy.hh>
 #include <paludis/util/private_implementation_pattern.hh>
 
 #include "supported.h"
@@ -15,12 +16,12 @@ namespace eir
     class Bot : public paludis::PrivateImplementationPattern<Bot>
     {
         public:
-            Bot(std::string config);
+            Bot(std::string name);
 
             void connect(std::string host, std::string port, std::string nick, std::string pass);
 
             const std::string& nick() const;
-
+            const std::string& name() const;
             const Client::ptr me() const;
 
             void run();
@@ -63,7 +64,20 @@ namespace eir
             const ISupport *supported() const;
 
             ~Bot();
-   };
+    };
+
+    class BotManager : public paludis::InstantiationPolicy<BotManager,
+                                                           paludis::instantiation_method::SingletonTag>,
+                       public paludis::PrivateImplementationPattern<BotManager>
+    {
+        public:
+            friend class Bot;
+
+            Bot *find(std::string name);
+            BotManager();
+            ~BotManager();
+    };
+
 }
 
 #endif

@@ -19,14 +19,14 @@ void print_cerr(std::string s)
 
 int main(int, char **argv)
 {
-    std::string filename("eir.conf");
+    std::string botname("eir");
 
     if (argv[1] && argv[1][0])
-        filename = argv[1];
+        botname = argv[1];
 
     try
     {
-        Bot bot(filename);
+        Bot bot(botname);
         bot.run();
     }
     catch (RestartException &e)

@@ -31,8 +31,10 @@ struct ModeParser : public CommandHandlerBase<ModeParser>
             if (!mem)
                 return;
 
-            if (!mem->has_mode(m->args[1][0]))
+            if (m->args[0] == "add" && !mem->has_mode(m->args[1][0]))
                 mem->modes += m->args[1][0];
+            else if (m->args[0] == "remove" && mem->has_mode(m->args[1][0]))
+                mem->modes.erase(mem->modes.find(m->args[1][0]));
         }
     }
 

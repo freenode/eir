@@ -55,6 +55,11 @@ namespace eir {
         ConfigurationError(std::string s) : Exception(s) { }
     };
 
+    struct InternalError : public Exception
+    {
+        InternalError(std::string s) : Exception(s) { }
+    };
+
 }
 
 #endif

@@ -8,18 +8,25 @@ using namespace std::tr1::placeholders;
 #include "match.h"
 
 #include <paludis/util/join.hh>
-#include <time.h>
+#include <paludis/util/tokeniser.hh>
+
+#include "times.h"
+
+#include <fstream>
 
 static const std::string default_time_fmt("%F %T");
 
 static std::string format_time(Bot *b, time_t t)
 {
+    if (t == 0)
+        return "never";
+
     char datebuf[128];
     tm time;
     localtime_r(&t, &time);
     strftime(datebuf,
              sizeof(datebuf),
-             b->get_setting_with_default("voice_time_fmt", default_time_fmt).c_str(),
+             b->get_setting_with_default("voice_time_format", default_time_fmt).c_str(),
              &time);
     return std::string(datebuf);
 }
@@ -28,10 +35,14 @@ struct voicebot : public CommandHandlerBase<voicebot>
 {
     struct voiceentry
     {
+        std::string bot;
         std::string mask, setter, reason;
         time_t set, expires;
-        voiceentry(std::string m, std::string s, std::string r, time_t st, time_t e)
-            : mask(m), setter(s), reason(r), set(st), expires(e)
+        voiceentry(std::string b, std::string m, std::string s, std::string r, time_t st, time_t e)
+            : bot(b), mask(m), setter(s), reason(r), set(st), expires(e)
+        { }
+        voiceentry()
+            : set(0), expires(0)
         { }
     };
 
@@ -49,16 +60,20 @@ struct voicebot : public CommandHandlerBase<voicebot>
             return;
         }
 
+        time_t expires = 0;
+
         std::vector<std::string>::const_iterator it = m->args.begin();
         std::string mask = *it++;
+
+        if ((*it)[0] == '~')
+            expires = time(NULL) + parse_time(*it++);
+
         std::string reason = paludis::join(it, m->args.end(), " ");
 
         // If this looks like a plain nick instead of a mask, treat it as a nickname
         // mask.
         if (mask.find_first_of("!@*") == std::string::npos)
             mask += "!*@*";
-
-        time_t expires = 0;
 
         for (voicelist::iterator it = dnv.begin(); it != dnv.end(); ++it)
         {
@@ -69,8 +84,52 @@ struct voicebot : public CommandHandlerBase<voicebot>
             }
         }
 
-        dnv.push_back(voiceentry(mask, m->source.raw, reason, time(NULL), expires));
+        dnv.push_back(voiceentry(m->bot->name(), mask, m->source.name, reason, time(NULL), expires));
         m->source.reply("Added " + mask);
+    }
+
+    void do_change(const Message *m)
+    {
+        if (!m->source.client || !m->source.client->privs().has_privilege("voiceadmin"))
+            return;
+
+        if (m->args.empty())
+        {
+            m->source.error("Need at least one argument");
+            return;
+        }
+
+        time_t expires = 0;
+
+        std::vector<std::string>::const_iterator it = m->args.begin();
+        std::string mask = *it++;
+
+        if ((*it)[0] == '~')
+            expires = time(NULL) + parse_time(*it++);
+
+        std::string reason = paludis::join(it, m->args.end(), " ");
+
+        // If this looks like a plain nick instead of a mask, treat it as a nickname
+        // mask.
+        if (mask.find_first_of("!@*") == std::string::npos)
+            mask += "!*@*";
+
+        bool found = false;
+
+        for (voicelist::iterator it = dnv.begin(); it != dnv.end(); ++it)
+        {
+            if (mask_match(mask, it->mask))
+            {
+                if (expires)
+                    it->expires = expires;
+                if (!reason.empty())
+                    it->reason = reason;
+                found = true;
+                m->source.reply("Updated " + it->mask);
+            }
+        }
+        if (!found)
+            m->source.reply("No entry matches " + mask);
     }
 
     void do_remove(const Message *m)
@@ -90,8 +149,9 @@ struct voicebot : public CommandHandlerBase<voicebot>
         {
             if (mask_match(mask, it->mask))
             {
+                Bot *bot = BotManager::get_instance()->find(it->bot);
                 m->source.reply("Removing " + it->mask + " (" + it->reason + ") " +
-                        "(added by " + it->setter + " on " + format_time(m->bot, it->set) + ")");
+                        "(added by " + it->setter + " on " + format_time(bot, it->set) + ")");
 
                 dnv.erase(it++);
             }
@@ -107,8 +167,10 @@ struct voicebot : public CommandHandlerBase<voicebot>
 
         for (voicelist::iterator it = dnv.begin(); it != dnv.end(); ++it)
         {
+            Bot *bot = BotManager::get_instance()->find(it->bot);
             m->source.reply(it->mask + " (" + it->reason + ") (added by " + 
-                    it->setter + " on " + format_time(m->bot, it->set) + ")");
+                    it->setter + " on " + format_time(bot, it->set) +
+                    ", expires " + format_time(bot, it->expires) + ")");
         }
 
         m->source.reply("*** End of DNV list");
@@ -207,7 +269,75 @@ struct voicebot : public CommandHandlerBase<voicebot>
         }
     }
 
-    CommandHolder add, remove, list, info, check, voice, clear;
+    void check_expiry()
+    {
+        time_t currenttime = time(NULL);
+
+        for (voicelist::iterator it = dnv.begin(); it != dnv.end(); )
+        {
+            if (it->expires != 0 && it->expires < currenttime)
+            {
+                Bot *bot = BotManager::get_instance()->find(it->bot);
+                std::string adminchan;
+                if (bot)
+                    adminchan = bot->get_setting("voicebot_admin_channel");
+
+                if (bot && !adminchan.empty())
+                    bot->send("NOTICE " + adminchan + " :Removing expired entry " +
+                            it->mask + " added by " + it->setter + " on " + format_time(bot, it->set));
+
+                dnv.erase(it++);
+            }
+            else
+                ++it;
+        }
+    }
+
+    void load_voicelist()
+    {
+        std::ifstream file("voice.db");
+
+        std::string line;
+
+        dnv.clear();
+
+        while (std::getline(file, line))
+        {
+            std::vector<std::string> tokens;
+            paludis::tokenise_whitespace(line, std::back_inserter(tokens));
+
+            if (tokens.size() < 6)
+                continue;
+
+            std::vector<std::string>::iterator it = tokens.begin();
+            voiceentry e;
+            e.bot = *it++;
+            e.mask = *it++;
+            e.setter = *it++;
+            e.set = atoi((*it++).c_str());
+            e.expires = atoi((*it++).c_str());
+            e.reason = paludis::join(it, tokens.end(), " ");
+
+            dnv.push_back(e);
+        }
+    }
+
+    void save_voicelist()
+    {
+        std::ofstream file("voice.db.tmp");
+
+        for (voicelist::iterator it = dnv.begin(); it != dnv.end(); ++it)
+        {
+            file << it->bot << " " << it->mask << " " << it->setter << " "
+                 << it->set << " " << it->expires << " " << it->reason << std::endl;
+        }
+
+        file.close();
+        ::rename("voice.db.tmp", "voice.db");
+    }
+
+    CommandHolder add, remove, list, info, check, voice, clear, change;
+    EventHolder check_event, save_event;
 
     voicebot()
     {
@@ -216,6 +346,23 @@ struct voicebot : public CommandHandlerBase<voicebot>
         list = add_handler("list", sourceinfo::IrcCommand, &voicebot::do_list);
         check = add_handler("check", sourceinfo::IrcCommand, &voicebot::do_check);
         voice = add_handler("voice", sourceinfo::IrcCommand, &voicebot::do_voice);
+        change = add_handler("edit", sourceinfo::IrcCommand, &voicebot::do_change);
+
+        check_event = add_recurring_event(60, &voicebot::check_expiry);
+        check_event = add_recurring_event(300, std::tr1::bind(&voicebot::save_voicelist, this));
+
+        load_voicelist();
+    }
+
+    ~voicebot()
+    {
+        try
+        {
+            save_voicelist();
+        }
+        catch (...)
+        {
+        }
     }
 } vb;
 

@@ -40,7 +40,7 @@ struct BotCommandHandler : public CommandHandlerBase<BotCommandHandler>
             return;
 
         std::list<std::string> tokens;
-        paludis::tokenise_whitespace_quoted(line, std::back_inserter(tokens));
+        paludis::tokenise_whitespace(line, std::back_inserter(tokens));
 
         if(tokens.empty())
             return;
