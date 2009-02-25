@@ -9,6 +9,8 @@
 #include <paludis/util/member_iterator-impl.hh>
 #include <paludis/util/private_implementation_pattern-impl.hh>
 
+#include "string_util.h"
+
 using namespace eir;
 
 namespace paludis
@@ -165,7 +167,7 @@ namespace paludis
         typedef std::set<Membership::ptr>::iterator MemberIterator;
         std::set<Membership::ptr> members;
 
-        Implementation(std::string n) : name(n)
+        Implementation(std::string n) : name(lowercase(n))
         { }
     };
 }

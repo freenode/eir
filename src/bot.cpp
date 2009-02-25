@@ -13,6 +13,8 @@
 
 #include <fstream>
 
+#include "string_util.h"
+
 using namespace eir;
 
 using namespace std::tr1::placeholders;
@@ -347,8 +349,9 @@ Bot::ClientIterator Bot::end_clients()
     return second_iterator(_imp->_clients.end());
 }
 
-Client::ptr Bot::find_client(std::string nick)
+Client::ptr Bot::find_client(std::string rawnick)
 {
+    std::string nick = lowercase(rawnick);
     Implementation<Bot>::ClientMap::iterator it = _imp->_clients.find(nick);
     if (it == _imp->_clients.end())
         return Client::ptr();
@@ -393,7 +396,8 @@ Bot::ChannelIterator Bot::end_channels()
 
 Channel::ptr Bot::find_channel(std::string name)
 {
-    Implementation<Bot>::ChannelMap::iterator it = _imp->_channels.find(name);
+    std::string lowername = lowercase(name);
+    Implementation<Bot>::ChannelMap::iterator it = _imp->_channels.find(lowername);
     if (it == _imp->_channels.end())
         return Channel::ptr();
     return it->second;
