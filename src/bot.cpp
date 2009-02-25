@@ -14,6 +14,7 @@
 #include <fstream>
 
 #include "string_util.h"
+#include <cstring>
 
 using namespace eir;
 
@@ -26,6 +27,15 @@ template class paludis::WrappedForwardIterator<Bot::SettingsIteratorTag, const s
 
 namespace paludis
 {
+    struct cistringcompare
+    {
+        bool operator() (std::string lhs, std::string rhs)
+        {
+            return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
+        }
+    };
+
+
     template <>
     struct Implementation<BotManager>
     {
@@ -36,8 +46,8 @@ namespace paludis
     template <>
     struct Implementation<Bot> : public CommandHandlerBase<Implementation<Bot> >
     {
-        typedef std::map<std::string, Client::ptr> ClientMap;
-        typedef std::map<std::string, Channel::ptr> ChannelMap;
+        typedef std::map<std::string, Client::ptr, cistringcompare> ClientMap;
+        typedef std::map<std::string, Channel::ptr, cistringcompare> ChannelMap;
         typedef std::map<std::string, std::string> SettingsMap;
 
         Bot *bot;
