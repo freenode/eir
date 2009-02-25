@@ -349,9 +349,8 @@ Bot::ClientIterator Bot::end_clients()
     return second_iterator(_imp->_clients.end());
 }
 
-Client::ptr Bot::find_client(std::string rawnick)
+Client::ptr Bot::find_client(std::string nick)
 {
-    std::string nick = lowercase(rawnick);
     Implementation<Bot>::ClientMap::iterator it = _imp->_clients.find(nick);
     if (it == _imp->_clients.end())
         return Client::ptr();
