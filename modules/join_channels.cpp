@@ -13,6 +13,13 @@ struct JoinChannels : public CommandHandlerBase<JoinChannels>
 
     void add_channel(const Message *m)
     {
+        if (m->source.type != sourceinfo::ConfigFile &&
+                (!m->source.client || !m->source.client->privs().has_privilege("admin")))
+        {
+            m->source.error("Nope.");
+            return;
+        }
+
         bot_channels.push_back(m->args[0]);
         if (m->bot && m->bot->connected())
             m->bot->send("JOIN " + m->args[0]);
@@ -22,6 +29,13 @@ struct JoinChannels : public CommandHandlerBase<JoinChannels>
 
     void remove_channel(const Message *m)
     {
+        if (m->source.type != sourceinfo::ConfigFile &&
+                (!m->source.client || !m->source.client->privs().has_privilege("admin")))
+        {
+            m->source.error("Nope.");
+            return;
+        }
+
         for (std::list<std::string>::iterator it = bot_channels.begin();
                 it != bot_channels.end(); ++it)
         {
