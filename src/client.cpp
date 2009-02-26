@@ -54,9 +54,9 @@ const std::string& Client::nuh() const
 
 void Client::change_nick(std::string newnick)
 {
+    _imp->bot->remove_client(shared_from_this());
     _imp->nick = newnick;
     _imp->nuh_cached = false;
-    _imp->bot->remove_client(shared_from_this());
     _imp->bot->add_client(shared_from_this());
 
 }
