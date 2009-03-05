@@ -48,6 +48,7 @@ struct voicebot : public CommandHandlerBase<voicebot>
 
     typedef std::list<voiceentry> voicelist;
     voicelist dnv;
+    voicelist old;
 
     void do_add(const Message *m)
     {
@@ -153,6 +154,7 @@ struct voicebot : public CommandHandlerBase<voicebot>
                 m->source.reply("Removing " + it->mask + " (" + it->reason + ") " +
                         "(added by " + it->setter + " on " + format_time(bot, it->set) + ")");
 
+                old.push_back(*it);
                 dnv.erase(it++);
             }
             else
@@ -286,6 +288,7 @@ struct voicebot : public CommandHandlerBase<voicebot>
                     bot->send("NOTICE " + adminchan + " :Removing expired entry " +
                             it->mask + " added by " + it->setter + " on " + format_time(bot, it->set));
 
+                old.push_back(*it);
                 dnv.erase(it++);
             }
             else
@@ -293,13 +296,13 @@ struct voicebot : public CommandHandlerBase<voicebot>
         }
     }
 
-    void load_voicelist()
+    void load_voicelist(std::string filename, voicelist *list)
     {
-        std::ifstream file("voice.db");
+        std::ifstream file(filename.c_str());
 
         std::string line;
 
-        dnv.clear();
+        list->clear();
 
         while (std::getline(file, line))
         {
@@ -318,23 +321,37 @@ struct voicebot : public CommandHandlerBase<voicebot>
             e.expires = atoi((*it++).c_str());
             e.reason = paludis::join(it, tokens.end(), " ");
 
-            dnv.push_back(e);
+            list->push_back(e);
         }
     }
 
-    void save_voicelist()
+    void save_voicelist(std::string filename, voicelist *list)
     {
-        std::ofstream file("voice.db.tmp");
+        std::string tmpfilename = filename + ".tmp";
+        std::ofstream file(tmpfilename.c_str());
 
-        for (voicelist::iterator it = dnv.begin(); it != dnv.end(); ++it)
+        for (voicelist::iterator it = list->begin(); it != list->end(); ++it)
         {
             file << it->bot << " " << it->mask << " " << it->setter << " "
                  << it->set << " " << it->expires << " " << it->reason << std::endl;
         }
 
         file.close();
-        ::rename("voice.db.tmp", "voice.db");
+        ::rename(tmpfilename.c_str(), filename.c_str());
     }
+
+    void load_lists()
+    {
+        load_voicelist("voice.db", &dnv);
+        load_voicelist("expired.voice.db", &old);
+    }
+
+    void save_lists()
+    {
+        save_voicelist("voice.db", &dnv);
+        save_voicelist("expired.voice.db", &old);
+    }
+
 
     CommandHolder add, remove, list, info, check, voice, clear, change;
     EventHolder check_event, save_event;
@@ -349,16 +366,16 @@ struct voicebot : public CommandHandlerBase<voicebot>
         change = add_handler("edit", sourceinfo::IrcCommand, &voicebot::do_change);
 
         check_event = add_recurring_event(60, &voicebot::check_expiry);
-        check_event = add_recurring_event(300, std::tr1::bind(&voicebot::save_voicelist, this));
+        save_event = add_recurring_event(300, &voicebot::save_lists);
 
-        load_voicelist();
+        load_lists();
     }
 
     ~voicebot()
     {
         try
         {
-            save_voicelist();
+            save_lists();
         }
         catch (...)
         {
