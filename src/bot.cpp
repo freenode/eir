@@ -232,8 +232,6 @@ void Implementation<Bot>::handle_message(std::string line)
         m.source.name = m.source.raw;
     }
 
-    m.source.type = sourceinfo::RawIrc;
-
     p2 = line.find(' ', p1);
     command = line.substr(p1, p2 - p1);
 
@@ -267,8 +265,10 @@ void Implementation<Bot>::handle_message(std::string line)
     }
 
     m.command = "server_incoming";
+    m.source.type = sourceinfo::Internal;
     CommandRegistry::get_instance()->dispatch(&m);
     m.command = command;
+    m.source.type = sourceinfo::RawIrc;
     CommandRegistry::get_instance()->dispatch(&m);
 }
 
