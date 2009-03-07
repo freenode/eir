@@ -14,7 +14,7 @@ struct NoticePrinter : public CommandHandlerBase<NoticePrinter>
         std::cout << m->raw << std::endl;
     }
     NoticePrinter() {
-        _id = add_handler("server_incoming", &NoticePrinter::print);
+        _id = add_handler(filter_command_type("server_incoming", sourceinfo::Internal), &NoticePrinter::print);
     }
     CommandHolder _id;
 };

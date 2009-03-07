@@ -10,6 +10,7 @@
 namespace eir
 {
     struct Message;
+    class Bot;
 
     class ISupport : private paludis::InstantiationPolicy<ISupport,paludis::instantiation_method::NonCopyableTag>,
                      private paludis::PrivateImplementationPattern<ISupport>
@@ -57,7 +58,7 @@ namespace eir
 
             bool is_channel_name(std::string) const;
 
-            ISupport();
+            ISupport(Bot*);
             ~ISupport();
     };
 }

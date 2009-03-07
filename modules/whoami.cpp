@@ -31,7 +31,7 @@ struct Whoami : public CommandHandlerBase<Whoami>
 
     Whoami()
     {
-        _id = add_handler("whoami", sourceinfo::IrcCommand, &Whoami::whoami);
+        _id = add_handler(filter_command_type("whoami", sourceinfo::IrcCommand), &Whoami::whoami);
     }
 } whoami;
 

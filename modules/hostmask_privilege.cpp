@@ -15,12 +15,6 @@ struct HostmaskPrivilege : public CommandHandlerBase<HostmaskPrivilege>
 
     void recalculate_privileges(const Message *m)
     {
-        if (m->source.type != sourceinfo::ConfigFile &&
-                ( !m->source.client || !m->source.client->privs().has_privilege("admin")))
-        {
-            return;
-        }
-
         for (Bot::ClientIterator it = m->bot->begin_clients(), ite = m->bot->end_clients(); it != ite; ++it)
             set_privileges(*it);
     }
@@ -28,12 +22,6 @@ struct HostmaskPrivilege : public CommandHandlerBase<HostmaskPrivilege>
 
     void add_privilege_entry(const Message *m)
     {
-        if (m->source.type != sourceinfo::ConfigFile &&
-                ( !m->source.client || !m->source.client->privs().has_privilege("admin")))
-        {
-            return;
-        }
-
         if (m->args.size() < 2)
         {
             m->source.error("Need two arguments for " + m->command);
@@ -53,12 +41,6 @@ struct HostmaskPrivilege : public CommandHandlerBase<HostmaskPrivilege>
 
     void remove_privilege_entry(const Message *m)
     {
-        if (m->source.type != sourceinfo::ConfigFile &&
-                ( !m->source.client || !m->source.client->privs().has_privilege("admin")))
-        {
-            return;
-        }
-
         if (m->args.size() < 2)
         {
             m->source.error("Need two arguments for " + m->command);
@@ -106,9 +88,13 @@ struct HostmaskPrivilege : public CommandHandlerBase<HostmaskPrivilege>
 
     HostmaskPrivilege()
     {
-        client_id = add_handler("new_client", &HostmaskPrivilege::set_client_privileges);
-        add_id = add_handler("host_privilege", &HostmaskPrivilege::add_privilege_entry);
-        remove_id = add_handler("del_host_privilege", &HostmaskPrivilege::remove_privilege_entry);
-        clear_id = add_handler("clear_lists", sourceinfo::ConfigFile, &HostmaskPrivilege::clear_host_privileges);
+        client_id = add_handler(filter_command_type("new_client",sourceinfo::Internal),
+                                &HostmaskPrivilege::set_client_privileges);
+        add_id = add_handler(filter_command_privilege("host_privilege", "admin").or_config(),
+                                &HostmaskPrivilege::add_privilege_entry);
+        remove_id = add_handler(filter_command_privilege("del_host_privilege", "admin").or_config(),
+                                &HostmaskPrivilege::remove_privilege_entry);
+        clear_id = add_handler(filter_command_type("clear_lists", sourceinfo::ConfigFile),
+                                &HostmaskPrivilege::clear_host_privileges);
     }
 } host_priv;

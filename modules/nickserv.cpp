@@ -27,7 +27,7 @@ struct Identifier : public CommandHandlerBase<Identifier>
     CommandHolder _id;
 
     Identifier() {
-        _id = add_handler("001", &Identifier::identify);
+        _id = add_handler(filter_command_type("001", sourceinfo::RawIrc), &Identifier::identify);
     }
 };
 

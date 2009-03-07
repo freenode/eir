@@ -12,31 +12,24 @@ namespace eir
     struct CommandHandlerBase
     {
         template <class F_>
-        CommandRegistry::id add_handler(std::string s, F_ f)
+        CommandRegistry::id add_handler(Filter f, F_ h)
         {
-            return eir::CommandRegistry::get_instance()->add_handler(s,
-                    std::tr1::bind(f, static_cast<T_*>(this), std::tr1::placeholders::_1));
+            return eir::CommandRegistry::get_instance()->add_handler(f,
+                    std::tr1::bind(h, static_cast<T_*>(this), std::tr1::placeholders::_1));
         }
 
         template <class F_>
-        CommandRegistry::id add_handler(std::string s, unsigned int t, F_ f)
-        {
-            return eir::CommandRegistry::get_instance()->add_handler(s, t,
-                    std::tr1::bind(f, static_cast<T_*>(this), std::tr1::placeholders::_1));
-        }
-
-        template <class F_>
-        EventManager::id add_event(time_t t, F_ f)
+        EventManager::id add_event(time_t t, F_ h)
         {
             return EventManager::get_instance()->add_event(t,
-                    std::tr1::bind(f, static_cast<T_*>(this)));
+                    std::tr1::bind(h, static_cast<T_*>(this)));
         }
 
         template <class F_>
-        EventManager::id add_recurring_event(time_t t, F_ f)
+        EventManager::id add_recurring_event(time_t t, F_ h)
         {
             return EventManager::get_instance()->add_recurring_event(t,
-                    std::tr1::bind(f, static_cast<T_*>(this)));
+                    std::tr1::bind(h, static_cast<T_*>(this)));
         }
     };
 

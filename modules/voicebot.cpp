@@ -52,9 +52,6 @@ struct voicebot : public CommandHandlerBase<voicebot>
 
     void do_add(const Message *m)
     {
-        if (!m->source.client || !m->source.client->privs().has_privilege("voiceadmin"))
-            return;
-
         if (m->args.empty())
         {
             m->source.error("Need at least one argument");
@@ -91,9 +88,6 @@ struct voicebot : public CommandHandlerBase<voicebot>
 
     void do_change(const Message *m)
     {
-        if (!m->source.client || !m->source.client->privs().has_privilege("voiceadmin"))
-            return;
-
         if (m->args.empty())
         {
             m->source.error("Need at least one argument");
@@ -135,9 +129,6 @@ struct voicebot : public CommandHandlerBase<voicebot>
 
     void do_remove(const Message *m)
     {
-        if (!m->source.client || !m->source.client->privs().has_privilege("voiceadmin"))
-            return;
-
         if (m->args.empty())
         {
             m->source.error("Need at least one argument");
@@ -164,9 +155,6 @@ struct voicebot : public CommandHandlerBase<voicebot>
 
     void do_list(const Message *m)
     {
-        if (!m->source.client || !m->source.client->privs().has_privilege("voiceadmin"))
-            return;
-
         for (voicelist::iterator it = dnv.begin(); it != dnv.end(); ++it)
         {
             Bot *bot = BotManager::get_instance()->find(it->bot);
@@ -206,9 +194,6 @@ struct voicebot : public CommandHandlerBase<voicebot>
 
     void do_check(const Message *m)
     {
-        if (!m->source.client || !m->source.client->privs().has_privilege("voiceadmin"))
-            return;
-
         std::string channelname = m->bot->get_setting("voicebot_channel");
         if (channelname.empty())
         {
@@ -233,9 +218,6 @@ struct voicebot : public CommandHandlerBase<voicebot>
 
     void do_voice(const Message *m)
     {
-        if (!m->source.client || !m->source.client->privs().has_privilege("voiceadmin"))
-            return;
-
         std::string channelname = m->bot->get_setting("voicebot_channel");
         if (channelname.empty())
         {
@@ -358,12 +340,18 @@ struct voicebot : public CommandHandlerBase<voicebot>
 
     voicebot()
     {
-        add = add_handler("add", sourceinfo::IrcCommand, &voicebot::do_add);
-        remove = add_handler("remove", sourceinfo::IrcCommand, &voicebot::do_remove);
-        list = add_handler("list", sourceinfo::IrcCommand, &voicebot::do_list);
-        check = add_handler("check", sourceinfo::IrcCommand, &voicebot::do_check);
-        voice = add_handler("voice", sourceinfo::IrcCommand, &voicebot::do_voice);
-        change = add_handler("edit", sourceinfo::IrcCommand, &voicebot::do_change);
+        add = add_handler(filter_command_type("add", sourceinfo::IrcCommand).requires_privilege("voiceadmin"),
+                            &voicebot::do_add);
+        remove = add_handler(filter_command_type("remove", sourceinfo::IrcCommand).requires_privilege("voiceadmin"),
+                            &voicebot::do_remove);
+        list = add_handler(filter_command_type("list", sourceinfo::IrcCommand).requires_privilege("voiceadmin"),
+                            &voicebot::do_list);
+        check = add_handler(filter_command_type("check", sourceinfo::IrcCommand).requires_privilege("voiceadmin"),
+                            &voicebot::do_check);
+        voice = add_handler(filter_command_type("voice", sourceinfo::IrcCommand).requires_privilege("voiceadmin"),
+                            &voicebot::do_voice);
+        change = add_handler(filter_command_type("edit", sourceinfo::IrcCommand).requires_privilege("voiceadmin"),
+                            &voicebot::do_change);
 
         check_event = add_recurring_event(60, &voicebot::check_expiry);
         save_event = add_recurring_event(300, &voicebot::save_lists);

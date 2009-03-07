@@ -11,12 +11,6 @@ struct Modloader : public CommandHandlerBase<Modloader>
 
     void do_modload(const eir::Message *m)
     {
-        if(m->source.type != sourceinfo::ConfigFile &&
-                !(m->source.client && m->source.client->privs().has_privilege("admin")))
-            return;
-
-        Context ctx("Processing MODLOAD " + m->args[0]);
-
         if (ModuleRegistry::get_instance()->is_loaded(m->args[0]))
         {
             m->source.reply(m->args[0] + " is already loaded.");
@@ -28,10 +22,6 @@ struct Modloader : public CommandHandlerBase<Modloader>
 
     void do_modunload(const eir::Message *m)
     {
-        if(m->source.type != sourceinfo::ConfigFile &&
-                !(m->source.client && m->source.client->privs().has_privilege("admin")))
-            return;
-
         Context ctx("Processing MODUNLOAD " + m->args[0]);
 
         ModuleRegistry::get_instance()->unload(m->args[0]);
@@ -40,10 +30,6 @@ struct Modloader : public CommandHandlerBase<Modloader>
 
     void do_modreload(const eir::Message *m)
     {
-        if(m->source.type != sourceinfo::ConfigFile &&
-                !(m->source.client && m->source.client->privs().has_privilege("admin")))
-            return;
-
         Context ctx("Processing MODRELOAD " + m->args[0]);
 
         if (ModuleRegistry::get_instance()->is_loaded(m->args[0]))
@@ -56,9 +42,12 @@ struct Modloader : public CommandHandlerBase<Modloader>
      }
 
     Modloader() {
-        modload_id = add_handler("modload", &Modloader::do_modload);
-        modunload_id = add_handler("modunload", &Modloader::do_modunload);
-        modreload_id = add_handler("modreload", &Modloader::do_modreload);
+        modload_id   = add_handler(filter_command("modload").requires_privilege("admin").or_config(),
+                                    &Modloader::do_modload);
+        modunload_id = add_handler(filter_command("modunload").requires_privilege("admin").or_config(),
+                                    &Modloader::do_modunload);
+        modreload_id = add_handler(filter_command("modreload").requires_privilege("admin").or_config(),
+                                    &Modloader::do_modreload);
     }
 };
 

@@ -69,6 +69,53 @@ namespace eir {
             : bot(m.bot), source(m.source), command(c)
         { source.type = type; }
     };
+
+    class Filter {
+        enum {
+            match_command = 1,
+            match_bot = 2,
+            match_privilege = 4,
+            match_private = 8,
+            match_in_channel = 16,
+            match_source_type = 32,
+            match_source_name = 64,
+            match_config_overrides = 128
+        };
+        unsigned matches;
+        std::string commandname, privilege, channel, source;
+        Bot *bot;
+        unsigned sourcetype;
+
+        public:
+            Filter();
+            Filter& is_command(std::string);
+            Filter& source_type(unsigned int);
+            Filter& source_named(std::string);
+            Filter& from_bot(Bot *);
+            Filter& in_private();
+            Filter& in_channel(std::string);
+            Filter& requires_privilege(std::string);
+            Filter& or_config();
+
+            bool match(const Message *) const;
+    };
+
+    inline Filter filter_type(unsigned int type)
+    { return Filter().source_type(type); }
+
+    inline Filter filter_command(std::string cmd)
+    { return Filter().is_command(cmd); }
+
+    inline Filter filter_command_type(std::string cmd, unsigned int type)
+    { return Filter().is_command(cmd).source_type(type); }
+
+    inline Filter filter_command_privilege(std::string cmd, std::string priv)
+    { return Filter().is_command(cmd).requires_privilege(priv); }
+
+    inline Filter filter_bot(Bot *b)
+    { return Filter().from_bot(b); }
+
+    inline Filter filter() { return Filter(); }
 }
 
 #endif

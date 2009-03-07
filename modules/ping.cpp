@@ -1,13 +1,15 @@
 #include "eir.h"
+#include "handler.h"
 
 #include <functional>
 #include <iostream>
 
+using namespace eir;
 using namespace std::tr1::placeholders;
 
-struct Ponger
+struct Ponger : CommandHandlerBase<Ponger>
 {
-    eir::CommandRegistry::id _id;
+    CommandHolder _id;
 
     void pong(const eir::Message *m)
     {
@@ -16,10 +18,7 @@ struct Ponger
     }
 
     Ponger() {
-        _id = eir::CommandRegistry::get_instance()->add_handler("PING", std::tr1::bind(std::tr1::mem_fn(&Ponger::pong), this, _1));
-    }
-    ~Ponger() {
-        eir::CommandRegistry::get_instance()->remove_handler(_id);
+        _id = add_handler(filter_command_type("PING", sourceinfo::RawIrc), &Ponger::pong);
     }
 };
 

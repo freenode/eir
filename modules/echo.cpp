@@ -13,7 +13,7 @@ struct echo : public CommandHandlerBase<echo>
 
     CommandHolder _id;
 
-    echo() { _id = add_handler("echo", sourceinfo::IrcCommand, &echo::do_echo); }
+    echo() { _id = add_handler(filter_command_type("echo", sourceinfo::IrcCommand), &echo::do_echo); }
 };
 
 echo e;

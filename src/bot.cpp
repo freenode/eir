@@ -89,11 +89,13 @@ namespace paludis
         void rehash(const Message *m);
 
         Implementation(Bot *b, std::string n)
-            : bot(b), _name(n), _connected(false)
+            : bot(b), _name(n), _connected(false), _supported(b)
         {
             config_filename = _name + ".conf";
-            set_handler = add_handler("set", &Implementation<Bot>::handle_set);
-            rehash_handler = add_handler("rehash", &Implementation<Bot>::rehash);
+            set_handler = add_handler(filter_command_privilege("set", "admin").from_bot(bot),
+                                      &Implementation<Bot>::handle_set);
+            rehash_handler = add_handler(filter_command_privilege("rehash", "admin").from_bot(bot),
+                                         &Implementation<Bot>::rehash);
         }
     };
 }
@@ -141,7 +143,8 @@ void Implementation<Bot>::load_config(std::tr1::function<void(std::string)> repl
     CommandHolder server_id;
 
     if (cold)
-        server_id = add_handler("server", sourceinfo::ConfigFile, &Implementation<Bot>::set_server);
+        server_id = add_handler(filter_command("server").from_bot(bot).source_type(sourceinfo::ConfigFile),
+                                &Implementation<Bot>::set_server);
 
     std::ifstream fs(config_filename.c_str());
     std::string line;
@@ -174,9 +177,6 @@ void Implementation<Bot>::load_config(std::tr1::function<void(std::string)> repl
 
 void Implementation<Bot>::rehash(const Message *m)
 {
-    if (! m->source.client || !m->source.client->privs().has_privilege("admin"))
-        return;
-
     load_config(m->source.reply_func);
 
     m->source.reply("Done.");
@@ -275,10 +275,6 @@ void Implementation<Bot>::handle_message(std::string line)
 void Implementation<Bot>::handle_set(const Message *m)
 {
     if (m->bot != bot)
-        return;
-
-    if (m->source.type != sourceinfo::ConfigFile &&
-            (!m->source.client || !m->source.client->privs().has_privilege("admin")))
         return;
 
     if (m->args.size() < 2)

@@ -30,12 +30,12 @@ ChannelHandler handles_channels;
 
 ChannelHandler::ChannelHandler()
 {
-    join_id = add_handler("JOIN", sourceinfo::RawIrc, &ChannelHandler::handle_join);
-    part_id = add_handler("PART", sourceinfo::RawIrc, &ChannelHandler::handle_part);
-    quit_id = add_handler("QUIT", sourceinfo::RawIrc, &ChannelHandler::handle_quit);
+    join_id = add_handler(filter_command_type("JOIN", sourceinfo::RawIrc), &ChannelHandler::handle_join);
+    part_id = add_handler(filter_command_type("PART", sourceinfo::RawIrc), &ChannelHandler::handle_part);
+    quit_id = add_handler(filter_command_type("QUIT", sourceinfo::RawIrc), &ChannelHandler::handle_quit);
     //names_id = add_handler("353", sourceinfo::RawIrc, &ChannelHandler::handle_names_reply);
-    nick_id = add_handler("NICK", sourceinfo::RawIrc, &ChannelHandler::handle_nick);
-    who_id = add_handler("352", sourceinfo::RawIrc, &ChannelHandler::handle_who_reply);
+    nick_id = add_handler(filter_command_type("NICK", sourceinfo::RawIrc), &ChannelHandler::handle_nick);
+    who_id = add_handler(filter_command_type("352", sourceinfo::RawIrc), &ChannelHandler::handle_who_reply);
 }
 
 namespace

@@ -57,7 +57,8 @@ struct BotCommandHandler : public CommandHandlerBase<BotCommandHandler>
 
     BotCommandHandler()
     {
-        _id = add_handler("PRIVMSG", sourceinfo::RawIrc, &BotCommandHandler::handle_privmsg);
+        _id = add_handler(filter_command("PRIVMSG").source_type(sourceinfo::RawIrc),
+                          &BotCommandHandler::handle_privmsg);
     }
 } bot_command_handler;
 

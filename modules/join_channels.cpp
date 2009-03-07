@@ -13,13 +13,6 @@ struct JoinChannels : public CommandHandlerBase<JoinChannels>
 
     void add_channel(const Message *m)
     {
-        if (m->source.type != sourceinfo::ConfigFile &&
-                (!m->source.client || !m->source.client->privs().has_privilege("admin")))
-        {
-            m->source.error("Nope.");
-            return;
-        }
-
         bot_channels.push_back(m->args[0]);
         if (m->bot && m->bot->connected())
             m->bot->send("JOIN " + m->args[0]);
@@ -29,13 +22,6 @@ struct JoinChannels : public CommandHandlerBase<JoinChannels>
 
     void remove_channel(const Message *m)
     {
-        if (m->source.type != sourceinfo::ConfigFile &&
-                (!m->source.client || !m->source.client->privs().has_privilege("admin")))
-        {
-            m->source.error("Nope.");
-            return;
-        }
-
         for (std::list<std::string>::iterator it = bot_channels.begin();
                 it != bot_channels.end(); ++it)
         {
@@ -62,10 +48,14 @@ struct JoinChannels : public CommandHandlerBase<JoinChannels>
 
     JoinChannels()
     {
-        addch_id = add_handler("channel", sourceinfo::ConfigFile, &JoinChannels::add_channel);
-        join_id = add_handler("join", sourceinfo::IrcCommand, &JoinChannels::add_channel);
-        part_id = add_handler("part", sourceinfo::IrcCommand, &JoinChannels::remove_channel);
-        conn_id = add_handler("001", sourceinfo::RawIrc, &JoinChannels::on_connect);
+        addch_id = add_handler(filter_command("channel").source_type(sourceinfo::ConfigFile),
+                                &JoinChannels::add_channel);
+        join_id = add_handler(filter_command_type("join", sourceinfo::IrcCommand).requires_privilege("admin"),
+                                &JoinChannels::add_channel);
+        part_id = add_handler(filter_command_type("part", sourceinfo::IrcCommand).requires_privilege("admin"),
+                                &JoinChannels::remove_channel);
+        conn_id = add_handler(filter_command("001").source_type(sourceinfo::RawIrc),
+                                &JoinChannels::on_connect);
     }
 } joiner;
 

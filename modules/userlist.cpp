@@ -33,7 +33,7 @@ struct UserLister : public CommandHandlerBase<UserLister>
 
     UserLister()
     {
-        _id = add_handler("names", sourceinfo::IrcCommand, &UserLister::list);
+        _id = add_handler(filter_command_type("names", sourceinfo::IrcCommand), &UserLister::list);
     }
 } lister;
 

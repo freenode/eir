@@ -32,9 +32,9 @@ namespace paludis
 
         CommandHolder _handler_id;
 
-        Implementation()
+        Implementation(Bot *b)
         {
-            _handler_id = add_handler("005", &Implementation<ISupport>::_populate);
+            _handler_id = add_handler(filter_command("005").from_bot(b), &Implementation<ISupport>::_populate);
         }
         ~Implementation()
         {
@@ -208,8 +208,8 @@ std::string ISupport::prefix_modes() const { return _imp->_prefix_modes; }
 
 int ISupport::max_modes() const { return _imp->_max_modes; }
 
-ISupport::ISupport()
-    : PrivateImplementationPattern<ISupport>(new Implementation<ISupport>)
+ISupport::ISupport(Bot *b)
+    : PrivateImplementationPattern<ISupport>(new Implementation<ISupport>(b))
 {
 }
 

@@ -1,3 +1,4 @@
+#if 0
 #include "bot.h"
 #include "handler.h"
 
@@ -29,3 +30,4 @@ struct Dumper : public CommandHandlerBase<Dumper>
     CommandHolder _id;
 } cd;
 
+#endif
