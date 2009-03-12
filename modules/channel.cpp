@@ -19,11 +19,12 @@ struct ChannelHandler : public CommandHandlerBase<ChannelHandler>
     void handle_quit(const Message *);
     void handle_names_reply(const Message *);
     void handle_nick(const Message *);
+    void handle_kick(const Message *);
     void handle_who_reply(const Message *);
 
     ChannelHandler();
 
-    CommandHolder join_id, part_id, quit_id, names_id, nick_id, who_id;
+    CommandHolder join_id, part_id, quit_id, names_id, nick_id, who_id, kick_id;
 };
 
 ChannelHandler handles_channels;
@@ -36,6 +37,7 @@ ChannelHandler::ChannelHandler()
     //names_id = add_handler("353", sourceinfo::RawIrc, &ChannelHandler::handle_names_reply);
     nick_id = add_handler(filter_command_type("NICK", sourceinfo::RawIrc), &ChannelHandler::handle_nick);
     who_id = add_handler(filter_command_type("352", sourceinfo::RawIrc), &ChannelHandler::handle_who_reply);
+    kick_id = add_handler(filter_command_type("KICK", sourceinfo::RawIrc), &ChannelHandler::handle_kick);
 }
 
 namespace
@@ -110,6 +112,37 @@ namespace
     {
         return find_or_create_channel(m->bot, m->source.destination);
     }
+
+    void client_leaving_channel(Bot *b, Client::ptr c, Channel::ptr ch)
+    {
+        // If we don't know anything about the client, then they can't be in our channel lists.
+        if (!c)
+            return;
+
+        if(!ch)
+            return;
+
+        c->leave_chan(ch);
+
+        if(c->begin_channels() == c->end_channels())
+        {
+            // If they don't share any channels, we can't know anything about them.
+            b->remove_client(c);
+        }
+
+        if (c != b->me())
+            return;
+
+        // If we just left, we need to remove any knowledge of the channel.
+        Channel::MemberIterator member = ch->begin_members();
+        while (member != ch->end_members())
+        {
+            Membership::ptr p = *member++;
+            p->client->leave_chan(p);
+        }
+
+        b->remove_channel(ch);
+    }
 }
 
 void ChannelHandler::handle_join(const Message *m)
@@ -178,24 +211,24 @@ void ChannelHandler::handle_part(const Message *m)
     Client::ptr c = m->source.client;
     Bot *b = m->bot;
 
-    // If we don't know anything about the client, then they can't be in our channel lists.
-    if (!c)
-        return;
-
     Channel::ptr ch = b->find_channel(m->source.destination);
-    if(!ch)
+
+    client_leaving_channel(b, c, ch);
+}
+
+void ChannelHandler::handle_kick(const Message *m)
+{
+    if (m->args.empty())
         return;
 
-    c->leave_chan(ch);
+    Context ctx("Processing kick for " + m->args[0] + " from " + m->source.destination);
 
-    if(c->begin_channels() == c->end_channels())
-    {
-        // If they don't share any channels, we can't know anything about them.
-        b->remove_client(c);
-    }
+    Bot *b = m->bot;
 
-    // We don't need to check whether ch is now empty, as we wouldn't be
-    // getting this message if we're not in it.
+    Client::ptr c = b->find_client(m->args[0]);
+    Channel::ptr ch = b->find_channel(m->source.destination);
+
+    client_leaving_channel(b, c, ch);
 }
 
 void ChannelHandler::handle_quit(const Message *m)

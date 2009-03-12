@@ -9,24 +9,46 @@ struct UserLister : public CommandHandlerBase<UserLister>
 {
     void list(const Message *m)
     {
-        if (! m->bot->supported()->is_channel_name(m->source.destination))
-            return;
+        std::string channelname;
 
-        Channel::ptr ch = m->bot->find_channel(m->source.destination);
+        unsigned int modeindex = 0;
+
+        if (m->bot->supported()->is_channel_name(m->source.destination))
+            channelname = m->source.destination;
+
+        if (!m->args.empty() && m->bot->supported()->is_channel_name(m->args[0]))
+        {
+            channelname = m->args[0];
+            ++modeindex;
+        }
+
+        if (channelname.empty())
+        {
+            m->source.error("I need a channel name");
+            return;
+        }
+
+        Channel::ptr ch = m->bot->find_channel(channelname);
 
         if (!ch)
+        {
+            m->source.error("I don't seem to be in that channel.");
             return;
+        }
 
         std::string reply;
 
         for (Channel::MemberIterator it = ch->begin_members(), ite = ch->end_members();
                 it != ite; ++it)
         {
-            if (m->args.empty() || (*it)->has_mode(m->args[0][0]))
+            if (m->args.size() <= modeindex || (*it)->has_mode(m->args[modeindex][0]))
                 reply += (*it)->client->nick() + " ";
         }
 
-        m->source.reply(reply);
+        if (reply.empty())
+            m->source.reply("<nothing>");
+        else
+            m->source.reply(reply);
     }
 
     CommandHolder _id;

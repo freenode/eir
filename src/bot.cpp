@@ -367,6 +367,10 @@ std::pair<Bot::ClientIterator, bool> Bot::add_client(Client::ptr c)
 {
     Context ctx("Adding client " + c->nick());
 
+    // Bit of a hack this...
+    if (!_imp->_me && c->nick() == nick())
+        _imp->_me = c;
+
     std::pair<Implementation<Bot>::ClientMap::iterator, bool> res = _imp->_clients.insert(make_pair(c->nick(), c));
     if (res.second)
     {
