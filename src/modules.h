@@ -2,13 +2,14 @@
 #define modules_h
 
 #include <string>
-#include <map>
 #include "exceptions.h"
 #include <paludis/util/instantiation_policy.hh>
+#include <paludis/util/private_implementation_pattern.hh>
 
 namespace eir {
 
-    class ModuleRegistry : public paludis::InstantiationPolicy<ModuleRegistry, paludis::instantiation_method::SingletonTag>
+    class ModuleRegistry : public paludis::InstantiationPolicy<ModuleRegistry, paludis::instantiation_method::SingletonTag>,
+                           public paludis::PrivateImplementationPattern<ModuleRegistry>
     {
         public:
             void load(std::string) throw(ModuleError);
@@ -16,15 +17,16 @@ namespace eir {
 
             bool is_loaded(std::string);
 
-            /*
-            template <typename T>
-                T getsym(std::string, std::string);
-            */
+            ModuleRegistry();
+            ~ModuleRegistry();
+    };
 
-        private:
-            typedef void *id;
-
-            std::map<std::string, id> _modules;
+    // A module's create() function should return a pointer to one of these. It will be destroyed
+    // before unloading the module.
+    class Module
+    {
+        public:
+            virtual ~Module() = 0;
     };
 }
 
