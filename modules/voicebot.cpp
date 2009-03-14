@@ -290,7 +290,7 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
             std::vector<std::string> tokens;
             paludis::tokenise_whitespace(line, std::back_inserter(tokens));
 
-            if (tokens.size() < 6)
+            if (tokens.size() < 5)
                 continue;
 
             std::vector<std::string>::iterator it = tokens.begin();
@@ -300,7 +300,8 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
             e.setter = *it++;
             e.set = atoi((*it++).c_str());
             e.expires = atoi((*it++).c_str());
-            e.reason = paludis::join(it, tokens.end(), " ");
+	    if (tokens.size() > 5)
+		e.reason = paludis::join(it, tokens.end(), " ");
 
             list->push_back(e);
         }
