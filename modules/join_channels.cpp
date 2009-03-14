@@ -7,7 +7,7 @@
 using namespace std::tr1::placeholders;
 using namespace eir;
 
-struct JoinChannels : public CommandHandlerBase<JoinChannels>
+struct JoinChannels : CommandHandlerBase<JoinChannels>, Module
 {
     std::list<std::string> bot_channels;
 
@@ -57,6 +57,8 @@ struct JoinChannels : public CommandHandlerBase<JoinChannels>
         conn_id = add_handler(filter_command("001").source_type(sourceinfo::RawIrc),
                                 &JoinChannels::on_connect);
     }
-} joiner;
+};
+
+MODULE_CLASS(JoinChannels)
 
 

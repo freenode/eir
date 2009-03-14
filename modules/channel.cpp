@@ -12,7 +12,7 @@
 using namespace eir;
 using namespace std::tr1::placeholders;
 
-struct ChannelHandler : public CommandHandlerBase<ChannelHandler>
+struct ChannelHandler : CommandHandlerBase<ChannelHandler>, Module
 {
     void handle_join(const Message *);
     void handle_part(const Message *);
@@ -26,8 +26,6 @@ struct ChannelHandler : public CommandHandlerBase<ChannelHandler>
 
     CommandHolder join_id, part_id, quit_id, names_id, nick_id, who_id, kick_id;
 };
-
-ChannelHandler handles_channels;
 
 ChannelHandler::ChannelHandler()
 {
@@ -260,3 +258,4 @@ void ChannelHandler::handle_nick(const Message *m)
     m->source.client->change_nick(newnick);
 }
 
+MODULE_CLASS(ChannelHandler)

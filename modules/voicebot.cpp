@@ -1,5 +1,4 @@
-#include "bot.h"
-#include "handler.h"
+#include "eir.h"
 
 using namespace eir;
 using namespace std::tr1::placeholders;
@@ -31,7 +30,7 @@ static std::string format_time(Bot *b, time_t t)
     return std::string(datebuf);
 }
 
-struct voicebot : public CommandHandlerBase<voicebot>
+struct voicebot : CommandHandlerBase<voicebot>, Module
 {
     struct voiceentry
     {
@@ -369,5 +368,7 @@ struct voicebot : public CommandHandlerBase<voicebot>
         {
         }
     }
-} vb;
+};
+
+MODULE_CLASS(voicebot)
 

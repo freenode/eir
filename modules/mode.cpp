@@ -5,7 +5,7 @@
 using namespace std::tr1::placeholders;
 using namespace eir;
 
-struct ModeParser : public CommandHandlerBase<ModeParser>
+struct ModeParser : CommandHandlerBase<ModeParser>, Module
 {
     void check_mode_changes(const Message *m)
     {
@@ -80,5 +80,6 @@ struct ModeParser : public CommandHandlerBase<ModeParser>
     {
         mode_id = add_handler(filter_command_type("MODE", sourceinfo::RawIrc), &ModeParser::parse_mode);
     }
-} mode_parser;
+};
 
+MODULE_CLASS(ModeParser)

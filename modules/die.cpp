@@ -5,7 +5,7 @@
 using namespace std::tr1::placeholders;
 using namespace eir;
 
-struct Die : public CommandHandlerBase<Die>
+struct Die : CommandHandlerBase<Die>, Module
 {
     void die(const Message *m)
     {
@@ -27,6 +27,6 @@ struct Die : public CommandHandlerBase<Die>
         die_id = add_handler(filter_command_privilege("die", "admin"), &Die::die);
         restart_id = add_handler(filter_command_privilege("restart", "admin"), &Die::restart);
     }
-} dieer;
+};
 
-
+MODULE_CLASS(Die)

@@ -5,7 +5,7 @@
 using namespace std::tr1::placeholders;
 using namespace eir;
 
-struct UserLister : public CommandHandlerBase<UserLister>
+struct UserLister : CommandHandlerBase<UserLister>, Module
 {
     void list(const Message *m)
     {
@@ -57,5 +57,7 @@ struct UserLister : public CommandHandlerBase<UserLister>
     {
         _id = add_handler(filter_command_type("names", sourceinfo::IrcCommand), &UserLister::list);
     }
-} lister;
+};
+
+MODULE_CLASS(UserLister)
 

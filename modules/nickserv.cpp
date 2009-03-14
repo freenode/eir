@@ -6,7 +6,7 @@
 using namespace eir;
 using namespace std::tr1::placeholders;
 
-struct Identifier : public CommandHandlerBase<Identifier>
+struct Identifier : CommandHandlerBase<Identifier>, Module
 {
     void identify(const Message *m)
     {
@@ -31,4 +31,4 @@ struct Identifier : public CommandHandlerBase<Identifier>
     }
 };
 
-Identifier p;
+MODULE_CLASS(Identifier)

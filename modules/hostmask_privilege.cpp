@@ -8,7 +8,7 @@
 using namespace eir;
 using namespace std::tr1::placeholders;
 
-struct HostmaskPrivilege : public CommandHandlerBase<HostmaskPrivilege>
+struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
 {
     typedef std::set<std::pair<std::string, std::string> > priv_list;
     priv_list priv_entries;
@@ -97,4 +97,6 @@ struct HostmaskPrivilege : public CommandHandlerBase<HostmaskPrivilege>
         clear_id = add_handler(filter_command_type("clear_lists", sourceinfo::ConfigFile),
                                 &HostmaskPrivilege::clear_host_privileges);
     }
-} host_priv;
+};
+
+MODULE_CLASS(HostmaskPrivilege)

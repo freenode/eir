@@ -4,7 +4,7 @@
 using namespace eir;
 using namespace std::tr1::placeholders;
 
-struct echo : public CommandHandlerBase<echo>
+struct echo : CommandHandlerBase<echo>, Module
 {
     void do_echo(const Message *m)
     {
@@ -16,5 +16,5 @@ struct echo : public CommandHandlerBase<echo>
     echo() { _id = add_handler(filter_command_type("echo", sourceinfo::IrcCommand), &echo::do_echo); }
 };
 
-echo e;
+MODULE_CLASS(echo)
 

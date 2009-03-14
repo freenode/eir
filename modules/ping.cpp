@@ -7,7 +7,7 @@
 using namespace eir;
 using namespace std::tr1::placeholders;
 
-struct Ponger : CommandHandlerBase<Ponger>
+struct Ponger : CommandHandlerBase<Ponger>, Module
 {
     CommandHolder _id;
 
@@ -22,4 +22,4 @@ struct Ponger : CommandHandlerBase<Ponger>
     }
 };
 
-Ponger p;
+MODULE_CLASS(Ponger)

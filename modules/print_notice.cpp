@@ -1,4 +1,5 @@
 #include "bot.h"
+#include "modules.h"
 #include "handler.h"
 
 #include <iostream>
@@ -7,7 +8,7 @@
 using namespace std::tr1::placeholders;
 using namespace eir;
 
-struct NoticePrinter : public CommandHandlerBase<NoticePrinter>
+struct NoticePrinter : public CommandHandlerBase<NoticePrinter>, public Module
 {
     void print(const eir::Message * m)
     {
@@ -19,5 +20,5 @@ struct NoticePrinter : public CommandHandlerBase<NoticePrinter>
     CommandHolder _id;
 };
 
-NoticePrinter p;
+MODULE_CLASS(NoticePrinter)
 

@@ -6,7 +6,7 @@
 using namespace eir;
 using namespace std::tr1::placeholders;
 
-struct Whoami : public CommandHandlerBase<Whoami>
+struct Whoami : CommandHandlerBase<Whoami>, Module
 {
     void whoami(const Message *m)
     {
@@ -33,8 +33,6 @@ struct Whoami : public CommandHandlerBase<Whoami>
     {
         _id = add_handler(filter_command_type("whoami", sourceinfo::IrcCommand), &Whoami::whoami);
     }
-} whoami;
+};
 
-
-
- 
+MODULE_CLASS(Whoami)

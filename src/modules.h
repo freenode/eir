@@ -30,4 +30,7 @@ namespace eir {
     };
 }
 
+// Utility macro to save typing in module source files
+#define MODULE_CLASS(x) extern "C" Module *create() { return new x;}
+
 #endif
