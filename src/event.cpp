@@ -8,7 +8,7 @@ EventManager *EventManager::get_instance()
     return &_instance;
 }
 
-static EventManager::id next_id = 0;
+static EventManager::id next_id = 1;
 
 EventManager::id EventManagerImpl::add_event(time_t t, EventManager::event_func f)
 {
