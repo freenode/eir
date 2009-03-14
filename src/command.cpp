@@ -60,7 +60,7 @@ void CommandRegistry::dispatch(const Message *m, bool fatal_errors)
 
 CommandRegistry::id CommandRegistry::add_handler(Filter f, const CommandRegistry::handler & h)
 {
-    static uintptr_t next_id = 0;
+    static uintptr_t next_id = 1;
 
     Context ctx("Registering new handler");
 
