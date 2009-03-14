@@ -92,7 +92,7 @@ namespace paludis
             : bot(b), _name(n), _connected(false), _supported(b)
         {
             config_filename = _name + ".conf";
-            set_handler = add_handler(filter_command_privilege("set", "admin").from_bot(bot),
+            set_handler = add_handler(filter_command_privilege("set", "admin").from_bot(bot).or_config(),
                                       &Implementation<Bot>::handle_set);
             rehash_handler = add_handler(filter_command_privilege("rehash", "admin").from_bot(bot),
                                          &Implementation<Bot>::rehash);
