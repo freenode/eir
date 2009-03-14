@@ -27,7 +27,8 @@ eir: $(eir_OBJS)
 modules: $(mod_MODULES)
 
 modules/%.so: modules/%.cpp
-	g++ $(CXXFLAGS) $(mod_INCLUDES) -fPIC -shared -o $@ $<
+	g++ $(CXXFLAGS) $(mod_INCLUDES) -fPIC -shared -o $@.tmp $<
+	mv $@.tmp $@
 
 paludis/util/%.o: paludis/util/%.cc
 	g++ -c $(CXXFLAGS) -fPIC -o $@ $<
