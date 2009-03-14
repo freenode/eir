@@ -14,14 +14,14 @@ EventManager::id EventManagerImpl::add_event(time_t t, EventManager::event_func 
 {
     event::ptr e(new event(next_id++, t, 0, f));
     events.push_back(e);
-    return e->id;
+    return e->_id;
 }
 
 EventManager::id EventManagerImpl::add_recurring_event(time_t i, EventManager::event_func f)
 {
     event::ptr e(new event(next_id++, time(NULL) + i, i, f));
     events.push_back(e);
-    return e->id;
+    return e->_id;
 }
 
 void EventManagerImpl::remove_event(EventManager::id id)
