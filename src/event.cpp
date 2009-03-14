@@ -26,10 +26,12 @@ EventManager::id EventManagerImpl::add_recurring_event(time_t i, EventManager::e
 
 void EventManagerImpl::remove_event(EventManager::id id)
 {
-    for (event_list::iterator it = events.begin(); it != events.end(); ++it)
+    event_list::iterator it = events.begin();
+    while (it != events.end())
     {
-        if ((*it)->_id ==  id)
-            events.erase(it++);
+        event_list::iterator it2 = it++;
+        if ((*it2)->_id ==  id)
+            events.erase(it2);
     }
 }
 
