@@ -252,6 +252,36 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
         }
     }
 
+    void do_match(const Message *m)
+    {
+        if (m->args.empty())
+        {
+            m->source.error("Need one argument");
+            return;
+        }
+
+        std::string mask = m->args[0];
+        if (mask.find_first_of("!@*") == std::string::npos)
+        {
+            Client::ptr c = m->bot->find_client(mask);
+            if (!c)
+                mask += "!*@*";
+            else
+                mask = c->nuh();
+        }
+
+        for (voicelist::iterator it = dnv.begin(); it != dnv.end(); ++it)
+            if (mask_match(it->mask, mask))
+            {
+                Bot *bot = BotManager::get_instance()->find(it->bot);
+                m->source.reply(it->mask + " (" + it->reason + ") (added by " +
+                    it->setter + " on " + format_time(bot, it->set) +
+                    ", expires " + format_time(bot, it->expires) + ")");
+            }
+
+        m->source.reply("*** End of DNV matches for " + mask);
+    }
+
     void check_expiry()
     {
         time_t currenttime = time(NULL);
@@ -335,7 +365,7 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
     }
 
 
-    CommandHolder add, remove, list, info, check, voice, clear, change;
+    CommandHolder add, remove, list, info, check, voice, clear, change, match_client;
     EventHolder check_event, save_event;
 
     voicebot()
@@ -352,6 +382,8 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
                             &voicebot::do_voice);
         change = add_handler(filter_command_type("edit", sourceinfo::IrcCommand).requires_privilege("voiceadmin"),
                             &voicebot::do_change);
+        match_client = add_handler(filter_command_type("match", sourceinfo::IrcCommand).requires_privilege("voiceadmin"),
+                            &voicebot::do_match);
 
         check_event = add_recurring_event(60, &voicebot::check_expiry);
         save_event = add_recurring_event(300, &voicebot::save_lists);
