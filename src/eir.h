@@ -8,5 +8,6 @@
 #include "exceptions.h"
 #include "match.h"
 #include "handler.h"
+#include "logger.h"
 
 #endif

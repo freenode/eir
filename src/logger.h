@@ -6,6 +6,7 @@
 
 #include <string>
 #include <tr1/functional>
+#include <tr1/memory>
 
 namespace eir
 {
@@ -37,12 +38,14 @@ namespace eir
                 Info    = 0x04,
                 Privs   = 0x08,
                 Warning = 0x10,
+                Raw     = 0x20,
 
-                All     = 0xffff
+                All     = 0xffffffff
             };
-            typedef unsigned short Type;
+            typedef unsigned int Type;
 
             void Log(Client *, Type, std::string);
+            void Log(std::tr1::shared_ptr<Client>, Type, std::string);
 
             typedef unsigned int BackendId;
             BackendId register_backend(std::string, LogBackend *);

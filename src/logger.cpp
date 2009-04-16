@@ -8,6 +8,8 @@ using namespace paludis;
 
 #include <list>
 
+template class paludis::InstantiationPolicy<Logger, paludis::instantiation_method::SingletonTag>;
+
 namespace
 {
     struct LogDestinationInfo
@@ -113,6 +115,22 @@ void Logger::remove_destination(DestinationId id)
     }
 }
 
+void Logger::Log(Client *source, Type type, std::string text)
+{
+    for (std::list<LogDestinationInfo>::iterator it = _imp->destinations.begin();
+            it != _imp->destinations.end(); ++it)
+    {
+        if (it->typemask & type)
+        {
+            it->dest->Log(source, text);
+        }
+    }
+}
+
+void Logger::Log(std::tr1::shared_ptr<Client> s, Type t, std::string text)
+{
+    Log(s.get(), t, text);
+}
 
 
 Logger::Logger()
@@ -122,4 +140,54 @@ Logger::Logger()
 
 Logger::~Logger()
 {
+}
+
+#include "handler.h"
+
+namespace
+{
+    Logger::Type TypeFromString(std::string s)
+    {
+        if (s == "debug")
+            return Logger::Debug;
+        if (s == "command")
+            return Logger::Command;
+        if (s == "info")
+            return Logger::Info;
+        if (s == "privs")
+            return Logger::Privs;
+        if (s == "warning")
+            return Logger::Warning;
+        if (s == "raw")
+            return Logger::Raw;
+        return 0;
+    }
+    struct LogCreator : public CommandHandlerBase<LogCreator>
+    {
+        CommandHolder add_log_id;
+
+        void add_log(const Message *m)
+        {
+            std::vector<std::string>::const_iterator it = m->args.begin();
+            std::string type = *it++;
+            std::string arg = *it++;
+
+            Logger::Type types;
+
+            for ( ; it != m->args.end(); ++it)
+            {
+                types |= TypeFromString(*it);
+            }
+
+            Logger::get_instance()->add_destination(type, arg, types);
+        }
+
+        LogCreator()
+        {
+            add_log_id = add_handler(filter_command("log").requires_privilege("admin").or_config(),
+                                     &LogCreator::add_log);
+        }
+    };
+
+    LogCreator lc;
 }

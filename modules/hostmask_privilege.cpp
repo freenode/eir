@@ -3,7 +3,6 @@
 #include "match.h"
 
 #include <functional>
-#include <iostream>
 
 using namespace eir;
 using namespace std::tr1::placeholders;

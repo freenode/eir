@@ -3,6 +3,7 @@
 
 #include "command.h"
 #include "event.h"
+#include "logger.h"
 #include <tr1/functional>
 
 
@@ -69,6 +70,25 @@ namespace eir
             { _release(); _id = id; return *this; }
 
             ~EventHolder() { _release(); }
+    };
+
+    class LogBackendHolder :
+        public paludis::InstantiationPolicy<LogBackendHolder, paludis::instantiation_method::NonCopyableTag>
+    {
+        private:
+            Logger::BackendId _id;
+
+            void _release() { if (_id) Logger::get_instance()->unregister_backend(_id); _id = 0; }
+
+        public:
+            LogBackendHolder() : _id(0)
+            { }
+            LogBackendHolder(Logger::BackendId id) : _id(id)
+            { }
+            const LogBackendHolder & operator= (Logger::BackendId id)
+            { _release(); _id = id; return *this; }
+
+            ~LogBackendHolder() { _release(); }
     };
 }
 

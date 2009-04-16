@@ -7,8 +7,6 @@
 
 #include <paludis/util/wrapped_forward_iterator-impl.hh>
 
-#include <iostream>
-
 using namespace eir;
 using namespace std::tr1::placeholders;
 
@@ -245,7 +243,7 @@ void ChannelHandler::handle_quit(const Message *m)
 
     b->remove_client(c);
 
-    std::cerr << "QUIT: " << c->nick() << std::endl;
+    Logger::get_instance()->Log(c, Logger::Debug, "QUIT: " + c->nick());
 }
 
 void ChannelHandler::handle_nick(const Message *m)
