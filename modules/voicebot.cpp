@@ -14,6 +14,7 @@ using namespace std::tr1::placeholders;
 #include <fstream>
 
 static const std::string default_time_fmt("%F %T");
+static const std::string default_expiry("1d");
 
 static std::string format_time(Bot *b, time_t t)
 {
@@ -28,6 +29,12 @@ static std::string format_time(Bot *b, time_t t)
              b->get_setting_with_default("voice_time_format", default_time_fmt).c_str(),
              &time);
     return std::string(datebuf);
+}
+
+static time_t get_default_expiry(Bot *b)
+{
+    std::string time = b->get_setting_with_default("default_voice_expiry", default_expiry);
+    return parse_time(time);
 }
 
 struct voicebot : CommandHandlerBase<voicebot>, Module
@@ -57,13 +64,18 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
             return;
         }
 
-        time_t expires = 0;
+        time_t expires;
 
         std::vector<std::string>::const_iterator it = m->args.begin();
         std::string mask = *it++;
 
         if ((*it)[0] == '~')
-            expires = time(NULL) + parse_time(*it++);
+            expires = parse_time(*it++);
+        else
+            expires = get_default_expiry(m->bot);
+
+        if (expires != 0)
+            expires += time(NULL);
 
         std::string reason = paludis::join(it, m->args.end(), " ");
 
