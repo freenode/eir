@@ -18,6 +18,10 @@ struct JoinChannels : CommandHandlerBase<JoinChannels>, Module
             m->bot->send("JOIN " + m->args[0]);
 
         m->source.reply("Added channel " + m->args[0]);
+
+        Logger::get_instance()->Log(m->bot, m->source.client, Logger::Info, "Adding channel " + m->args[0]);
+        if (m->source.client)
+            Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command, m->raw);
     }
 
     void remove_channel(const Message *m)
@@ -33,6 +37,10 @@ struct JoinChannels : CommandHandlerBase<JoinChannels>, Module
             m->bot->send("PART " + m->args[0]);
 
         m->source.reply("Removed channel " + m->args[0]);
+
+        Logger::get_instance()->Log(m->bot, m->source.client, Logger::Info, "Removing channel " + m->args[0]);
+        if (m->source.client)
+            Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command, m->raw);
     }
 
     void on_connect(const Message *m)

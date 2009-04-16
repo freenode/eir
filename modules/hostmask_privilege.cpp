@@ -27,6 +27,9 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
             return;
         }
 
+        if (m->source.client)
+            Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command, m->source.raw);
+
         std::vector<std::string>::const_iterator it = m->args.begin();
         ++it;
         for( ; it != m->args.end(); ++it)
@@ -47,6 +50,9 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
             m->source.error("Need two arguments for " + m->command);
             return;
         }
+
+        if (m->source.client)
+            Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command, m->source.raw);
 
         priv_list::iterator it = priv_entries.begin(), ite = priv_entries.end();
         for ( ; it != ite; ++it)

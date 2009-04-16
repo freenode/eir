@@ -83,6 +83,8 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
         dnv.push_back(voiceentry(m->bot->name(), mask, m->source.name, reason, time(NULL), expires));
         m->source.reply("Added " + mask);
+
+        Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command, "ADD " + mask);
     }
 
     void do_change(const Message *m)
@@ -124,6 +126,8 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
         }
         if (!found)
             m->source.reply("No entry matches " + mask);
+
+        Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command, "CHANGE " + mask);
     }
 
     void do_remove(const Message *m)
@@ -150,6 +154,8 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
             else
                 ++it;
         }
+
+        Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command, "REMOVE " + mask);
     }
 
     void do_list(const Message *m)
@@ -250,6 +256,8 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
                                        paludis::join(thisvoicerun.begin(), thisvoicerun.end(), " ");
             m->bot->send(voicecommand);
         }
+
+        Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command, "VOICE");
     }
 
     void do_match(const Message *m)
@@ -330,8 +338,8 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
             e.setter = *it++;
             e.set = atoi((*it++).c_str());
             e.expires = atoi((*it++).c_str());
-	    if (tokens.size() > 5)
-		e.reason = paludis::join(it, tokens.end(), " ");
+            if (tokens.size() > 5)
+                e.reason = paludis::join(it, tokens.end(), " ");
 
             list->push_back(e);
         }
