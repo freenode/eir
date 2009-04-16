@@ -18,6 +18,12 @@ struct Modloader : public CommandHandlerBase<Modloader>
 
         ModuleRegistry::get_instance()->load(m->args[0]);
         m->source.reply("Loaded " + m->args[0]);
+
+        if (m->source.client)
+            Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command,
+                                        "MODLOAD " + m->args[0]);
+        Logger::get_instance()->Log(m->bot, m->source.client, Logger::Admin,
+                                    "Loaded " + m->args[0]);
     }
 
     void do_modunload(const eir::Message *m)
@@ -26,6 +32,12 @@ struct Modloader : public CommandHandlerBase<Modloader>
 
         ModuleRegistry::get_instance()->unload(m->args[0]);
         m->source.reply("Unloaded " + m->args[0]);
+
+        if (m->source.client)
+            Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command,
+                                        "MODUNLOAD " + m->args[0]);
+        Logger::get_instance()->Log(m->bot, m->source.client, Logger::Admin,
+                                    "Unloaded " + m->args[0]);
      }
 
     void do_modreload(const eir::Message *m)
@@ -39,6 +51,12 @@ struct Modloader : public CommandHandlerBase<Modloader>
         }
         ModuleRegistry::get_instance()->load(m->args[0]);
         m->source.reply("Loaded " + m->args[0]);
+
+        if (m->source.client)
+            Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command,
+                                        "MODRELOAD " + m->args[0]);
+        Logger::get_instance()->Log(m->bot, m->source.client, Logger::Admin,
+                                    "Reloaded " + m->args[0]);
      }
 
     Modloader() {
