@@ -285,6 +285,12 @@ void Implementation<Bot>::handle_set(const Message *m)
     }
 
     _settings[m->args[0]] = m->args[1];
+
+    if (m->source.client)
+        Logger::get_instance()->Log(bot, m->source.client, Logger::Command,
+                                    "SET " + m->args[0] + " = " + m->args[1]);
+    Logger::get_instance()->Log(bot, m->source.client, Logger::Admin,
+                                "Set " + m->args[0] + " to " + m->args[1]);
 }
 
 const std::string& Bot::nick() const
