@@ -135,7 +135,7 @@ void Implementation<Server>::maybe_send_stuff()
     while(_burst < 4 && ! _send_queue.empty())
     {
         std::string line = _send_queue.front();
-        Logger::get_instance()->Log(NULL, Logger::Raw, "--> " + line);
+        Logger::get_instance()->Log(NULL, NULL, Logger::Raw, "--> " + line);
         write(socketfd, line.c_str(), line.size());
         _send_queue.pop();
         ++_burst;

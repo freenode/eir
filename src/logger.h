@@ -10,12 +10,13 @@
 
 namespace eir
 {
+    class Bot;
     class Client;
 
     class LogDestination
     {
         public:
-            virtual void Log(Client *, std::string) = 0;
+            virtual void Log(Bot *, Client *, std::string) = 0;
             virtual ~LogDestination() { }
     };
 
@@ -45,8 +46,8 @@ namespace eir
             };
             typedef unsigned int Type;
 
-            void Log(Client *, Type, std::string);
-            void Log(std::tr1::shared_ptr<Client>, Type, std::string);
+            void Log(Bot *, Client *, Type, std::string);
+            void Log(Bot *, std::tr1::shared_ptr<Client>, Type, std::string);
 
             typedef unsigned int BackendId;
             BackendId register_backend(std::string, LogBackend *);

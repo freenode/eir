@@ -8,7 +8,7 @@ struct StdErrLogger : public Module
 {
     struct Destination : public LogDestination
     {
-        void Log(Client *, std::string text)
+        void Log(Bot *b, Client *, std::string text)
         {
             std::string::size_type p = text.rfind("\r\n");
             if(p != std::string::npos)
@@ -20,6 +20,8 @@ struct StdErrLogger : public Module
                     text = text.substr(0, p);
             }
 
+            if (b)
+                std::cerr << "[" << b->name() << "] ";
             std::cerr << text << std::endl;
         }
     };

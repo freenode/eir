@@ -115,21 +115,21 @@ void Logger::remove_destination(DestinationId id)
     }
 }
 
-void Logger::Log(Client *source, Type type, std::string text)
+void Logger::Log(Bot *bot, Client *source, Type type, std::string text)
 {
     for (std::list<LogDestinationInfo>::iterator it = _imp->destinations.begin();
             it != _imp->destinations.end(); ++it)
     {
         if (it->typemask & type)
         {
-            it->dest->Log(source, text);
+            it->dest->Log(bot, source, text);
         }
     }
 }
 
-void Logger::Log(std::tr1::shared_ptr<Client> s, Type t, std::string text)
+void Logger::Log(Bot *b, std::tr1::shared_ptr<Client> s, Type t, std::string text)
 {
-    Log(s.get(), t, text);
+    Log(b, s.get(), t, text);
 }
 
 

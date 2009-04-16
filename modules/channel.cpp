@@ -243,7 +243,7 @@ void ChannelHandler::handle_quit(const Message *m)
 
     b->remove_client(c);
 
-    Logger::get_instance()->Log(c, Logger::Debug, "QUIT: " + c->nick());
+    Logger::get_instance()->Log(b, c, Logger::Debug, "QUIT: " + c->nick());
 }
 
 void ChannelHandler::handle_nick(const Message *m)
