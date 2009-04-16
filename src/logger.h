@@ -39,6 +39,7 @@ namespace eir
                 Privs   = 0x08,
                 Warning = 0x10,
                 Raw     = 0x20,
+                Admin   = 0x40,
 
                 All     = 0xffffffff
             };

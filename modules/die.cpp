@@ -10,12 +10,14 @@ struct Die : CommandHandlerBase<Die>, Module
     void die(const Message *m)
     {
         m->source.reply("Bye bye...");
+        Logger::get_instance()->Log(m->source.client, Logger::Admin, "DIE from " + m->source.raw);
         m->bot->disconnect("Shutting down (" + m->source.name + ")");
         throw DieException(m->source.client->nuh());
     }
     void restart(const Message *m)
     {
         m->source.reply("Restarting...");
+        Logger::get_instance()->Log(m->source.client, Logger::Admin, "RESTART from " + m->source.raw);
         m->bot->disconnect("Restarting (" + m->source.name + ")");
         throw RestartException();
     }

@@ -33,6 +33,8 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
         {
             priv_entries.insert(make_pair(m->args[0], *it));
             m->source.reply("Added privilege " + *it + " for " + m->args[0]);
+            Logger::get_instance()->Log(m->source.client, Logger::Admin,
+                                        "Adding privilege " + *it + " for " + m->args[0]);
         }
 
         recalculate_privileges(m);
@@ -51,6 +53,8 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
         {
             if (it->first == m->args[0] && match(m->args[1], it->second))
             {
+                Logger::get_instance()->Log(m->source.client, Logger::Admin,
+                                            "Removing privilege " + *it + " for " + m->args[0]);
                 m->source.reply("Removing privilege " + it->second + " from " + it->first);
                 priv_entries.erase(it++);
             }

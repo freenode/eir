@@ -160,6 +160,8 @@ namespace
             return Logger::Warning;
         if (s == "raw")
             return Logger::Raw;
+        if (s == "admin")
+            return Logger::Admin;
         return 0;
     }
     struct LogCreator : public CommandHandlerBase<LogCreator>
