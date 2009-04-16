@@ -2,8 +2,6 @@
 #include "exceptions.h"
 #include "event_internal.h"
 
-#include "logger.h"
-
 #include <paludis/util/private_implementation_pattern-impl.hh>
 
 #include <queue>
@@ -135,7 +133,6 @@ void Implementation<Server>::maybe_send_stuff()
     while(_burst < 4 && ! _send_queue.empty())
     {
         std::string line = _send_queue.front();
-        Logger::get_instance()->Log(NULL, NULL, Logger::Raw, "--> " + line);
         write(socketfd, line.c_str(), line.size());
         _send_queue.pop();
         ++_burst;

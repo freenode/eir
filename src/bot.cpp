@@ -267,6 +267,7 @@ void Implementation<Bot>::handle_message(std::string line)
     m.command = "server_incoming";
     m.source.type = sourceinfo::Internal;
     CommandRegistry::get_instance()->dispatch(&m);
+    Logger::get_instance()->Log(bot, m.source.client, Logger::Raw, "<-- " + m.raw);
     m.command = command;
     m.source.type = sourceinfo::RawIrc;
     CommandRegistry::get_instance()->dispatch(&m);
@@ -321,16 +322,16 @@ void Bot::run()
 
     _imp->_server->connect(_imp->_host, _imp->_port);
 
+    _imp->_connected = true;
+
     Message m(this, "on_connect");
     CommandRegistry::get_instance()->dispatch(&m);
 
     if (_imp->_pass.length() > 0)
-        _imp->_server->send("PASS " + _imp->_pass);
+        send("PASS " + _imp->_pass);
 
-    _imp->_server->send("NICK " + _imp->_nick);
-    _imp->_server->send("USER eir * * :eir version 0.0.1");
-
-    _imp->_connected = true;
+    send("NICK " + _imp->_nick);
+    send("USER eir * * :eir version 0.0.1");
 
     _imp->_server->run();
 }
@@ -339,6 +340,8 @@ void Bot::send(std::string line)
 {
     if (!_imp->_connected || !_imp->_server)
         throw NotConnectedException();
+
+    Logger::get_instance()->Log(this, NULL, Logger::Raw, "--> " + line);
 
     _imp->_server->send(line);
 }
