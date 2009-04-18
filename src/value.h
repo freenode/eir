@@ -105,8 +105,6 @@ namespace eir
             //operator int() const;
             operator std::string() const;
 
-            ValueArray::const_iterator begin() const;
-            ValueArray::const_iterator end() const;
             ValueArray::iterator begin();
             ValueArray::iterator end();
 
@@ -119,6 +117,8 @@ namespace eir
 
             Value& operator[](const Value&);
             Value& operator[](int);
+
+            void push_back(Value v);
 
             const char *c_str() const { return String().c_str(); }
 

@@ -12,6 +12,9 @@
 using namespace eir;
 using namespace paludis;
 
+template class paludis::WrappedForwardIterator<KeyValueArray::KeyValueArrayIteratorTag, std::pair<const Value, Value> >;
+template class paludis::WrappedForwardIterator<ValueArray::ValueArrayIteratorTag, Value>;
+
 namespace
 {
     struct ValueCompare
@@ -298,6 +301,24 @@ Value& Value::operator[](const Value& v)
         return Array()[v.Int()];
 
     throw TypeMismatchException(array, Type());
+}
+
+void Value::push_back(Value v)
+{
+    if (Type() != array)
+        throw TypeMismatchException(array, Type());
+
+    _imp->_array->push_back(v);
+}
+
+ValueArray::iterator Value::begin()
+{
+    return Array().begin();
+}
+
+ValueArray::iterator Value::end()
+{
+    return Array().end();
 }
 
 
