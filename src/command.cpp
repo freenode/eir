@@ -1,5 +1,6 @@
 #include "command.h"
 #include "exceptions.h"
+#include "logger.h"
 
 #include <paludis/util/instantiation_policy-impl.hh>
 #include <paludis/util/private_implementation_pattern-impl.hh>
@@ -45,14 +46,17 @@ void CommandRegistry::dispatch(const Message *m, bool fatal_errors)
             {
                 if (e.fatal() || fatal_errors)
                     throw;
-                m->source.error("Error processing message " + m->command + ": " +
-                        e.message() + " (" + e.what() + ")");
+                m->source.error("I have suffered a terrible failure. (" + e.message() + ")");
+                Logger::get_instance()->Log(m->bot, m->source.client, Logger::Warning,
+                        "Error processing message " + m->command + ": " + e.message() + " (" + e.what() + ")");
             }
             catch (std::exception &e)
             {
                 if (fatal_errors)
                     throw;
-                m->source.error("Unknown error processing message " + m->command + ": " + e.what());
+                m->source.error(std::string("I have suffered a terrible failure. (") + e.what() + ")");
+                Logger::get_instance()->Log(m->bot, m->source.client, Logger::Warning,
+                        "Unknown error processing message " + m->command + ": " + e.what());
             }
         }
     }
