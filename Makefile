@@ -43,7 +43,7 @@ src/.depend: $(eir_SOURCES) $(eir_HEADERS)
 	g++ -MM $(CXXFLAGS) $(eir_SOURCES) | sed 's!\(^[^ ]*.o:\)!src/\1!' >$@
 
 modules/.depend: $(mod_SOURCES) $(eir_HEADERS)
-	g++ -MM $(CXXFLAGS) $(mod_INCLUDES) $(mod_SOURCES) | sed 's!\(^[^ ]*.o:\)!modules/\1!' >$@
+	g++ -MM $(CXXFLAGS) $(mod_INCLUDES) $(mod_SOURCES) | sed 's!\(^[^ ]*\)\.o:!modules/\1.so:!' >$@
 
 paludis/util/.depend: $(paludisutil_SOURCES) $(paludisutil_HEADERS)
 	g++ -MM $(CXXFLAGS) $(paludisutil_CXXFLAGS) $(paludisutil_SOURCES) | sed 's!\(^[^ ]*.o:\)!paludis/util/\1!' >$@
