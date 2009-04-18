@@ -26,7 +26,28 @@ namespace eir
         ~HelpTopicHolder()
         {
             Value& help_root = GlobalSettingsManager::get_instance()->get("help_root");
+            if (help_root.Type() != Value::kvarray)
+                return;
             help_root.KV().erase(Value(name));
+        }
+    };
+    struct HelpIndexHolder
+    {
+        std::string name;
+        HelpIndexHolder(std::string n, std::string priv)
+            :name(n)
+        {
+            Value& help_index = GlobalSettingsManager::get_instance()->get("help_index");
+            if (help_index.Type() != Value::kvarray)
+                help_index = Value(Value::kvarray);
+            help_index[name] = priv;
+        }
+        ~HelpIndexHolder()
+        {
+            Value& help_index = GlobalSettingsManager::get_instance()->get("help_index");
+            if (help_index.Type() != Value::kvarray)
+                return;
+            help_index.KV().erase(Value(name));
         }
     };
 }

@@ -3,6 +3,7 @@
 #include "help.h"
 
 #include <paludis/util/tokeniser.hh>
+#include <paludis/util/join.hh>
 
 #include <algorithm>
 
@@ -28,7 +29,7 @@ struct helper : CommandHandlerBase<helper>, Module
         Value& help_topic = help_root[topic];
         if (help_topic.Type() != Value::kvarray ||
              ( !!help_topic["priv"] &&
-               !m->source.client->privs().has_privilege(help_topic["priv"])))
+               (!m->source.client || !m->source.client->privs().has_privilege(help_topic["priv"]))))
         {
             m->source.error("No help for '" + topic + "'.");
             return;
@@ -43,10 +44,25 @@ struct helper : CommandHandlerBase<helper>, Module
         std::for_each(reply.begin(), reply.end(), m->source.reply_func);
     }
 
+    void do_help_index(const Message *m)
+    {
+        std::list<std::string> topics;
+        Value& help_index = GlobalSettingsManager::get_instance()->get("help_index");
+        for (KeyValueArray::iterator it = help_index.KV().begin(); it != help_index.KV().end(); ++it)
+        {
+            if (it->second.String().empty() ||
+                 (m->source.client && m->source.client->privs().has_privilege(it->second)))
+            {
+                topics.push_back(it->first);
+            }
+        }
+        m->source.reply("Available help topics are: " + paludis::join(topics.begin(), topics.end(), " "));
+    }
+
     void help(const Message *m)
     {
         if (m->args.empty())
-            do_help(m, "default");
+            do_help_index(m);
         else
             do_help(m, m->args[0]);
     }
