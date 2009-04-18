@@ -13,28 +13,61 @@ using namespace std::tr1::placeholders;
 
 #include <fstream>
 
-static const std::string default_time_fmt("%F %T");
-static const std::string default_expiry("1d");
+#include "help.h"
 
-static std::string format_time(Bot *b, time_t t)
+namespace
 {
-    if (t == 0)
-        return "never";
+    const std::string default_time_fmt("%F %T");
+    const std::string default_expiry("1d");
 
-    char datebuf[128];
-    tm time;
-    localtime_r(&t, &time);
-    strftime(datebuf,
-             sizeof(datebuf),
-             b->get_setting_with_default("voice_time_format", default_time_fmt).c_str(),
-             &time);
-    return std::string(datebuf);
-}
+    std::string format_time(Bot *b, time_t t)
+    {
+        if (t == 0)
+            return "never";
 
-static time_t get_default_expiry(Bot *b)
-{
-    std::string time = b->get_setting_with_default("default_voice_expiry", default_expiry);
-    return parse_time(time);
+        char datebuf[128];
+        tm time;
+        localtime_r(&t, &time);
+        strftime(datebuf,
+                 sizeof(datebuf),
+                 b->get_setting_with_default("voice_time_format", default_time_fmt).c_str(),
+                 &time);
+        return std::string(datebuf);
+    }
+
+    time_t get_default_expiry(Bot *b)
+    {
+        std::string time = b->get_setting_with_default("default_voice_expiry", default_expiry);
+        return parse_time(time);
+    }
+
+    const char *help_voicebot =
+        "The voicebot module exists to manage a moderated channel. It maintains a list of hostmask entries that "
+        "will not be voiced (the \002DNV\002 list), and voices, on request, all unvoiced users in the channel that "
+        "do not match any of those entries.\n"
+        "Available voicebot commands are: voice check match add remove edit.\n"
+        "Relevant settings are \037voicebot_channel\037, \037voicebot_admin_channel\037, \037default_voice_expiry\037, "
+        "and \037voice_time_format\037.";
+    const char *help_voice =
+        "\002voice\002. Voices all users who are in \037voicebot_channel\037 and do not match a DNV list entry.";
+    const char *help_check =
+        "\002check\002. Displays a list of users in \037voicebot_channel\037 who would be voiced by the \002voice\002 "
+        "command, and a list of those unvoiced users who would not be voiced.";
+    const char *help_match =
+        "\002match <mask>|<nick>\002. Displays the DNV list entries that match the given argument. If the nickname "
+        "of a currently visible user is given, entries matching that user are shown. Otherwise, it is interpreted as "
+        "a hostmask.";
+    const char *help_add =
+        "\002add <mask> [time] <reason>\002. Adds a DNV entry <mask>, expiring in <time>, with comment <reason>.\n"
+        "If \037time\037 is not specified, the default_voice_expiry setting is used. \037time\037 may "
+        "be zero, in whcih case the entry will not expire. \037reason\037 may be empty.";
+    const char *help_remove =
+        "\002remove <mask>\002. Removes all entries from the DNV list that match the given mask.\n"
+        "Note that 'remove *' will clear the list.";
+    const char *help_edit =
+        "\002edit <mask> [time] [reason]\002. Edits the expiry time and/or comment of an existing DNV entry. If "
+        "\037time\037 is given but \037reason\037 is not, then only the expiry will be changed. Similarly if "
+        "\037reason\037 is given but \037time\037 is not, then the expiry will be left unchanged.";
 }
 
 struct voicebot : CommandHandlerBase<voicebot>, Module
@@ -387,8 +420,18 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     CommandHolder add, remove, list, info, check, voice, clear, change, match_client;
     EventHolder check_event, save_event;
+    HelpTopicHolder voicebothelp, voicehelp, checkhelp, matchhelp, addhelp, removehelp, edithelp;
+    HelpIndexHolder index;
 
     voicebot()
+        : voicebothelp("voicebot", "voiceadmin", help_voicebot),
+          voicehelp("voice", "voiceadmin", help_voice),
+          checkhelp("check", "voiceadmin", help_check),
+          matchhelp("match", "voiceadmin", help_match),
+          addhelp("add", "voiceadmin", help_add),
+          removehelp("remove", "voiceadmin", help_remove),
+          edithelp("edit", "voiceadmin", help_edit),
+          index("voicebot", "voiceadmin")
     {
         add = add_handler(filter_command_type("add", sourceinfo::IrcCommand).requires_privilege("voiceadmin"),
                             &voicebot::do_add);
