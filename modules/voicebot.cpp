@@ -185,6 +185,9 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
         std::string mask = m->args[0];
 
+        if (mask.find_first_of("!@*") == std::string::npos)
+            mask += "!*@*";
+
         for (voicelist::iterator it = dnv.begin(); it != dnv.end(); )
         {
             if (mask_match(mask, it->mask))
