@@ -12,7 +12,7 @@ using namespace std::tr1::placeholders;
 
 namespace
 {
-    const char *help_help = "help [topic] -- Gives help on <topic>.";
+    const char *help_help = "help <topic|command> -- Gives help on a given topic or command.";
 }
 
 struct helper : CommandHandlerBase<helper>, Module
@@ -69,8 +69,9 @@ struct helper : CommandHandlerBase<helper>, Module
 
     CommandHolder _id;
     HelpTopicHolder helptopic;
+    HelpIndexHolder index;
 
-    helper() : helptopic("help", "", help_help)
+    helper() : helptopic("help", "", help_help), index("help", "")
     { _id = add_handler(filter_command_type("help", sourceinfo::IrcCommand), &helper::help); }
 };
 
