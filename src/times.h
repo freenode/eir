@@ -21,16 +21,16 @@ namespace eir
             ++b;
         switch (*--e)
         {
+            case 'm':
+                mult = 60;
+                e = ts.erase(e);
+                break;
             case 'h':
                 mult = 3600;
                 e = ts.erase(e);
                 break;
             case 'd':
                 mult = 3600 * 24;
-                e = ts.erase(e);
-                break;
-            case 'm':
-                mult = 3600 * 24 * 28;
                 e = ts.erase(e);
                 break;
             default:
