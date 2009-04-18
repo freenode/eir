@@ -132,6 +132,14 @@ void Logger::Log(Bot *b, std::tr1::shared_ptr<Client> s, Type t, std::string tex
     Log(b, s.get(), t, text);
 }
 
+void Logger::clear_logs()
+{
+    for (std::list<LogDestinationInfo>::iterator it = _imp->destinations.begin();
+            it != _imp->destinations.end(); it = _imp->destinations.erase(it))
+    {
+        delete it->dest;
+    }
+}
 
 Logger::Logger()
     : PrivateImplementationPattern<Logger>(new Implementation<Logger>)
@@ -166,7 +174,7 @@ namespace
     }
     struct LogCreator : public CommandHandlerBase<LogCreator>
     {
-        CommandHolder add_log_id;
+        CommandHolder add_log_id, clear_log_id;
 
         void add_log(const Message *m)
         {
@@ -174,7 +182,7 @@ namespace
             std::string type = *it++;
             std::string arg = *it++;
 
-            Logger::Type types;
+            Logger::Type types(0);
 
             for ( ; it != m->args.end(); ++it)
             {
@@ -184,10 +192,17 @@ namespace
             Logger::get_instance()->add_destination(type, arg, types);
         }
 
+        void clear_logs(const Message *)
+        {
+            Logger::get_instance()->clear_logs();
+        }
+
         LogCreator()
         {
             add_log_id = add_handler(filter_command("log").requires_privilege("admin").or_config(),
                                      &LogCreator::add_log);
+            clear_log_id = add_handler(filter_command_type("clear_lists", sourceinfo::Internal),
+                                        &LogCreator::clear_logs);
         }
     };
 

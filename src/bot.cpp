@@ -177,6 +177,12 @@ void Implementation<Bot>::load_config(std::tr1::function<void(std::string)> repl
 
 void Implementation<Bot>::rehash(const Message *m)
 {
+    Logger::get_instance()->Log(bot, m->source.client, Logger::Command, "REHASH");
+    Logger::get_instance()->Log(bot, m->source.client, Logger::Admin, "Reloading config file");
+
+    Message m2(bot, sourceinfo::Internal, "clear_lists");
+    CommandRegistry::get_instance()->dispatch(&m2);
+
     load_config(m->source.reply_func);
 
     m->source.reply("Done.");

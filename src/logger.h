@@ -57,6 +57,8 @@ namespace eir
             DestinationId add_destination(std::string type, std::string arg, Type types);
             void remove_destination(DestinationId);
 
+            void clear_logs();
+
             Logger();
             ~Logger();
     };

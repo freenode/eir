@@ -103,7 +103,7 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
                                 &HostmaskPrivilege::add_privilege_entry);
         remove_id = add_handler(filter_command_privilege("del_host_privilege", "admin").or_config(),
                                 &HostmaskPrivilege::remove_privilege_entry);
-        clear_id = add_handler(filter_command_type("clear_lists", sourceinfo::ConfigFile),
+        clear_id = add_handler(filter_command_type("clear_lists", sourceinfo::Internal),
                                 &HostmaskPrivilege::clear_host_privileges);
     }
 };
