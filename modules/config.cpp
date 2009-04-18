@@ -17,7 +17,7 @@ struct Config : CommandHandlerBase<Config>, Module
         Bot::SettingsIterator it1 = m->bot->find_setting(m->args[0]);
         if (it1 != m->bot->end_settings())
         {
-            m->source.reply(m->args[0] + " for " + m->bot->name() + " is " + stringify(it1->second));
+            m->source.reply(m->args[0] + " for " + m->bot->name() + " is " + (std::string)it1->second);
             return;
         }
 
