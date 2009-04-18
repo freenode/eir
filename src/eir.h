@@ -9,5 +9,6 @@
 #include "match.h"
 #include "handler.h"
 #include "logger.h"
+#include "settings.h"
 
 #endif

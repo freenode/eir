@@ -26,7 +26,7 @@ struct BotCommandHandler : public CommandHandlerBase<BotCommandHandler>
             line = m->args[0];
             reply_dest = m->source.name;
         }
-        else if (m->bot->get_setting("command_chars").find(m->args[0][0]) != std::string::npos)
+        else if (m->bot->get_setting("command_chars").String().find(m->args[0][0]) != std::string::npos)
         {
             line = m->args[0].substr(1);
             reply_dest = m->source.destination;

@@ -23,7 +23,7 @@ using namespace paludis;
 
 template class paludis::WrappedForwardIterator<Bot::ClientIteratorTag, const Client::ptr>;
 template class paludis::WrappedForwardIterator<Bot::ChannelIteratorTag, const Channel::ptr>;
-template class paludis::WrappedForwardIterator<Bot::SettingsIteratorTag, const std::pair<const std::string, std::string> >;
+template class paludis::WrappedForwardIterator<Bot::SettingsIteratorTag, const std::pair<const std::string, Value> >;
 
 namespace paludis
 {
@@ -48,7 +48,7 @@ namespace paludis
     {
         typedef std::map<std::string, Client::ptr, cistringcompare> ClientMap;
         typedef std::map<std::string, Channel::ptr, cistringcompare> ChannelMap;
-        typedef std::map<std::string, std::string> SettingsMap;
+        typedef std::map<std::string, Value> SettingsMap;
 
         Bot *bot;
 
@@ -457,7 +457,7 @@ Bot::SettingsIterator Bot::find_setting(std::string name)
     return _imp->_settings.find(name);
 }
 
-std::string Bot::get_setting(std::string name)
+Value Bot::get_setting(std::string name)
 {
     SettingsIterator it = find_setting(name);
     if(it == end_settings())
@@ -465,7 +465,7 @@ std::string Bot::get_setting(std::string name)
     return it->second;
 }
 
-std::string Bot::get_setting_with_default(std::string name, std::string _default)
+Value Bot::get_setting_with_default(std::string name, std::string _default)
 {
     SettingsIterator it = find_setting(name);
     if(it == end_settings())
@@ -473,9 +473,9 @@ std::string Bot::get_setting_with_default(std::string name, std::string _default
     return it->second;
 }
 
-std::pair<Bot::SettingsIterator, bool> Bot::add_setting(std::string n, std::string s)
+std::pair<Bot::SettingsIterator, bool> Bot::add_setting(std::string n, Value s)
 {
-    Context ctx("Adding setting " + n + "(" + s + ")");
+    Context ctx("Adding setting " + n + "(" + stringify(s) + ")");
     return _imp->_settings.insert(make_pair(n, s));
 }
 

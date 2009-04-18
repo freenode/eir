@@ -10,6 +10,7 @@
 #include "supported.h"
 #include "client.h"
 #include "message.h"
+#include "value.h"
 
 namespace eir
 {
@@ -51,13 +52,13 @@ namespace eir
 
             struct SettingsIteratorTag;
             typedef paludis::WrappedForwardIterator<SettingsIteratorTag,
-                                        const std::pair<const std::string, std::string> > SettingsIterator;
+                                        const std::pair<const std::string, Value> > SettingsIterator;
             SettingsIterator begin_settings();
             SettingsIterator end_settings();
             SettingsIterator find_setting(std::string name);
-            std::string get_setting(std::string name);
-            std::string get_setting_with_default(std::string name, std::string _default);
-            std::pair<SettingsIterator, bool> add_setting(std::string n, std::string s);
+            Value get_setting(std::string name);
+            Value get_setting_with_default(std::string name, std::string _default);
+            std::pair<SettingsIterator, bool> add_setting(std::string n, Value v);
             unsigned long remove_setting(std::string n);
             void remove_setting(SettingsIterator it);
 

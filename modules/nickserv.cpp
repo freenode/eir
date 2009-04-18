@@ -18,7 +18,7 @@ struct Identifier : CommandHandlerBase<Identifier>, Module
         std::string user("");
         it = m->bot->find_setting("nickserv_user");
         if(it != m->bot->end_settings())
-            user = it->second;
+            user = (std::string)it->second;
 
         m->bot->send("NS IDENTIFY " + user + " " + pass);
     }
