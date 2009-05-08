@@ -6,6 +6,7 @@
 #include <paludis/util/private_implementation_pattern-impl.hh>
 #include <cstring>
 #include <map>
+#include <stdint.h>
 
 using namespace eir;
 using namespace paludis;

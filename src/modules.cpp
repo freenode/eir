@@ -4,6 +4,7 @@
 #include <paludis/util/private_implementation_pattern-impl.hh>
 
 #include <list>
+#include <stdint.h>
 
 #include <dlfcn.h>
 
