@@ -10,7 +10,8 @@ struct ChannelLogger : public Module
 
         void Log(Bot *b, Client *c, std::string text)
         {
-            b->send("PRIVMSG " + channel + " :(" + c->nick() + ") " + text);
+            if (b->connected())
+                b->send("PRIVMSG " + channel + " :(" + (c ? c->nick() : "<unknown>") + ") " + text);
         }
 
         Destination(std::string ch)
