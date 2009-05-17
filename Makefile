@@ -7,7 +7,7 @@ eir_SOURCES = $(wildcard src/*.cpp)
 eir_HEADERS = $(wildcard src/*.h)
 eir_OBJS = $(subst .cpp,.o,$(eir_SOURCES))
 
-mod_SOURCES = $(wildcard modules/*.cpp)
+mod_SOURCES = $(wildcard modules/*/*.cpp modules/*.cpp)
 mod_MODULES = $(subst .cpp,.so,$(mod_SOURCES))
 
 libpaludisutil_SOURCES = $(wildcard paludis/util/*.cc)
