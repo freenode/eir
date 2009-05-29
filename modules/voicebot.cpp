@@ -60,7 +60,7 @@ namespace
     const char *help_add =
         "\002add <mask> [time] <reason>\002. Adds a DNV entry <mask>, expiring in <time>, with comment <reason>.\n"
         "If \037time\037 is not specified, the default_voice_expiry setting is used. \037time\037 may "
-        "be zero, in whcih case the entry will not expire. \037reason\037 may be empty.";
+        "be zero, in which case the entry will not expire. \037reason\037 may be empty.";
     const char *help_remove =
         "\002remove <mask>\002. Removes all entries from the DNV list that match the given mask.\n"
         "Note that 'remove *' will clear the list.";
