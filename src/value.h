@@ -129,6 +129,18 @@ namespace eir
 
     std::ostream & operator<<(std::ostream&, const Value&);
 
+    inline std::string operator+(std::string lhs, const Value& rhs)
+    { return lhs + rhs.String(); }
+
+    inline std::string operator+(const Value& lhs, std::string rhs)
+    { return lhs.String() + rhs; }
+
+    inline std::string operator+(const char *lhs, const Value& rhs)
+    { return lhs + rhs.String(); }
+
+    inline std::string operator+(const Value& lhs, const char *rhs)
+    { return lhs.String() + rhs; }
+
     class TypeMismatchException : public Exception
     {
         public:
