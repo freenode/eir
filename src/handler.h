@@ -4,6 +4,7 @@
 #include "command.h"
 #include "event.h"
 #include "logger.h"
+#include "storage.h"
 #include <tr1/functional>
 
 
@@ -89,6 +90,25 @@ namespace eir
             { _release(); _id = id; return *this; }
 
             ~LogBackendHolder() { _release(); }
+    };
+
+    class StorageBackendHolder :
+        public paludis::InstantiationPolicy<StorageBackendHolder, paludis::instantiation_method::NonCopyableTag>
+    {
+        private:
+            StorageManager::BackendId _id;
+
+            void _release() { if (_id) StorageManager::get_instance()->unregister_backend(_id); _id = 0; }
+
+        public:
+            StorageBackendHolder() : _id(0)
+            { }
+            StorageBackendHolder(StorageManager::BackendId id) : _id(id)
+            { }
+            const StorageBackendHolder & operator= (StorageManager::BackendId id)
+            { _release(); _id = id; return *this; }
+
+            ~StorageBackendHolder() { _release(); }
     };
 }
 

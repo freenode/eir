@@ -60,6 +60,16 @@ namespace eir {
         InternalError(std::string s) : Exception(s) { }
     };
 
+    struct StorageError : public Exception
+    {
+        StorageError(std::string s) : Exception(s) { }
+    };
+
+    struct IOError : public Exception
+    {
+        IOError(std::string s) : Exception(s) { }
+    };
+
 }
 
 #endif
