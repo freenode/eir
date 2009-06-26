@@ -68,29 +68,28 @@ namespace
         "\002edit <mask> [time] [reason]\002. Edits the expiry time and/or comment of an existing DNV entry. If "
         "\037time\037 is given but \037reason\037 is not, then only the expiry will be changed. Similarly if "
         "\037reason\037 is given but \037time\037 is not, then the expiry will be left unchanged.";
+
+
+    Value voiceentry(std::string bot, std::string mask, std::string setter, std::string reason,
+                     time_t set, time_t expires)
+    {
+        Value v(Value::kvarray);
+        v["bot"] = bot;
+        v["mask"] = mask;
+        v["setter"] = setter;
+        v["reason"] = reason;
+        v["set"] = set;
+        v["expires"] = expires;
+        return v;
+    }
 }
 
 struct voicebot : CommandHandlerBase<voicebot>, Module
 {
-    struct voiceentry
-    {
-        std::string bot;
-        std::string mask, setter, reason;
-        time_t set, expires;
-        voiceentry(std::string b, std::string m, std::string s, std::string r, time_t st, time_t e)
-            : bot(b), mask(m), setter(s), reason(r), set(st), expires(e)
-        { }
-        voiceentry()
-            : set(0), expires(0)
-        { }
-    };
-
-    typedef std::list<voiceentry> voicelist;
-    voicelist dnv;
-    voicelist old;
-
     void do_add(const Message *m)
     {
+        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
+
         if (m->args.empty())
         {
             m->source.error("Need at least one argument");
@@ -117,11 +116,11 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
         if (mask.find_first_of("!@*") == std::string::npos)
             mask += "!*@*";
 
-        for (voicelist::iterator it = dnv.begin(); it != dnv.end(); ++it)
+        for (ValueArray::iterator it = dnv.begin(); it != dnv.end(); ++it)
         {
-            if (mask_match(it->mask, mask))
+            if (mask_match((*it)["mask"], mask))
             {
-                m->source.reply("Mask already matched by " + it->mask);
+                m->source.reply("Mask already matched by " + (*it)["mask"]);
                 return;
             }
         }
@@ -134,6 +133,7 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void do_change(const Message *m)
     {
+        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
         if (m->args.empty())
         {
             m->source.error("Need at least one argument");
@@ -157,16 +157,16 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
         bool found = false;
 
-        for (voicelist::iterator it = dnv.begin(); it != dnv.end(); ++it)
+        for (ValueArray::iterator it = dnv.begin(); it != dnv.end(); ++it)
         {
-            if (mask_match(mask, it->mask))
+            if (mask_match(mask, (*it)["mask"]))
             {
                 if (expires)
-                    it->expires = expires;
+                    (*it)["expires"] = expires;
                 if (!reason.empty())
-                    it->reason = reason;
+                    (*it)["reason"] = reason;
                 found = true;
-                m->source.reply("Updated " + it->mask);
+                m->source.reply("Updated " + (*it)["mask"]);
             }
         }
         if (!found)
@@ -177,6 +177,9 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void do_remove(const Message *m)
     {
+        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
+        Value& old = GlobalSettingsManager::get_instance()->get("voicebot:expired");
+
         if (m->args.empty())
         {
             m->source.error("Need at least one argument");
@@ -188,16 +191,16 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
         if (mask.find_first_of("!@*") == std::string::npos)
             mask += "!*@*";
 
-        for (voicelist::iterator it = dnv.begin(); it != dnv.end(); )
+        for (ValueArray::iterator it = dnv.begin(); it != dnv.end(); )
         {
-            if (mask_match(mask, it->mask))
+            if (mask_match(mask, (*it)["mask"]))
             {
-                Bot *bot = BotManager::get_instance()->find(it->bot);
-                m->source.reply("Removing " + it->mask + " (" + it->reason + ") " +
-                        "(added by " + it->setter + " on " + format_time(bot, it->set) + ")");
+                Bot *bot = BotManager::get_instance()->find((*it)["bot"]);
+                m->source.reply("Removing " + (*it)["mask"] + " (" + (*it)["reason"] + ") " +
+                        "(added by " + (*it)["setter"] + " on " + format_time(bot, (*it)["set"].Int()) + ")");
 
                 old.push_back(*it);
-                dnv.erase(it++);
+                dnv.Array().erase(it++);
             }
             else
                 ++it;
@@ -208,12 +211,14 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void do_list(const Message *m)
     {
-        for (voicelist::iterator it = dnv.begin(); it != dnv.end(); ++it)
+        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
+
+        for (ValueArray::iterator it = dnv.begin(); it != dnv.end(); ++it)
         {
-            Bot *bot = BotManager::get_instance()->find(it->bot);
-            m->source.reply(it->mask + " (" + it->reason + ") (added by " + 
-                    it->setter + " on " + format_time(bot, it->set) +
-                    ", expires " + format_time(bot, it->expires) + ")");
+            Bot *bot = BotManager::get_instance()->find((*it)["bot"]);
+            m->source.reply((*it)["mask"] + " (" + (*it)["reason"] + ") (added by " + 
+                    (*it)["setter"] + " on " + format_time(bot, (*it)["set"].Int()) +
+                    ", expires " + format_time(bot, (*it)["expires"].Int()) + ")");
         }
 
         m->source.reply("*** End of DNV list");
@@ -223,15 +228,17 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
                            std::list<std::string> *tovoice,
                            std::list<std::string> *tonotvoice)
     {
+        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
+
         for (Channel::MemberIterator it = channel->begin_members(); it != channel->end_members(); ++it)
         {
             if ((*it)->has_mode('v'))
                 continue;
 
             bool matched = false;
-            for (voicelist::iterator i2 = dnv.begin(); i2 != dnv.end(); ++i2)
+            for (ValueArray::iterator i2 = dnv.begin(); i2 != dnv.end(); ++i2)
             {
-                if (match(i2->mask, (*it)->client->nuh()))
+                if (match((*i2)["mask"], (*it)->client->nuh()))
                 {
                     matched = true;
                     break;
@@ -310,6 +317,8 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void do_match(const Message *m)
     {
+        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
+
         if (m->args.empty())
         {
             m->source.error("Need one argument");
@@ -326,13 +335,13 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
                 mask = c->nuh();
         }
 
-        for (voicelist::iterator it = dnv.begin(); it != dnv.end(); ++it)
-            if (mask_match(it->mask, mask))
+        for (ValueArray::iterator it = dnv.begin(); it != dnv.end(); ++it)
+            if (mask_match((*it)["mask"], mask))
             {
-                Bot *bot = BotManager::get_instance()->find(it->bot);
-                m->source.reply(it->mask + " (" + it->reason + ") (added by " +
-                    it->setter + " on " + format_time(bot, it->set) +
-                    ", expires " + format_time(bot, it->expires) + ")");
+                Bot *bot = BotManager::get_instance()->find((*it)["bot"]);
+                m->source.reply((*it)["mask"] + " (" + (*it)["reason"] + ") (added by " +
+                    (*it)["setter"] + " on " + format_time(bot, (*it)["set"].Int()) +
+                    ", expires " + format_time(bot, (*it)["expires"].Int()) + ")");
             }
 
         m->source.reply("*** End of DNV matches for " + mask);
@@ -341,83 +350,58 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
     void check_expiry()
     {
         time_t currenttime = time(NULL);
+        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
+        Value& old = GlobalSettingsManager::get_instance()->get("voicebot:expired");
 
-        for (voicelist::iterator it = dnv.begin(); it != dnv.end(); )
+        for (ValueArray::iterator it = dnv.begin(); it != dnv.end(); )
         {
-            if (it->expires != 0 && it->expires < currenttime)
+            if ((*it)["expires"].Int() != 0 && (*it)["expires"].Int() < currenttime)
             {
-                Bot *bot = BotManager::get_instance()->find(it->bot);
+                Bot *bot = BotManager::get_instance()->find((*it)["bot"]);
                 std::string adminchan;
                 if (bot)
                     adminchan = bot->get_setting("voicebot_admin_channel");
 
                 if (bot && !adminchan.empty())
                     bot->send("NOTICE " + adminchan + " :Removing expired entry " +
-                            it->mask + " added by " + it->setter + " on " + format_time(bot, it->set));
+                            (*it)["mask"] + " added by " + (*it)["setter"] + " on " +
+                            format_time(bot, (*it)["set"].Int()));
 
                 old.push_back(*it);
-                dnv.erase(it++);
+                dnv.Array().erase(it++);
             }
             else
                 ++it;
         }
     }
 
-    void load_voicelist(std::string filename, voicelist *list)
-    {
-        std::ifstream file(filename.c_str());
-
-        std::string line;
-
-        list->clear();
-
-        while (std::getline(file, line))
-        {
-            std::vector<std::string> tokens;
-            paludis::tokenise_whitespace(line, std::back_inserter(tokens));
-
-            if (tokens.size() < 5)
-                continue;
-
-            std::vector<std::string>::iterator it = tokens.begin();
-            voiceentry e;
-            e.bot = *it++;
-            e.mask = *it++;
-            e.setter = *it++;
-            e.set = atoi((*it++).c_str());
-            e.expires = atoi((*it++).c_str());
-            if (tokens.size() > 5)
-                e.reason = paludis::join(it, tokens.end(), " ");
-
-            list->push_back(e);
-        }
-    }
-
-    void save_voicelist(std::string filename, voicelist *list)
-    {
-        std::string tmpfilename = filename + ".tmp";
-        std::ofstream file(tmpfilename.c_str());
-
-        for (voicelist::iterator it = list->begin(); it != list->end(); ++it)
-        {
-            file << it->bot << " " << it->mask << " " << it->setter << " "
-                 << it->set << " " << it->expires << " " << it->reason << std::endl;
-        }
-
-        file.close();
-        ::rename(tmpfilename.c_str(), filename.c_str());
-    }
-
     void load_lists()
     {
-        load_voicelist("voice.db", &dnv);
-        load_voicelist("expired.voice.db", &old);
+        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
+        Value& old = GlobalSettingsManager::get_instance()->get("voicebot:expired");
+        try
+        {
+            dnv = StorageManager::get_instance()->Load("json:donotvoice");
+            old = StorageManager::get_instance()->Load("json:expireddonotvoice");
+        }
+        catch (StorageError &)
+        {
+            dnv = Value(Value::array);
+            old = Value(Value::array);
+        }
+        catch (IOError &)
+        {
+            dnv = Value(Value::array);
+            old = Value(Value::array);
+        }
     }
 
     void save_lists()
     {
-        save_voicelist("voice.db", &dnv);
-        save_voicelist("expired.voice.db", &old);
+        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
+        Value& old = GlobalSettingsManager::get_instance()->get("voicebot:expired");
+        StorageManager::get_instance()->Save(dnv, "json:donotvoice");
+        StorageManager::get_instance()->Save(old, "json:expireddonotvoice");
     }
 
 
@@ -463,8 +447,9 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
         {
             save_lists();
         }
-        catch (...)
+        catch (Exception & e)
         {
+            Logger::get_instance()->Log(0, 0, Logger::Admin, "Error saving dnv lists: " + e.message() + " (" + e.what() + ")");
         }
     }
 };
