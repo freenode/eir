@@ -119,7 +119,7 @@ struct JsonStorage : Module, StorageBackend
         ss << fs.rdbuf();
         raw = ss.str();
 
-        if (fs || !ss)
+        if (!fs || !ss)
             throw IOError("Error reading from " + filename);
 
         if (!reader.parse(raw, jv))
