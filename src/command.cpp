@@ -47,7 +47,7 @@ void CommandRegistry::dispatch(const Message *m, bool fatal_errors)
             {
                 if (e.fatal() || fatal_errors)
                     throw;
-                m->source.error("I have suffered a terrible failure. (" + e.message() + ")");
+                m->source.error("I have suffered a terrible failure. (" + e.message() + ") (" + e.what() + ")");
                 Logger::get_instance()->Log(m->bot, m->source.client, Logger::Warning,
                         "Error processing message " + m->command + ": " + e.message() + " (" + e.what() + ")");
             }
