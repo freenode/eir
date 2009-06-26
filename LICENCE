@@ -2,6 +2,12 @@ All source files in this repository are released under the terms of the
 GNU General Public Licence version 2, unless otherwise stated. The full
 text of this licence is below.
 
+The paludis/ subdirectory contains code from Paludis
+<http://paludis.pioto.org> which is also licensed under the GPL v2.
+
+The libjson/ subdirectory contains code from the jsoncpp library
+<http://jsoncpp.sourceforge.net> which is in the public domain.
+
 
                     GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991

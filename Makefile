@@ -14,8 +14,12 @@ libpaludisutil_SOURCES = $(wildcard paludis/util/*.cc)
 libpaludisutil_HEADERS = $(wildcard paludis/util/*.hh)
 libpaludisutil_OBJS = $(subst .cc,.o,$(libpaludisutil_SOURCES))
 
-.PHONY: all
-all: eir modules libpaludisutil.so
+libjson_SOURCES = $(wildcard libjson/*.cpp)
+libjson_OBJS = $(subst .cpp,.o,$(libjson_SOURCES))
+libjson.so: CXXFLAGS += -Ilibjson -Wno-error
+
+.PHONY: all clean
+all: eir modules libpaludisutil.so libjson.so
 
 eir: libpaludisutil.so
 
@@ -34,6 +38,12 @@ paludis/util/%.o: paludis/util/%.cc
 	g++ -c $(CXXFLAGS) -fPIC -o $@ $<
 
 libpaludisutil.so: $(libpaludisutil_OBJS)
+	g++ $(CXXFLAGS) -fPIC -shared -o $@ $^
+
+libjson/%.o: libjson/%.cpp
+	g++ $(CXXFLAGS) -fPIC -c -o $@ $<
+
+libjson.so: $(libjson_OBJS)
 	g++ $(CXXFLAGS) -fPIC -shared -o $@ $^
 
 clean:
