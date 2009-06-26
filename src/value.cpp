@@ -13,7 +13,9 @@ using namespace eir;
 using namespace paludis;
 
 template class paludis::WrappedForwardIterator<KeyValueArray::KeyValueArrayIteratorTag, std::pair<const Value, Value> >;
+template class paludis::WrappedForwardIterator<KeyValueArray::KeyValueArrayIteratorTag, const std::pair<const Value, Value> >;
 template class paludis::WrappedForwardIterator<ValueArray::ValueArrayIteratorTag, Value>;
+template class paludis::WrappedForwardIterator<ValueArray::ValueArrayIteratorTag, const Value>;
 
 namespace
 {
