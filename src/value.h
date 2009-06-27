@@ -141,6 +141,12 @@ namespace eir
     inline std::string operator+(const Value& lhs, const char *rhs)
     { return lhs.String() + rhs; }
 
+    inline bool operator==(const Value& lhs, const std::string& rhs)
+    { return lhs.String() == rhs; }
+
+    inline bool operator==(const std::string& lhs, const Value& rhs)
+    { return lhs == rhs.String(); }
+
     class TypeMismatchException : public Exception
     {
         public:
