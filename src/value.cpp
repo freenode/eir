@@ -341,6 +341,21 @@ Value& Value::operator[](int i)
 
 Value& Value::operator[](const Value& v)
 {
+    if (Type() == empty)
+    {
+        switch (v.Type())
+        {
+            case integer:
+                _imp->NeedType(array);
+                break;
+            case string:
+                _imp->NeedType(kvarray);
+                break;
+            default:
+                break;
+        }
+    }
+
     if (Type() == kvarray)
         return KV()[v];
 
