@@ -119,6 +119,9 @@ namespace eir
             Value& operator[](int);
 
             void push_back(Value v);
+            void erase(ValueArray::iterator it);
+
+            void clear();
 
             const char *c_str() const { return String().c_str(); }
 

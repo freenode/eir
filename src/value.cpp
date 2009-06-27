@@ -357,6 +357,28 @@ void Value::push_back(Value v)
     _imp->_array->push_back(v);
 }
 
+void Value::erase(ValueArray::iterator it)
+{
+    _imp->NeedType(array);
+
+    _imp->_array->erase(it);
+}
+
+void Value::clear()
+{
+    switch (Type())
+    {
+        case array:
+            _imp->_array->clear();
+            break;
+        case kvarray:
+            _imp->_kv_array->clear();
+            break;
+        default:
+            break;
+    }
+}
+
 ValueArray::iterator Value::begin()
 {
     _imp->NeedType(array);
@@ -414,6 +436,11 @@ void ValueArray::erase(ValueArray::iterator it)
 void ValueArray::erase(size_t idx)
 {
     _imp->_array.erase(_imp->_array.begin() + idx);
+}
+
+void ValueArray::clear()
+{
+    _imp->_array.clear();
 }
 
 bool ValueArray::empty() const
