@@ -2,6 +2,7 @@
 #define client_h
 
 #include "privilege.h"
+#include "value.h"
 
 #include <string>
 #include <tr1/memory>
@@ -33,13 +34,13 @@ namespace eir
 
         struct AttributeIteratorTag;
         typedef paludis::WrappedForwardIterator<AttributeIteratorTag,
-                        std::pair<const std::string, std::string> > AttributeIterator;
+                        std::pair<const std::string, Value> > AttributeIterator;
 
         AttributeIterator attr_begin();
         AttributeIterator attr_end();
 
-        std::string attr(const std::string &);
-        void set_attr(const std::string &, const std::string &);
+        Value attr(const std::string &);
+        void set_attr(const std::string &, const Value &);
 
         Client(Bot *, std::string, std::string, std::string);
         ~Client();
@@ -73,6 +74,16 @@ namespace eir
 
         bool add_member(MembershipPtr);
         bool remove_member(MembershipPtr);
+
+        struct AttributeIteratorTag;
+        typedef paludis::WrappedForwardIterator<AttributeIteratorTag,
+                        std::pair<const std::string, Value> > AttributeIterator;
+
+        AttributeIterator attr_begin();
+        AttributeIterator attr_end();
+
+        Value attr(const std::string &);
+        void set_attr(const std::string &, const Value &);
 
         Channel(std::string);
         ~Channel();

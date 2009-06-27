@@ -13,6 +13,11 @@
 
 using namespace eir;
 
+template class paludis::WrappedForwardIterator<eir::Client::ChannelIteratorTag, eir::Membership::ptr const>;
+template class paludis::WrappedForwardIterator<eir::Channel::MemberIteratorTag, eir::Membership::ptr const>;
+template class paludis::WrappedForwardIterator<eir::Client::AttributeIteratorTag, std::pair<const std::string, eir::Value> >;
+template class paludis::WrappedForwardIterator<eir::Channel::AttributeIteratorTag, std::pair<const std::string, eir::Value> >;
+
 namespace paludis
 {
     template <>
@@ -22,7 +27,7 @@ namespace paludis
 
         std::string nick, user, host;
 
-        std::map<std::string, std::string> attributes;
+        std::map<std::string, Value> attributes;
 
         std::map<std::string, Membership::ptr> channels;
 
@@ -71,12 +76,12 @@ Client::AttributeIterator Client::attr_end()
     return _imp->attributes.end();
 }
 
-std::string Client::attr(const std::string &name)
+Value Client::attr(const std::string &name)
 {
     return _imp->attributes[name];
 }
 
-void Client::set_attr(const std::string &name, const std::string &value)
+void Client::set_attr(const std::string &name, const Value &value)
 {
     _imp->attributes[name] = value;
 }
@@ -164,6 +169,8 @@ namespace paludis
     {
         std::string name;
 
+        std::map<std::string, Value> attributes;
+
         typedef std::set<Membership::ptr>::iterator MemberIterator;
         std::set<Membership::ptr> members;
 
@@ -197,6 +204,26 @@ bool Channel::remove_member(Membership::ptr m)
     return _imp->members.erase(m) != 0;
 }
 
+Channel::AttributeIterator Channel::attr_begin()
+{
+    return _imp->attributes.begin();
+}
+
+Channel::AttributeIterator Channel::attr_end()
+{
+    return _imp->attributes.end();
+}
+
+Value Channel::attr(const std::string &name)
+{
+    return _imp->attributes[name];
+}
+
+void Channel::set_attr(const std::string &name, const Value &value)
+{
+    _imp->attributes[name] = value;
+}
+
 Channel::Channel(std::string n)
     : paludis::PrivateImplementationPattern<Channel>(new paludis::Implementation<Channel>(n))
 {
@@ -205,6 +232,3 @@ Channel::Channel(std::string n)
 Channel::~Channel()
 {
 }
-
-template class paludis::WrappedForwardIterator<eir::Client::ChannelIteratorTag, eir::Membership::ptr const>;
-template class paludis::WrappedForwardIterator<eir::Channel::MemberIteratorTag, eir::Membership::ptr const>;
