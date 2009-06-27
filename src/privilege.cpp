@@ -50,4 +50,5 @@ PrivilegeSet::~PrivilegeSet()
 {
 }
 
-template class paludis::WrappedForwardIterator<eir::PrivilegeSet::PrivilegeIteratorTag, const std::string>;
+template class paludis::WrappedForwardIterator<eir::PrivilegeSet::PrivilegeIteratorTag,
+                                               const std::pair<std::string, std::string> >;
