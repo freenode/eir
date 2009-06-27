@@ -12,7 +12,7 @@ namespace paludis
     template <>
     struct Implementation<PrivilegeSet>
     {
-        std::set<std::string> privs;
+        std::set<std::pair<std::string, std::string> > privs;
     };
 }
 
@@ -28,12 +28,12 @@ PrivilegeSet::iterator PrivilegeSet::end()
 
 bool PrivilegeSet::has_privilege(std::string p)
 {
-    return _imp->privs.find(p) != _imp->privs.end();
+    return _imp->privs.find(make_pair("", p)) != _imp->privs.end();
 }
 
 void PrivilegeSet::add_privilege(std::string p)
 {
-    _imp->privs.insert(p);
+    _imp->privs.insert(make_pair("", p));
 }
 
 void PrivilegeSet::clear()

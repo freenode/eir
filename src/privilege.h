@@ -11,13 +11,19 @@ namespace eir
     {
         public:
             struct PrivilegeIteratorTag;
-            typedef paludis::WrappedForwardIterator<PrivilegeIteratorTag, const std::string> iterator;
+            typedef paludis::WrappedForwardIterator<PrivilegeIteratorTag,
+                                                    const std::pair<std::string, std::string> > iterator;
 
             iterator begin();
             iterator end();
 
+            // One-argument forms are for global privilege; two-argument forms for channel privs.
             bool has_privilege(std::string);
             void add_privilege(std::string);
+
+            bool has_privilege(std::string, std::string);
+            void add_privilege(std::string, std::string);
+
             void clear();
 
             PrivilegeSet();
