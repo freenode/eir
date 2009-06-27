@@ -86,10 +86,10 @@ namespace
 
 struct voicebot : CommandHandlerBase<voicebot>, Module
 {
+    Value &dnv, &old;
+
     void do_add(const Message *m)
     {
-        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
-
         if (m->args.empty())
         {
             m->source.error("Need at least one argument");
@@ -133,7 +133,6 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void do_change(const Message *m)
     {
-        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
         if (m->args.empty())
         {
             m->source.error("Need at least one argument");
@@ -177,9 +176,6 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void do_remove(const Message *m)
     {
-        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
-        Value& old = GlobalSettingsManager::get_instance()->get("voicebot:expired");
-
         if (m->args.empty())
         {
             m->source.error("Need at least one argument");
@@ -211,8 +207,6 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void do_list(const Message *m)
     {
-        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
-
         for (ValueArray::iterator it = dnv.begin(); it != dnv.end(); ++it)
         {
             Bot *bot = BotManager::get_instance()->find((*it)["bot"]);
@@ -228,8 +222,6 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
                            std::list<std::string> *tovoice,
                            std::list<std::string> *tonotvoice)
     {
-        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
-
         for (Channel::MemberIterator it = channel->begin_members(); it != channel->end_members(); ++it)
         {
             if ((*it)->has_mode('v'))
@@ -317,8 +309,6 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void do_match(const Message *m)
     {
-        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
-
         if (m->args.empty())
         {
             m->source.error("Need one argument");
@@ -350,8 +340,6 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
     void check_expiry()
     {
         time_t currenttime = time(NULL);
-        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
-        Value& old = GlobalSettingsManager::get_instance()->get("voicebot:expired");
 
         for (ValueArray::iterator it = dnv.begin(); it != dnv.end(); )
         {
@@ -377,8 +365,6 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void load_lists()
     {
-        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
-        Value& old = GlobalSettingsManager::get_instance()->get("voicebot:expired");
         try
         {
             dnv = StorageManager::get_instance()->Load("json:donotvoice");
@@ -398,8 +384,6 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void save_lists()
     {
-        Value& dnv = GlobalSettingsManager::get_instance()->get("voicebot:dnv");
-        Value& old = GlobalSettingsManager::get_instance()->get("voicebot:expired");
         StorageManager::get_instance()->Save(dnv, "json:donotvoice");
         StorageManager::get_instance()->Save(old, "json:expireddonotvoice");
     }
@@ -411,7 +395,9 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
     HelpIndexHolder index;
 
     voicebot()
-        : voicebothelp("voicebot", "voiceadmin", help_voicebot),
+        : dnv(GlobalSettingsManager::get_instance()->get("voicebot:donotvoice")),
+          old(GlobalSettingsManager::get_instance()->get("voicebot:expireddonotvoice")),
+          voicebothelp("voicebot", "voiceadmin", help_voicebot),
           voicehelp("voice", "voiceadmin", help_voice),
           checkhelp("check", "voiceadmin", help_check),
           matchhelp("match", "voiceadmin", help_match),
