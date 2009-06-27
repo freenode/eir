@@ -9,15 +9,22 @@ using namespace std::tr1::placeholders;
 
 struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
 {
-    typedef std::set<std::pair<std::string, std::string> > priv_list;
-    priv_list priv_entries;
+    Value & priv_entries;
+
+    Value make_priv_entry(std::string hostmask, std::string priv, bool isconf)
+    {
+        Value v(Value::kvarray);
+        v["hostmask"] = hostmask;
+        v["priv"] = priv;
+        v["isconf"] = (int)isconf;
+        return v;
+    }
 
     void recalculate_privileges(const Message *m)
     {
         for (Bot::ClientIterator it = m->bot->begin_clients(), ite = m->bot->end_clients(); it != ite; ++it)
             set_privileges(*it);
     }
-
 
     void add_privilege_entry(const Message *m)
     {
@@ -34,7 +41,7 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
         ++it;
         for( ; it != m->args.end(); ++it)
         {
-            priv_entries.insert(make_pair(m->args[0], *it));
+            priv_entries.push_back(make_priv_entry(m->args[0], *it, m->source.type == sourceinfo::ConfigFile));
             m->source.reply("Added privilege " + *it + " for " + m->args[0]);
             Logger::get_instance()->Log(m->bot, m->source.client, Logger::Admin,
                                         "Adding privilege " + *it + " for " + m->args[0]);
@@ -54,14 +61,14 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
         if (m->source.client)
             Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command, m->source.raw);
 
-        priv_list::iterator it = priv_entries.begin(), ite = priv_entries.end();
+        ValueArray::iterator it = priv_entries.begin(), ite = priv_entries.end();
         for ( ; it != ite; ++it)
         {
-            if (it->first == m->args[0] && match(m->args[1], it->second))
+            if ((*it)["hostmask"] == m->args[0] && match(m->args[1], (*it)["priv"]))
             {
                 Logger::get_instance()->Log(m->bot, m->source.client, Logger::Admin,
-                                            "Removing privilege " + it->second + " from " + it->first);
-                m->source.reply("Removing privilege " + it->second + " from " + it->first);
+                                            "Removing privilege " + (*it)["priv"] + " from " + (*it)["hostmask"]);
+                m->source.reply("Removing privilege " + (*it)["priv"] + " from " + (*it)["hostmask"]);
                 priv_entries.erase(it++);
             }
         }
@@ -69,13 +76,12 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
 
     void set_privileges(Client::ptr c)
     {
-        priv_list::iterator it = priv_entries.begin(), ite = priv_entries.end();
+        ValueArray::iterator it = priv_entries.begin(), ite = priv_entries.end();
 
         for ( ; it != ite; ++it)
         {
-            std::string s1 = it->first, s2 = it->second;
-            if (match(it->first, c->nuh()))
-                c->privs().add_privilege(it->second);
+            if (match((*it)["hostmask"], c->nuh()))
+                c->privs().add_privilege((*it)["priv"]);
         }
     }
 
@@ -96,6 +102,7 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
     CommandHolder add_id, remove_id, client_id, clear_id;
 
     HostmaskPrivilege()
+        : priv_entries(GlobalSettingsManager::get_instance()->get("privileges")["global"]["hostmask"])
     {
         client_id = add_handler(filter_command_type("new_client",sourceinfo::Internal),
                                 &HostmaskPrivilege::set_client_privileges);
