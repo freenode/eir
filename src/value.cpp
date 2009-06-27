@@ -51,7 +51,9 @@ namespace paludis
     template <>
     struct Implementation<Value>
     {
-        Value::ValueType _type;
+        // This shouldn't really be mutable, but it lets us initialise an empty type
+        // to a meaningful one in what are still semantically const operations.
+        mutable Value::ValueType _type;
         int _intval;
         std::string _stringval;
         std::tr1::shared_ptr<ValueArray> _array;
@@ -67,6 +69,55 @@ namespace paludis
             _stringval = "";
             _array.reset();
             _kv_array.reset();
+        }
+
+        void NeedType(Value::ValueType t) const
+        {
+            if (_type == Value::empty)
+            {
+                switch (t)
+                {
+                    case Value::empty:
+                    case Value::integer:
+                    case Value::string:
+                        // These three we can switch to without needing to initialise.
+                        _type = t;
+                        return;
+                    case Value::array:
+                    case Value::kvarray:
+                        // These two we can't.
+                        throw TypeMismatchException(t, _type);
+                }
+            }
+            else if (_type != t)
+            {
+                throw TypeMismatchException(t, _type);
+            }
+        }
+
+        void NeedType(Value::ValueType t)
+        {
+            if (_type == Value::empty)
+            {
+                _type = t;
+            }
+            else if (_type != t)
+            {
+                throw TypeMismatchException(t, _type);
+            }
+            switch (t)
+            {
+                case Value::empty:
+                case Value::integer:
+                case Value::string:
+                    return;
+                case Value::array:
+                    if (!_array) _array.reset(new ValueArray);
+                    return;
+                case Value::kvarray:
+                    if (!_kv_array) _kv_array.reset(new KeyValueArray);
+                    return;
+            }
         }
     };
 
@@ -207,9 +258,7 @@ Value::operator int() const
 
 Value::operator std::string() const
 {
-    if (_imp->_type != string)
-        throw TypeMismatchException(string, _imp->_type);
-    return _imp->_stringval;
+    return String();
 }
 
 int Value::Int() const
@@ -252,32 +301,28 @@ std::string Value::String() const
 
 ValueArray& Value::Array()
 {
-    if (Type() != array)
-        throw TypeMismatchException(array, Type());
+    _imp->NeedType(array);
 
     return *_imp->_array;
 }
 
 const ValueArray& Value::Array() const
 {
-    if (Type() != array)
-        throw TypeMismatchException(array, Type());
+    _imp->NeedType(array);
 
     return *_imp->_array;
 }
 
 KeyValueArray& Value::KV()
 {
-    if (Type() != kvarray)
-        throw TypeMismatchException(kvarray, Type());
+    _imp->NeedType(kvarray);
 
     return *_imp->_kv_array;
 }
 
 const KeyValueArray& Value::KV() const
 {
-    if (Type() != kvarray)
-        throw TypeMismatchException(kvarray, Type());
+    _imp->NeedType(kvarray);
 
     return *_imp->_kv_array;
 }
@@ -307,19 +352,22 @@ Value& Value::operator[](const Value& v)
 
 void Value::push_back(Value v)
 {
-    if (Type() != array)
-        throw TypeMismatchException(array, Type());
+    _imp->NeedType(array);
 
     _imp->_array->push_back(v);
 }
 
 ValueArray::iterator Value::begin()
 {
+    _imp->NeedType(array);
+
     return Array().begin();
 }
 
 ValueArray::iterator Value::end()
 {
+    _imp->NeedType(array);
+
     return Array().end();
 }
 
