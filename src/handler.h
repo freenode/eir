@@ -111,6 +111,12 @@ namespace eir
 
             ~StorageBackendHolder() { _release(); }
     };
+
+    inline void dispatch_internal_message(Bot *b, std::string cmd)
+    {
+        Message m(b, cmd, sourceinfo::Internal);
+        CommandRegistry::get_instance()->dispatch(&m);
+    }
 }
 
 #endif
