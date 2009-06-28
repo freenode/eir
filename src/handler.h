@@ -14,10 +14,11 @@ namespace eir
     struct CommandHandlerBase
     {
         template <class F_>
-        CommandRegistry::id add_handler(Filter f, F_ h)
+        CommandRegistry::id add_handler(Filter f, F_ h, Message::Order o = Message::normal)
         {
             return eir::CommandRegistry::get_instance()->add_handler(f,
-                    std::tr1::bind(h, static_cast<T_*>(this), std::tr1::placeholders::_1));
+                    std::tr1::bind(h, static_cast<T_*>(this), std::tr1::placeholders::_1),
+                    o);
         }
 
         template <class F_>

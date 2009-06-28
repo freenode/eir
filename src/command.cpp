@@ -19,7 +19,7 @@ namespace paludis
     struct Implementation<CommandRegistry>
     {
         typedef std::map<CommandRegistry::id, std::pair<Filter, CommandRegistry::handler> > HandlerMap;
-        HandlerMap _handlers;
+        HandlerMap _handlers[3];
     };
 }
 
@@ -34,47 +34,51 @@ CommandRegistry::~CommandRegistry()
 
 void CommandRegistry::dispatch(const Message *m, bool fatal_errors)
 {
-    for ( Implementation<CommandRegistry>::HandlerMap::iterator it = _imp->_handlers.begin();
-            it != _imp->_handlers.end(); ++it)
+    for (int i=0; i < 3; ++i)
     {
-        if (it->second.first.match(m))
+        for ( Implementation<CommandRegistry>::HandlerMap::iterator it = _imp->_handlers[i].begin();
+                it != _imp->_handlers[i].end(); ++it)
         {
-            try
+            if (it->second.first.match(m))
             {
-                it->second.second(m);
-            }
-            catch (Exception &e)
-            {
-                if (e.fatal() || fatal_errors)
-                    throw;
-                m->source.error("I have suffered a terrible failure. (" + e.message() + ") (" + e.what() + ")");
-                Logger::get_instance()->Log(m->bot, m->source.client, Logger::Warning,
-                        "Error processing message " + m->command + ": " + e.message() + " (" + e.what() + ")");
-            }
-            catch (std::exception &e)
-            {
-                if (fatal_errors)
-                    throw;
-                m->source.error(std::string("I have suffered a terrible failure. (") + e.what() + ")");
-                Logger::get_instance()->Log(m->bot, m->source.client, Logger::Warning,
-                        "Unknown error processing message " + m->command + ": " + e.what());
+                try
+                {
+                    it->second.second(m);
+                }
+                catch (Exception &e)
+                {
+                    if (e.fatal() || fatal_errors)
+                        throw;
+                    m->source.error("I have suffered a terrible failure. (" + e.message() + ") (" + e.what() + ")");
+                    Logger::get_instance()->Log(m->bot, m->source.client, Logger::Warning,
+                            "Error processing message " + m->command + ": " + e.message() + " (" + e.what() + ")");
+                }
+                catch (std::exception &e)
+                {
+                    if (fatal_errors)
+                        throw;
+                    m->source.error(std::string("I have suffered a terrible failure. (") + e.what() + ")");
+                    Logger::get_instance()->Log(m->bot, m->source.client, Logger::Warning,
+                            "Unknown error processing message " + m->command + ": " + e.what());
+                }
             }
         }
     }
 }
 
-CommandRegistry::id CommandRegistry::add_handler(Filter f, const CommandRegistry::handler & h)
+CommandRegistry::id CommandRegistry::add_handler(Filter f, const CommandRegistry::handler & h, Message::Order order)
 {
     static uintptr_t next_id = 1;
 
     Context ctx("Registering new handler");
 
-    _imp->_handlers.insert(std::make_pair(CommandRegistry::id(++next_id), std::make_pair(f, h)));
+    _imp->_handlers[order].insert(std::make_pair(CommandRegistry::id(++next_id), std::make_pair(f, h)));
     return id(next_id);
 }
 
 void CommandRegistry::remove_handler(id h)
 {
-    _imp->_handlers.erase(h);
+    for (int i=0; i < 3; ++i)
+        _imp->_handlers[i].erase(h);
 }
 

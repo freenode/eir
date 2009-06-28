@@ -52,6 +52,14 @@ namespace eir {
     };
 
     struct Message {
+
+        enum Order
+        {
+            first = 0,
+            normal,
+            last
+        };
+
         Bot *bot;
         sourceinfo source;
         std::string command;
