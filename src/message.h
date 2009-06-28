@@ -65,7 +65,7 @@ namespace eir {
             : bot(b), source(t, cl), command(cmd)
         { }
 
-        Message(const Message& m, unsigned int type, std::string c)
+        Message(const Message& m, std::string c, unsigned int type)
             : bot(m.bot), source(m.source), command(c)
         { source.type = type; }
     };

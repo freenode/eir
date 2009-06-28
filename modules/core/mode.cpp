@@ -12,7 +12,7 @@ struct ModeParser : CommandHandlerBase<ModeParser>, Module
         if (m->args.size() < 2)
             return;
 
-        Message m2(*m, sourceinfo::Internal, "mode " + m->args[1]);
+        Message m2(*m, "mode " + m->args[1], sourceinfo::Internal);
         m2.args.push_back(m->args[0]);
         if (m->args.size() >= 3)
             m2.args.push_back(m->args[2]);
@@ -55,7 +55,7 @@ struct ModeParser : CommandHandlerBase<ModeParser>, Module
                 dir = -1;
             else
             {
-                Message m2(*m, sourceinfo::Internal, "mode_change");
+                Message m2(*m, "mode_change", sourceinfo::Internal);
 
                 m2.args.push_back(dir > 0 ? "add" : "remove");
                 m2.args.push_back(std::string(1, *ch));

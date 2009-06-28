@@ -180,7 +180,7 @@ void Implementation<Bot>::rehash(const Message *m)
     Logger::get_instance()->Log(bot, m->source.client, Logger::Command, "REHASH");
     Logger::get_instance()->Log(bot, m->source.client, Logger::Admin, "Reloading config file");
 
-    Message m2(bot, sourceinfo::Internal, "clear_lists");
+    Message m2(bot, "clear_lists", sourceinfo::Internal);
     CommandRegistry::get_instance()->dispatch(&m2);
 
     load_config(m->source.reply_func);

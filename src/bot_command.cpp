@@ -45,7 +45,7 @@ struct BotCommandHandler : public CommandHandlerBase<BotCommandHandler>
         if(tokens.empty())
             return;
 
-        Message m2(*m, sourceinfo::IrcCommand, *tokens.begin());
+        Message m2(*m, *tokens.begin(), sourceinfo::IrcCommand);
 
         tokens.pop_front();
         std::copy(tokens.begin(), tokens.end(), std::back_inserter(m2.args));
