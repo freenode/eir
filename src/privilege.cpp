@@ -5,6 +5,9 @@
 #include <paludis/util/private_implementation_pattern-impl.hh>
 #include <paludis/util/wrapped_forward_iterator-impl.hh>
 
+#include "handler.h"
+#include "bot.h"
+
 using namespace eir;
 
 namespace paludis
@@ -52,3 +55,24 @@ PrivilegeSet::~PrivilegeSet()
 
 template class paludis::WrappedForwardIterator<eir::PrivilegeSet::PrivilegeIteratorTag,
                                                const std::pair<std::string, std::string> >;
+
+namespace
+{
+    struct ClearPrivs : public CommandHandlerBase<ClearPrivs>
+    {
+        void do_clear(const Message *m)
+        {
+            for (Bot::ClientIterator it = m->bot->begin_clients(); it != m->bot->end_clients(); ++it)
+                (*it)->privs().clear();
+        }
+        CommandHolder id;
+
+        ClearPrivs()
+            : id(add_handler(filter_command_type("recalculate_privileges", sourceinfo::Internal),
+                            &ClearPrivs::do_clear, Message::first))
+        {
+        }
+    };
+
+    ClearPrivs privilege_clearer;
+}

@@ -180,10 +180,11 @@ void Implementation<Bot>::rehash(const Message *m)
     Logger::get_instance()->Log(bot, m->source.client, Logger::Command, "REHASH");
     Logger::get_instance()->Log(bot, m->source.client, Logger::Admin, "Reloading config file");
 
-    Message m2(bot, "clear_lists", sourceinfo::Internal);
-    CommandRegistry::get_instance()->dispatch(&m2);
+    dispatch_internal_message(bot, "clear_lists");
 
     load_config(m->source.reply_func);
+
+    dispatch_internal_message(bot, "recalculate_privileges");
 
     m->source.reply("Done.");
 }
