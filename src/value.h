@@ -20,6 +20,9 @@ namespace eir
             typedef paludis::WrappedForwardIterator<ValueArrayIteratorTag, Value> iterator;
             typedef paludis::WrappedForwardIterator<ValueArrayIteratorTag, const Value> const_iterator;
 
+            typedef Value& reference;
+            typedef const Value& const_reference;
+
             iterator begin();
             iterator end();
             const_iterator begin() const;
@@ -48,6 +51,9 @@ namespace eir
             typedef std::pair<const Value, Value> value_type;
             typedef paludis::WrappedForwardIterator<KeyValueArrayIteratorTag, value_type> iterator;
             typedef paludis::WrappedForwardIterator<KeyValueArrayIteratorTag, const value_type> const_iterator;
+
+            typedef Value& reference;
+            typedef const Value& const_reference;
 
             iterator begin();
             iterator end();
