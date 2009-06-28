@@ -20,17 +20,6 @@ namespace
     };
 
     typedef std::list<BackendData> BackendList;
-
-    void split_storage_dest(const std::string & dest, std::string & type, std::string & target)
-    {
-        std::string::size_type colon = dest.find(':');
-
-        if (colon == std::string::npos)
-            throw StorageError("Couldn't determine storage type from " + dest);
-
-        type = dest.substr(0, colon);
-        target = dest.substr(colon + 1);
-    }
 }
 
 namespace paludis
@@ -61,6 +50,27 @@ namespace paludis
             }
             return it;
         }
+
+        void split_storage_dest(const std::string & dest, std::string & type, std::string & target)
+        {
+            std::string::size_type colon = dest.find(':');
+
+            if (colon == std::string::npos)
+            {
+                if (!default_backend)
+                    throw StorageError("No storage backend specified and no default set");
+
+                type = default_backend->type;
+                target = dest;
+            }
+            else
+            {
+                type = dest.substr(0, colon);
+                target = dest.substr(colon + 1);
+            }
+        }
+
+        BackendData *default_backend;
     };
 }
 
@@ -100,7 +110,7 @@ StorageManager::BackendId StorageManager::register_backend(std::string type, Sto
 void StorageManager::Save(const eir::Value & v, std::string dest)
 {
     std::string type, destination;
-    split_storage_dest(dest, type, destination);
+    _imp->split_storage_dest(dest, type, destination);
 
     BackendList::iterator it = _imp->find_by_type(type);
 
@@ -113,7 +123,7 @@ void StorageManager::Save(const eir::Value & v, std::string dest)
 eir::Value StorageManager::Load(std::string src)
 {
     std::string type, source;
-    split_storage_dest(src, type, source);
+    _imp->split_storage_dest(src, type, source);
 
     BackendList::iterator it = _imp->find_by_type(type);
 
@@ -122,4 +132,45 @@ eir::Value StorageManager::Load(std::string src)
 
     return it->be->Load(source);
 }
+
+std::string StorageManager::default_backend()
+{
+    return _imp->default_backend->type;
+}
+
+void StorageManager::default_backend(std::string type)
+{
+    BackendList::iterator it = _imp->find_by_type(type);
+
+    if (it == _imp->backends.end())
+        throw StorageError("No such storage type '" + type + "' has been loaded");
+
+    _imp->default_backend = &*it;
+}
+
+#include "handler.h"
+
+namespace
+{
+    struct SetDefaultBackend : CommandHandlerBase<SetDefaultBackend>
+    {
+        void set(const Message *m)
+        {
+            if (m->args.empty())
+                return;
+
+            StorageManager::get_instance()->default_backend(m->args[0]);
+        }
+
+        CommandHolder id;
+        SetDefaultBackend()
+            : id(add_handler(filter_command_type("default_storage", sourceinfo::ConfigFile),
+                        &SetDefaultBackend::set))
+        {
+        }
+    };
+
+    SetDefaultBackend default_setter;
+}
+
 

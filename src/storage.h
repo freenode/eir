@@ -25,6 +25,9 @@ namespace eir
             BackendId register_backend(std::string, StorageBackend *);
             void unregister_backend(BackendId);
 
+            std::string default_backend();
+            void default_backend(std::string);
+
             StorageManager();
             ~StorageManager();
     };

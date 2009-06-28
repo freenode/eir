@@ -367,8 +367,8 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
     {
         try
         {
-            dnv = StorageManager::get_instance()->Load("json:donotvoice");
-            old = StorageManager::get_instance()->Load("json:expireddonotvoice");
+            dnv = StorageManager::get_instance()->Load("donotvoice");
+            old = StorageManager::get_instance()->Load("expireddonotvoice");
         }
         catch (StorageError &)
         {
@@ -384,8 +384,8 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void save_lists()
     {
-        StorageManager::get_instance()->Save(dnv, "json:donotvoice");
-        StorageManager::get_instance()->Save(old, "json:expireddonotvoice");
+        StorageManager::get_instance()->Save(dnv, "donotvoice");
+        StorageManager::get_instance()->Save(old, "expireddonotvoice");
     }
 
 
