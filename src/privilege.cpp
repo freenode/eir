@@ -5,9 +5,6 @@
 #include <paludis/util/private_implementation_pattern-impl.hh>
 #include <paludis/util/wrapped_forward_iterator-impl.hh>
 
-#include "handler.h"
-#include "bot.h"
-
 using namespace eir;
 
 namespace paludis
@@ -56,6 +53,10 @@ PrivilegeSet::~PrivilegeSet()
 template class paludis::WrappedForwardIterator<eir::PrivilegeSet::PrivilegeIteratorTag,
                                                const std::pair<std::string, std::string> >;
 
+#include "handler.h"
+#include "bot.h"
+#include "settings.h"
+
 namespace
 {
     struct ClearPrivs : public CommandHandlerBase<ClearPrivs>
@@ -75,4 +76,38 @@ namespace
     };
 
     ClearPrivs privilege_clearer;
+
+    struct PrivilegeSaver : CommandHandlerBase<PrivilegeSaver>
+    {
+        void save_event()
+        {
+            save(0);
+        }
+
+        void save(const Message *)
+        {
+            StorageManager::get_instance()->Save(
+                GlobalSettingsManager::get_instance()->get("privileges"), "privileges");
+        }
+
+        void load(const Message *)
+        {
+            GlobalSettingsManager::get_instance()->get("privileges") =
+                StorageManager::get_instance()->Load("privileges");
+        }
+
+        EventHolder save_evt;
+        CommandHolder config_loaded_id, on_shutdown_id;
+
+        PrivilegeSaver()
+            : save_evt(add_recurring_event(300, &PrivilegeSaver::save_event)),
+              config_loaded_id(add_handler(filter_command_type("config_loaded", sourceinfo::Internal),
+                          &PrivilegeSaver::load)),
+              on_shutdown_id(add_handler(filter_command_type("shutting_down", sourceinfo::Internal),
+                          &PrivilegeSaver::save))
+        {
+        }
+    };
+
+    PrivilegeSaver privilege_saver;
 }

@@ -117,6 +117,8 @@ Bot::Bot(std::string botname)
     BotManager::get_instance()->_imp->bots.insert(make_pair(botname, this));
 
     _imp->load_config(print_cerr, true);
+
+    dispatch_internal_message(this, "config_loaded");
 }
 
 void Bot::connect(std::string host, std::string port, std::string nick, std::string pass)
@@ -126,6 +128,7 @@ void Bot::connect(std::string host, std::string port, std::string nick, std::str
 
 Bot::~Bot()
 {
+    dispatch_internal_message(this, "shutting_down");
 }
 
 void Implementation<Bot>::set_server(const Message *m)

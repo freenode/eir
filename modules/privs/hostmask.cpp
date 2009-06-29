@@ -7,7 +7,7 @@ using namespace std::tr1::placeholders;
 
 struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
 {
-    Value & priv_entries;
+    Value & priv_entries() { return GlobalSettingsManager::get_instance()->get("privileges")["global"]["hostmask"]; }
     Value conf_priv_entries;
 
     Value make_priv_entry(std::string hostmask, std::string priv)
@@ -32,7 +32,7 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
             return;
         }
 
-        Value& list = (m->source.type == sourceinfo::ConfigFile ? conf_priv_entries : priv_entries);
+        Value& list = (m->source.type == sourceinfo::ConfigFile ? conf_priv_entries : priv_entries());
 
         if (m->source.client)
             Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command, m->source.raw);
@@ -58,14 +58,14 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
             return;
         }
 
-        for ( ValueArray::iterator it = priv_entries.begin(), ite = priv_entries.end(); it != ite; )
+        for ( ValueArray::iterator it = priv_entries().begin(), ite = priv_entries().end(); it != ite; )
         {
             if ((*it)["hostmask"] == m->args[0] && match(m->args[1], (*it)["priv"]))
             {
                 Logger::get_instance()->Log(m->bot, m->source.client, Logger::Admin,
                                             "Removing privilege " + (*it)["priv"] + " from " + (*it)["hostmask"]);
                 m->source.reply("Removing privilege " + (*it)["priv"] + " from " + (*it)["hostmask"]);
-                priv_entries.erase(it++);
+                priv_entries().erase(it++);
             }
             else
                 ++it;
@@ -85,7 +85,7 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
 
     void set_privileges(Client::ptr c)
     {
-        for ( ValueArray::iterator it = priv_entries.begin(), ite = priv_entries.end(); it != ite; ++it)
+        for ( ValueArray::iterator it = priv_entries().begin(), ite = priv_entries().end(); it != ite; ++it)
             if (match((*it)["hostmask"], c->nuh()))
                 c->privs().add_privilege((*it)["priv"]);
 
@@ -108,7 +108,6 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
     CommandHolder add_id, add2_id, remove_id, client_id, recalc_id, clear_id;
 
     HostmaskPrivilege()
-        : priv_entries(GlobalSettingsManager::get_instance()->get("privileges")["global"]["hostmask"])
     {
         client_id = add_handler(filter_command_type("new_client",sourceinfo::Internal),
                                 &HostmaskPrivilege::set_client_privileges);
