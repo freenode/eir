@@ -83,6 +83,33 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
         dispatch_internal_message(m->bot, "recalculate_privileges");
     }
 
+    void list_privs(const Message *m)
+    {
+        std::map<std::string, std::string> response, c_response;
+
+        for (ValueArray::iterator it = priv_entries().begin(); it != priv_entries().end(); ++it)
+        {
+            response[(*it)["hostmask"]] = (*it)["priv"] + " ";
+        }
+
+        for (ValueArray::iterator it = conf_priv_entries.begin(); it != conf_priv_entries.end(); ++it)
+        {
+            c_response[(*it)["hostmask"]] = (*it)["priv"] + " ";
+        }
+
+        m->source.reply("*** Config privileges");
+        for (std::map<std::string, std::string>::iterator it = c_response.begin(); it != c_response.end(); ++it)
+        {
+            m->source.reply(" - " + it->first + " has privileges " + it->second);
+        }
+
+        m->source.reply("*** Dynamic privileges");
+        for (std::map<std::string, std::string>::iterator it = response.begin(); it != response.end(); ++it)
+        {
+            m->source.reply(" - " + it->first + " has privileges " + it->second);
+        }
+    }
+
     void set_privileges(Client::ptr c)
     {
         for ( ValueArray::iterator it = priv_entries().begin(), ite = priv_entries().end(); it != ite; ++it)
@@ -105,7 +132,7 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
         conf_priv_entries.clear();
     }
 
-    CommandHolder add_id, add2_id, remove_id, client_id, recalc_id, clear_id;
+    CommandHolder add_id, add2_id, remove_id, client_id, recalc_id, clear_id, list_id;
 
     HostmaskPrivilege()
     {
@@ -117,6 +144,8 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
                                 &HostmaskPrivilege::add_privilege_entry);
         remove_id = add_handler(filter_command_privilege("delpriv", "admin"),
                                 &HostmaskPrivilege::remove_privilege_entry);
+        list_id = add_handler(filter_command_privilege("showprivs", "admin"),
+                                &HostmaskPrivilege::list_privs);
         recalc_id = add_handler(filter_command_type("recalculate_privileges", sourceinfo::Internal),
                                 &HostmaskPrivilege::recalculate_host_privileges);
         clear_id = add_handler(filter_command_type("clear_lists", sourceinfo::Internal),
