@@ -11,7 +11,7 @@ using namespace std::tr1::placeholders;
 
 #include "times.h"
 
-#include <fstream>
+#include <algorithm>
 
 #include "help.h"
 
@@ -81,6 +81,21 @@ namespace
         v["set"] = set;
         v["expires"] = expires;
         return v;
+    }
+
+    struct Removed
+    {
+        bool operator() (const Value& v)
+        {
+            return v.Type() == Value::kvarray && v.KV().find("removed") != v.KV().end();
+        }
+    };
+
+    void do_removals(Value& list)
+    {
+        Value newlist(Value::array);
+        std::remove_copy_if(list.begin(), list.end(), std::back_inserter(newlist.Array()), Removed());
+        std::swap(list, newlist);
     }
 }
 
@@ -187,7 +202,7 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
         if (mask.find_first_of("!@*") == std::string::npos)
             mask += "!*@*";
 
-        for (ValueArray::iterator it = dnv.begin(); it != dnv.end(); )
+        for (ValueArray::iterator it = dnv.begin(); it != dnv.end(); ++it)
         {
             if (mask_match(mask, (*it)["mask"]))
             {
@@ -196,11 +211,11 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
                         "(added by " + (*it)["setter"] + " on " + format_time(bot, (*it)["set"].Int()) + ")");
 
                 old.push_back(*it);
-                dnv.Array().erase(it++);
+                (*it)["removed"] = 1;
             }
-            else
-                ++it;
         }
+
+        do_removals(dnv);
 
         Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command, "REMOVE " + mask);
     }
@@ -341,7 +356,7 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
     {
         time_t currenttime = time(NULL);
 
-        for (ValueArray::iterator it = dnv.begin(); it != dnv.end(); )
+        for (ValueArray::iterator it = dnv.begin(); it != dnv.end(); ++it)
         {
             if ((*it)["expires"].Int() != 0 && (*it)["expires"].Int() < currenttime)
             {
@@ -356,11 +371,11 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
                             format_time(bot, (*it)["set"].Int()));
 
                 old.push_back(*it);
-                dnv.Array().erase(it++);
+                (*it)["removed"] = 1;
             }
-            else
-                ++it;
         }
+
+        do_removals(dnv);
     }
 
     void load_lists()
