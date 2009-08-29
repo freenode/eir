@@ -23,6 +23,7 @@ using namespace eir;
 struct PerlModule : CommandHandlerBase<PerlModule>, Module
 {
     PerlInterpreter *my_perl;
+    void *libperl_handle;
 
     void do_script_load(const Message *m)
     {
@@ -53,7 +54,7 @@ struct PerlModule : CommandHandlerBase<PerlModule>, Module
         // However, this doesn't work for eir because this module, which is what
         // brought in libperl, was loaded with RTLD_LOCAL.
         // So, we re-open libperl with RTLD_GLOBAL to make its symbols visible.
-        if (!dlopen("libperl.so", RTLD_GLOBAL | RTLD_LAZY | RTLD_NOLOAD))
+        if (!(libperl_handle = dlopen("libperl.so", RTLD_GLOBAL | RTLD_LAZY | RTLD_NOLOAD)))
             throw InternalError("Couldn't re-open libperl.so");
 
         const char *_perl_argv[] = { "", PERL_INIT_FILE, };
@@ -85,6 +86,9 @@ struct PerlModule : CommandHandlerBase<PerlModule>, Module
         perl_free(my_perl);
         my_perl = 0;
         PERL_SYS_TERM();
+
+        if (libperl_handle)
+            dlclose(libperl_handle);
     }
 
     CommandHolder load_id, unload_id;
