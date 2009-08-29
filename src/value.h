@@ -22,6 +22,7 @@ namespace eir
 
             typedef Value& reference;
             typedef const Value& const_reference;
+            typedef Value value_type;
 
             iterator begin();
             iterator end();
