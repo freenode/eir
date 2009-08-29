@@ -37,6 +37,7 @@ namespace eir
             typedef paludis::WrappedForwardIterator<ClientIteratorTag, Client::ptr const> ClientIterator;
             ClientIterator begin_clients();
             ClientIterator end_clients();
+            ClientIterator find_client_it(std::string nick);
             Client::ptr find_client(std::string nick);
             std::pair<ClientIterator, bool> add_client(Client::ptr c);
             unsigned long remove_client(Client::ptr c);
@@ -45,6 +46,7 @@ namespace eir
             typedef paludis::WrappedForwardIterator<ChannelIteratorTag, Channel::ptr const> ChannelIterator;
             ChannelIterator begin_channels();
             ChannelIterator end_channels();
+            ChannelIterator find_channel_it(std::string name);
             Channel::ptr find_channel(std::string name);
             std::pair<ChannelIterator, bool> add_channel(Channel::ptr c);
             unsigned long remove_channel(Channel::ptr c);

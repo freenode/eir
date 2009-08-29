@@ -374,6 +374,11 @@ Bot::ClientIterator Bot::end_clients()
     return second_iterator(_imp->_clients.end());
 }
 
+Bot::ClientIterator Bot::find_client_it(std::string nick)
+{
+    return second_iterator(_imp->_clients.find(nick));
+}
+
 Client::ptr Bot::find_client(std::string nick)
 {
     Implementation<Bot>::ClientMap::iterator it = _imp->_clients.find(nick);
@@ -420,6 +425,11 @@ Bot::ChannelIterator Bot::begin_channels()
 Bot::ChannelIterator Bot::end_channels()
 {
     return second_iterator(_imp->_channels.end());
+}
+
+Bot::ChannelIterator Bot::find_channel_it(std::string name)
+{
+    return second_iterator(_imp->_channels.find(name));
 }
 
 Channel::ptr Bot::find_channel(std::string name)
