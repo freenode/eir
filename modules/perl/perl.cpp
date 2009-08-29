@@ -10,6 +10,12 @@
 
 #include "util/call_perl.hh"
 
+// Include the xs_init definition here, as i'm too lazy to make the build system
+// include two source files for this .so
+extern "C" {
+#include "perlxsi.c"
+}
+
 using namespace eir;
 
 struct PerlModule : CommandHandlerBase<PerlModule>, Module
@@ -53,7 +59,7 @@ struct PerlModule : CommandHandlerBase<PerlModule>, Module
         perl_construct(my_perl);
 
         PL_origalen = 1;
-        int exitstatus = perl_parse(my_perl, NULL, perl_argc, perl_argv, NULL);
+        int exitstatus = perl_parse(my_perl, xs_init, perl_argc, perl_argv, NULL);
         PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
 
         if (exitstatus != 0)

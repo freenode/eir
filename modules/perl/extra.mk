@@ -7,6 +7,12 @@ APIDIR=modules/perl/api
 
 EXTRA_CXXFLAGS_perl= $(PERL_INCLUDES) $(PERL_LDFLAGS) -Wno-error
 
+# The perl module also require the generated definition of xs_init...
+modules/perl/perl.so: modules/perl/perlxsi.c
+
+modules/perl/perlxsi.c:
+	perl -MExtUtils::Embed -e xsinit -- -o $@
+
 # Then, define how to build the api library.
 
 modules/perl/perl.so: | $(APIDIR)/perlapi.so
