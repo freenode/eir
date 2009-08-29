@@ -4,7 +4,9 @@
 #include <paludis/util/exception.hh>
 #include <paludis/util/stringify.hh>
 
+#ifndef assert
 #define assert(x) if(!x) throw paludis::InternalError(PALUDIS_HERE, "Assertion failed: "#x)
+#endif
 
 namespace eir {
     using paludis::Context;
