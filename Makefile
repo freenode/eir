@@ -1,7 +1,7 @@
 
 ### Global settings first
 
-CXXFLAGS = -O0 -fno-inline-functions -ggdb3 -I. -Wall -Werror -Wextra -pedantic
+CXXFLAGS = -O0 -fno-inline-functions -ggdb3 -I. -Wall -Werror -Wextra -pedantic -std=gnu++0x
 LDFLAGS = -Wl,-export-dynamic
 
 mod_INCLUDES = -I. -Isrc
