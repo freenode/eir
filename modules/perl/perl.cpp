@@ -6,6 +6,8 @@
 #include <EXTERN.h>
 #include <perl.h>
 
+#include <dlfcn.h>
+
 #include "definitions.h"
 
 #include "util/call_perl.hh"
@@ -46,6 +48,14 @@ struct PerlModule : CommandHandlerBase<PerlModule>, Module
 
     void startup()
     {
+        // Hack alert: Perl extension .sos aren't linked against libperl; they
+        // rely on libperl already being loaded when they are.
+        // However, this doesn't work for eir because this module, which is what
+        // brought in libperl, was loaded with RTLD_LOCAL.
+        // So, we re-open libperl with RTLD_GLOBAL to make its symbols visible.
+        if (!dlopen("libperl.so", RTLD_GLOBAL | RTLD_LAZY | RTLD_NOLOAD))
+            throw InternalError("Couldn't re-open libperl.so");
+
         const char *_perl_argv[] = { "", PERL_INIT_FILE, };
         char **perl_argv = const_cast<char**>(_perl_argv);
         int perl_argc = 2;
