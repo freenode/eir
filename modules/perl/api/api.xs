@@ -7,19 +7,17 @@
 #include "eir.h"
 
 using namespace eir;
+using std::string;
+
+#include "util/type_maps.h"
 
 MODULE = Eir            PACKAGE = Eir
 
-SV *
+Bot *
 find_bot(name)
     char *name
-PPCODE:
-    Bot *ret = eir::BotManager::get_instance()->find(name);
-    if (!ret)
-        XSRETURN_UNDEF;
-    SV *realret = sv_newmortal();
-    sv_setref_pv(realret, "Eir::Bot", (void*)ret);
-    XPUSHs(realret);
+CODE:
+    RETVAL = BotManager::get_instance()->find(name);
 
 MODULE = Eir            PACKAGE = Eir::Bot
 

@@ -1,9 +1,15 @@
 TYPEMAP
-Bot *              O_OBJECT
+Bot *               O_OBJECT
+Client *            O_OBJECT
+
+string              O_STDSTRING
 
 OUTPUT
 O_OBJECT
-    sv_setref_pv( $arg, CLASS, (void*)$var );
+    sv_setref_pv( $arg, PerlClassMap<${(my $ntt=$ntype)=~s/Ptr$/*/;\$ntt}>::name(), (void*)$var );
+
+O_STDSTRING
+    sv_setpv($arg, $var.c_str());
 
 INPUT
 O_OBJECT
