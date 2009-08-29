@@ -6,10 +6,22 @@
 
 #include "eir.h"
 
+using namespace eir;
+
 MODULE = Eir            PACKAGE = Eir
 
-Bot *
+SV *
 find_bot(name)
     char *name
-CODE:
-    RETVAL = eir::BotManager::get_instance()->find(name);
+PPCODE:
+    Bot *ret = eir::BotManager::get_instance()->find(name);
+    if (!ret)
+        XSRETURN_UNDEF;
+    SV *realret = sv_newmortal();
+    sv_setref_pv(realret, "Eir::Bot", (void*)ret);
+    XPUSHs(realret);
+
+MODULE = Eir            PACKAGE = Eir::Bot
+
+void
+Bot::send(char* name)

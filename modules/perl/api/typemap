@@ -1,5 +1,5 @@
 TYPEMAP
-Eir__Bot *              O_OBJECT
+Bot *              O_OBJECT
 
 OUTPUT
 O_OBJECT

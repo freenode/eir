@@ -19,6 +19,7 @@ use FindBin;
 use Symbol qw(delete_package);
 
 use lib "$FindBin::Bin";
+use lib "$FindBin::Bin/../api";
 
 our %Scripts;
 
