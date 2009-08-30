@@ -7,51 +7,55 @@ namespace eir
 {
     namespace perl
     {
+
+        class BotChannelHash
+        {
+            Bot *_bot;
+            public:
+                BotChannelHash(Bot *b);
+                Channel *FETCH(char *nick);
+                bool EXISTS(char *nick);
+                const char* FIRSTKEY();
+                const char* NEXTKEY(char *prevnick);
+                int SCALAR();
+        };
+
         class BotClientHash
         {
             Bot *_bot;
-
             public:
-                BotClientHash(Bot *b)
-                    : _bot(b)
-                {
-                }
-
-                Client *FETCH(char *nick)
-                {
-                    return _bot->find_client(nick).get();
-                }
-
-                bool EXISTS(char *nick)
-                {
-                    return _bot->find_client(nick);
-                }
-
-                const char* FIRSTKEY()
-                {
-                    Bot::ClientIterator it = _bot->begin_clients();
-                    if (it == _bot->end_clients())
-                        return 0;
-                    else
-                        return (*it)->nick().c_str();
-                }
-
-                const char* NEXTKEY(char *prevnick)
-                {
-                    Bot::ClientIterator it = _bot->find_client_it(prevnick);
-                    if (it == _bot->end_clients())
-                        return 0;
-                    ++it;
-                    if (it == _bot->end_clients())
-                        return 0;
-                    return (*it)->nick().c_str();
-                }
-
-                int SCALAR()
-                {
-                    return _bot->begin_clients() != _bot->end_clients();
-                }
+                BotClientHash(Bot *b);
+                Client *FETCH(char *nick);
+                bool EXISTS(char *nick);
+                const char* FIRSTKEY();
+                const char* NEXTKEY(char *prevnick);
+                int SCALAR();
         };
+
+        class ClientMembershipHash
+        {
+            Client *_client;
+            public:
+                ClientMembershipHash(Client *b);
+                Membership *FETCH(char *nick);
+                bool EXISTS(char *nick);
+                const char* FIRSTKEY();
+                const char* NEXTKEY(char *prevnick);
+                int SCALAR();
+        };
+
+        class ChannelMembershipHash
+        {
+            Channel *_channel;
+            public:
+                ChannelMembershipHash(Channel *b);
+                Membership *FETCH(char *nick);
+                bool EXISTS(char *nick);
+                const char* FIRSTKEY();
+                const char* NEXTKEY(char *prevnick);
+                int SCALAR();
+        };
+
     }
 }
 

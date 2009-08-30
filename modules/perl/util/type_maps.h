@@ -19,8 +19,15 @@ struct PerlClassMap
 #define TYPE_MAP_INTERNAL(x) TYPE_MAP_(x,  "Eir::Internal::"#x)
 
 TYPE_MAP(Bot)
+
 TYPE_MAP(Client)
+TYPE_MAP(Channel)
+TYPE_MAP(Membership)
+
 
 TYPE_MAP_INTERNAL(BotClientHash)
+TYPE_MAP_INTERNAL(BotChannelHash)
+TYPE_MAP_INTERNAL(ClientMembershipHash)
+TYPE_MAP_INTERNAL(ChannelMembershipHash)
 
 #endif

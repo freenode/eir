@@ -17,7 +17,7 @@ modules/perl/perlxsi.c:
 
 modules/perl/perl.so: | $(APIDIR)/Eir.so
 
-PERLAPI_SOURCES = api_XS.cpp
+PERLAPI_SOURCES = api_XS.cpp HashWrappers.cpp
 
 .PRECIOUS: $(APIDIR)/%_XS.cpp
 

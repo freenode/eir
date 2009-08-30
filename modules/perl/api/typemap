@@ -1,10 +1,15 @@
 TYPEMAP
-Bot *               O_OBJECT
-Client *            O_OBJECT
+Bot *                   O_OBJECT
+Client *                O_OBJECT
+Channel *               O_OBJECT
+Membership *            O_OBJECT
 
-BotClientHash *     O_OBJECT
+BotClientHash *         O_OBJECT
+BotChannelHash *        O_OBJECT
+ClientMembershipHash *  O_OBJECT
+ChannelMembershipHash * O_OBJECT
 
-string              O_STDSTRING
+string                  O_STDSTRING
 
 OUTPUT
 O_OBJECT
