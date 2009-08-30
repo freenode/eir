@@ -7,4 +7,12 @@ require DynaLoader;
 
 bootstrap Eir;
 
+package Eir::Bot;
+
+sub Clients {
+    my ($self) = @_;
+    tie %client_hash, 'Eir::Internal::BotClientHash', $self;
+    return \%client_hash;
+}
+
 1;

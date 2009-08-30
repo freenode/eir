@@ -5,7 +5,7 @@ APIDIR=modules/perl/api
 
 # First, add the right compiler flags to build the main perl.so module
 
-EXTRA_CXXFLAGS_perl= $(PERL_INCLUDES) $(PERL_LDFLAGS) -Wno-unused-variable
+EXTRA_CXXFLAGS_perl= $(PERL_INCLUDES) $(PERL_LDFLAGS) -Wno-unused-variable -Wno-write-strings
 
 # The perl module also require the generated definition of xs_init...
 modules/perl/perl.so: modules/perl/perlxsi.c
