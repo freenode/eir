@@ -54,6 +54,7 @@ namespace eir
         ChannelIterator begin_channels();
         ChannelIterator end_channels();
         MembershipPtr find_membership(std::string channel);
+        ChannelIterator find_membership_it(std::string channel);
         const MembershipPtr find_membership(std::string channel) const;
 
         PrivilegeSet& privs();
@@ -71,6 +72,8 @@ namespace eir
         typedef paludis::WrappedForwardIterator<MemberIteratorTag, const MembershipPtr> MemberIterator;
         MemberIterator begin_members();
         MemberIterator end_members();
+        MembershipPtr find_member(std::string nick);
+        MemberIterator find_member_it(std::string nick);
 
         bool add_member(MembershipPtr);
         bool remove_member(MembershipPtr);

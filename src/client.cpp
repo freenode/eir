@@ -104,6 +104,11 @@ Membership::ptr Client::find_membership(std::string chname)
     return it->second;
 }
 
+Client::ChannelIterator Client::find_membership_it(std::string chname)
+{
+    return second_iterator(_imp->channels.find(chname));
+}
+
 Membership::ptr Client::join_chan(Channel::ptr c)
 {
     Context ctx("Adding client " + _imp->nick + " to channel " + c->name());
@@ -171,8 +176,8 @@ namespace paludis
 
         std::map<std::string, Value> attributes;
 
-        typedef std::set<Membership::ptr>::iterator MemberIterator;
-        std::set<Membership::ptr> members;
+        typedef std::map<std::string, Membership::ptr>::iterator MemberIterator;
+        std::map<std::string, Membership::ptr> members;
 
         Implementation(std::string n) : name(lowercase(n))
         { }
@@ -186,22 +191,35 @@ const std::string& Channel::name()
 
 Channel::MemberIterator Channel::begin_members()
 {
-    return Channel::MemberIterator(_imp->members.begin());
+    return second_iterator(_imp->members.begin());
 }
 
 Channel::MemberIterator Channel::end_members()
 {
-    return Channel::MemberIterator(_imp->members.end());
+    return second_iterator(_imp->members.end());
+}
+
+Channel::MemberIterator Channel::find_member_it(std::string nick)
+{
+    return second_iterator(_imp->members.find(nick));
+}
+
+MembershipPtr Channel::find_member(std::string nick)
+{
+    std::map<std::string, Membership::ptr>::iterator it = _imp->members.find(nick);
+    if (it == _imp->members.end())
+        return Membership::ptr();
+    return it->second;
 }
 
 bool Channel::add_member(Membership::ptr m)
 {
-    return _imp->members.insert(m).second;
+    return _imp->members.insert(std::make_pair(m->client->nick(), m)).second;
 }
 
 bool Channel::remove_member(Membership::ptr m)
 {
-    return _imp->members.erase(m) != 0;
+    return _imp->members.erase(m->client->nick()) != 0;
 }
 
 Channel::AttributeIterator Channel::attr_begin()
