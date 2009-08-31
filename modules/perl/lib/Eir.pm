@@ -16,6 +16,13 @@ sub Clients {
     return $ret;
 }
 
+sub Channels {
+    my ($self) = @_;
+    my $ret = {};
+    tie %$ret, 'Eir::Internal::BotChannelHash', $self;
+    return $ret;
+}
+
 package Eir::Client;
 
 sub Channels {
