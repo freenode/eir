@@ -5,7 +5,8 @@ APIDIR=modules/perl/api
 
 # First, add the right compiler flags to build the main perl.so module
 
-EXTRA_CXXFLAGS_perl= $(PERL_INCLUDES) $(PERL_LDFLAGS) -Wno-unused-variable -Wno-write-strings
+EXTRA_CXXFLAGS_perl= $(PERL_INCLUDES) $(PERL_LDFLAGS) \
+		     -Wno-unused-variable -Wno-write-strings
 
 # The perl module also require the generated definition of xs_init...
 modules/perl/perl.so: modules/perl/perlxsi.c
@@ -17,7 +18,7 @@ modules/perl/perlxsi.c:
 
 modules/perl/perl.so: | $(APIDIR)/Eir.so
 
-PERLAPI_SOURCES = api_XS.cpp HashWrappers.cpp
+PERLAPI_SOURCES = api_XS.cpp HashWrappers.cpp perl_helpers.cpp
 
 .PRECIOUS: $(APIDIR)/%_XS.cpp
 
@@ -28,7 +29,7 @@ PERLAPI_OBJS = $(addprefix $(APIDIR)/,$(addsuffix .o,$(basename $(PERLAPI_SOURCE
 
 $(APIDIR)/%.o: $(APIDIR)/%.cpp
 	g++ $(CXXFLAGS) $(mod_INCLUDES) $(PERL_INCLUDES) \
-	    -Wno-unused-variable -Wno-write-strings \
+	    -Wno-unused-variable -Wno-write-strings -DPERL_GCC_PEDANTIC \
 	    -fPIC -c -o$@ $<
 
 $(APIDIR)/Eir.so: $(PERLAPI_OBJS)

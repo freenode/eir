@@ -4,10 +4,14 @@ Client *                O_OBJECT
 Channel *               O_OBJECT
 Membership *            O_OBJECT
 
+Filter *                O_OBJECT
+Message *               O_OBJECT
+
 BotClientHash *         O_OBJECT
 BotChannelHash *        O_OBJECT
 ClientMembershipHash *  O_OBJECT
 ChannelMembershipHash * O_OBJECT
+PerlHolder *            O_OBJECT
 
 string                  O_STDSTRING
 

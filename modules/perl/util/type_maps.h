@@ -23,11 +23,16 @@ TYPE_MAP(Bot)
 TYPE_MAP(Client)
 TYPE_MAP(Channel)
 TYPE_MAP(Membership)
+TYPE_MAP(Filter)
+TYPE_MAP(CommandRegistry)
+
+TYPE_MAP_(const Message, "Eir::Message")
 
 
 TYPE_MAP_INTERNAL(BotClientHash)
 TYPE_MAP_INTERNAL(BotChannelHash)
 TYPE_MAP_INTERNAL(ClientMembershipHash)
 TYPE_MAP_INTERNAL(ChannelMembershipHash)
+TYPE_MAP_INTERNAL(PerlHolder)
 
 #endif
