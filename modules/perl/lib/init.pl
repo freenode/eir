@@ -36,6 +36,10 @@ sub package_name_ify {
 }
 
 sub load_script {
+    call_wrapper(\&do_load_script, @_);
+}
+
+sub do_load_script {
     my ($filename) = @_;
     my $packagename = package_name_ify($filename);
 
