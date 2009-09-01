@@ -61,7 +61,10 @@ sub do_load_script {
         my ($filename, $packagename, $script_text);
         eval $eval;
     }
-    die $@ if $@;
+    if ($@) {
+        delete_package $packagename;
+        die $@;
+    }
 
     $Scripts{$packagename} = 1;
 }
