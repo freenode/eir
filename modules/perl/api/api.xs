@@ -399,7 +399,8 @@ CODE:
     CommandRegistry *reg = CommandRegistry::get_instance();
     CommandRegistry::id id = reg->add_handler(
                                 *filter,
-                                std::bind(call_perl<PerlContext::Void, SV*, const Message *>, aTHX_ func, _1));
+                                std::bind(call_perl<PerlContext::Void, const char *, SV*, const Message *>,
+                                            aTHX_ "Eir::Init::call_wrapper", func, _1));
     RETVAL = new PerlCommandHolder(aTHX_ id, func);
 OUTPUT:
     RETVAL

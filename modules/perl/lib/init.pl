@@ -74,3 +74,16 @@ sub unload_script {
     delete_package($packagename);
     delete $Scripts{$packagename};
 }
+
+sub call_wrapper {
+    my $sub = shift;
+    my $saved_alarm=$SIG{ALRM};
+    $SIG{ALRM} = sub { die "Script used too much running time"; };
+    eval {
+        alarm 1;
+        &$sub(@_);
+        alarm 0;
+    };
+    $SIG{ALRM} = $saved_alarm;
+    die $@ if $@;
+}
