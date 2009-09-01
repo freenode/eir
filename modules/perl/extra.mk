@@ -29,7 +29,8 @@ PERLAPI_OBJS = $(addprefix $(APIDIR)/,$(addsuffix .o,$(basename $(PERLAPI_SOURCE
 
 $(APIDIR)/%.o: $(APIDIR)/%.cpp
 	g++ $(CXXFLAGS) $(mod_INCLUDES) $(PERL_INCLUDES) \
-	    -Wno-unused-variable -Wno-write-strings -DPERL_GCC_PEDANTIC \
+	    -Wno-unused-variable -Wno-write-strings -Wno-unused\
+	    -DPERL_GCC_PEDANTIC \
 	    -fPIC -c -o$@ $<
 
 $(APIDIR)/Eir.so: $(PERLAPI_OBJS)

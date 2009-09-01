@@ -116,12 +116,12 @@ BotClientHash::FETCH(char *nick)
 void
 BotClientHash::STORE(char *nick, SV *foo)
 CODE:
-    Perl_croak("Tried to modify a read-only tied hash Bot::Clients");
+    Perl_croak(aTHX_ "Tried to modify a read-only tied hash Bot::Clients");
 
 void
 BotClientHash::DELETE(char *nick)
 CODE:
-    Perl_croak("Tried to modify a read-only tied hash Bot::Clients");
+    Perl_croak(aTHX_ "Tried to modify a read-only tied hash Bot::Clients");
 
 int
 BotClientHash::EXISTS(char *nick)
@@ -154,12 +154,12 @@ BotChannelHash::FETCH(char *nick)
 void
 BotChannelHash::STORE(char *nick, SV *foo)
 CODE:
-    Perl_croak("Tried to modify a read-only tied hash Bot::Channels");
+    Perl_croak(aTHX_ "Tried to modify a read-only tied hash Bot::Channels");
 
 void
 BotChannelHash::DELETE(char *nick)
 CODE:
-    Perl_croak("Tried to modify a read-only tied hash Bot::Channels");
+    Perl_croak(aTHX_ "Tried to modify a read-only tied hash Bot::Channels");
 
 int
 BotChannelHash::EXISTS(char *nick)
@@ -192,12 +192,12 @@ ClientMembershipHash::FETCH(char *name)
 void
 ClientMembershipHash::STORE(char *name, SV *foo)
 CODE:
-    Perl_croak("Tried to modify a read-only tied hash Bot::Channels");
+    Perl_croak(aTHX_ "Tried to modify a read-only tied hash Bot::Channels");
 
 void
 ClientMembershipHash::DELETE(char *name)
 CODE:
-    Perl_croak("Tried to modify a read-only tied hash Bot::Channels");
+    Perl_croak(aTHX_ "Tried to modify a read-only tied hash Bot::Channels");
 
 int
 ClientMembershipHash::EXISTS(char *name)
@@ -230,12 +230,12 @@ ChannelMembershipHash::FETCH(char *name)
 void
 ChannelMembershipHash::STORE(char *name, SV *foo)
 CODE:
-    Perl_croak("Tried to modify a read-only tied hash Bot::Channels");
+    Perl_croak(aTHX_ "Tried to modify a read-only tied hash Bot::Channels");
 
 void
 ChannelMembershipHash::DELETE(char *name)
 CODE:
-    Perl_croak("Tried to modify a read-only tied hash Bot::Channels");
+    Perl_croak(aTHX_ "Tried to modify a read-only tied hash Bot::Channels");
 
 int
 ChannelMembershipHash::EXISTS(char *name)
@@ -399,7 +399,7 @@ CODE:
     CommandRegistry *reg = CommandRegistry::get_instance();
     CommandRegistry::id id = reg->add_handler(
                                 *filter,
-                                std::bind(call_perl<PerlContext::Void, SV*, const Message *>, func, _1));
-    RETVAL = new PerlCommandHolder(id, func);
+                                std::bind(call_perl<PerlContext::Void, SV*, const Message *>, aTHX_ func, _1));
+    RETVAL = new PerlCommandHolder(aTHX_ id, func);
 OUTPUT:
     RETVAL

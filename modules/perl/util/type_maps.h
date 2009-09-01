@@ -7,7 +7,7 @@ struct PerlClassMap
 };
 
 #define TYPE_MAP_(t, n) \
-    SV* sv_from(t *p) { \
+    SV* sv_from(pTHX_ t *p) { \
         SV *ret = newSV(0); \
         sv_setref_pv(ret, n, (void*)p); \
         return sv_2mortal(ret); \
