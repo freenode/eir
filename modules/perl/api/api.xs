@@ -404,3 +404,41 @@ CODE:
     RETVAL = new PerlCommandHolder(aTHX_ id, func);
 OUTPUT:
     RETVAL
+
+
+MODULE = Eir            PACKAGE = Eir::Source
+
+int
+RawIrc()
+CODE:
+    RETVAL = sourceinfo::RawIrc;
+
+int
+ConfigFile()
+CODE:
+    RETVAL = sourceinfo::ConfigFile;
+
+int
+SystemConsole()
+CODE:
+    RETVAL = sourceinfo::SystemConsole;
+
+int
+Signal()
+CODE:
+    RETVAL = sourceinfo::Signal;
+
+int
+Internal()
+CODE:
+    RETVAL = sourceinfo::Internal;
+
+int
+IrcCommand()
+CODE:
+    RETVAL = sourceinfo::IrcCommand;
+
+int
+Any()
+CODE:
+    RETVAL = sourceinfo::Any;
