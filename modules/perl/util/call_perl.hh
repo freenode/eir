@@ -21,6 +21,27 @@ namespace eir
     };
 }
 
+SV* sv_from(pTHX_ long i)
+{
+    return sv_2mortal(newSViv(i));
+}
+SV* sv_from(pTHX_ double d)
+{
+    return sv_2mortal(newSVnv(d));
+}
+SV* sv_from(pTHX_ const char *s)
+{
+    return sv_2mortal(newSVpv(s, 0));
+}
+SV* sv_from(pTHX_ std::string s)
+{
+    return sv_from(aTHX_ s.c_str());
+}
+SV* sv_from(pTHX_ SV* sv)
+{
+    return sv;
+}
+
 namespace call_perl_internals
 {
     typedef std::vector<SV*> sv_list;
@@ -101,27 +122,6 @@ namespace call_perl_internals
 
         enum { callflag = G_ARRAY };
     };
-
-    SV* sv_from(pTHX_ long i)
-    {
-        return sv_2mortal(newSViv(i));
-    }
-    SV* sv_from(pTHX_ double d)
-    {
-        return sv_2mortal(newSVnv(d));
-    }
-    SV* sv_from(pTHX_ const char *s)
-    {
-        return sv_2mortal(newSVpv(s, 0));
-    }
-    SV* sv_from(pTHX_ std::string s)
-    {
-        return sv_from(aTHX_ s.c_str());
-    }
-    SV* sv_from(pTHX_ SV *sv)
-    {
-        return sv;
-    }
 }
 
 template <PerlContext _C, typename _Func, typename... ArgTypes>
