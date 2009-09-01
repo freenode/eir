@@ -118,6 +118,10 @@ namespace call_perl_internals
     {
         return sv_from(aTHX_ s.c_str());
     }
+    SV* sv_from(pTHX_ SV *sv)
+    {
+        return sv;
+    }
 }
 
 template <PerlContext _C, typename _Func, typename... ArgTypes>
