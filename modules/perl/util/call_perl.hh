@@ -39,6 +39,7 @@ SV* sv_from(pTHX_ std::string s)
 }
 SV* sv_from(pTHX_ SV* sv)
 {
+    PERL_UNUSED_CONTEXT;
     return sv;
 }
 
