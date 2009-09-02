@@ -47,22 +47,8 @@ string
 Bot::name()
 
 
-MODULE = Eir            PACKAGE = Eir::CommandRegistry
-
-PerlHolder *
-add_handler(Filter *filter, SV *func)
-CODE:
-    CommandRegistry *reg = CommandRegistry::get_instance();
-    CommandRegistry::id id = reg->add_handler(
-                                *filter,
-                                std::bind(call_perl<PerlContext::Void, const char *, SV*, const Message *>,
-                                            aTHX_ "Eir::Init::call_wrapper", func, _1));
-    RETVAL = new PerlCommandHolder(aTHX_ id, func);
-OUTPUT:
-    RETVAL
-
-
 INCLUDE: clients.xs
 INCLUDE: helpers.xs
 INCLUDE: messages.xs
+INCLUDE: handlers.xs
 

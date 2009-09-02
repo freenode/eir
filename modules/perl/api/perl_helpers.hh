@@ -33,6 +33,26 @@ namespace eir
                     SvREFCNT_dec(_command);
                 }
         };
+
+        class PerlEventHolder : public PerlHolder
+        {
+            EventManager::id _id;
+            SV *_handler;
+            PerlInterpreter *_perl;
+
+            public:
+                PerlEventHolder(pTHX_ EventManager::id i, SV *h)
+                    : _id(i), _handler(h), _perl(aTHX)
+                {
+                    SvREFCNT_inc(h);
+                }
+                ~PerlEventHolder()
+                {
+                    PerlInterpreter *my_perl = _perl;
+                    EventManager::get_instance()->remove_event(_id);
+                    SvREFCNT_dec(_handler);
+                }
+        };
     }
 }
 
