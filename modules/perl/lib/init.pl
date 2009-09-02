@@ -89,8 +89,8 @@ sub call_wrapper {
     eval {
         alarm 1;
         &$sub(@_);
-        alarm 0;
     };
+    alarm 0;
     $SIG{ALRM} = $saved_alarm;
     die $@ if $@;
 }
