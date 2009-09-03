@@ -49,7 +49,7 @@ namespace eir
     {
         public:
             struct KeyValueArrayIteratorTag { };
-            typedef std::pair<const Value, Value> value_type;
+            typedef std::pair<const std::string, Value> value_type;
             typedef paludis::WrappedForwardIterator<KeyValueArrayIteratorTag, value_type> iterator;
             typedef paludis::WrappedForwardIterator<KeyValueArrayIteratorTag, const value_type> const_iterator;
 
@@ -61,19 +61,19 @@ namespace eir
             const_iterator begin() const;
             const_iterator end() const;
 
-            iterator find(Value);
-            const_iterator find(Value) const;
+            iterator find(std::string);
+            const_iterator find(std::string) const;
 
             size_t size() const;
             bool empty() const;
 
-            bool insert(Value, Value);
+            bool insert(std::string, Value);
 
-            bool erase(Value);
+            bool erase(std::string);
             void erase(iterator);
             void clear();
 
-            Value& operator[](Value);
+            Value& operator[](std::string);
 
             KeyValueArray();
             ~KeyValueArray();
@@ -122,7 +122,7 @@ namespace eir
             KeyValueArray& KV();
             const KeyValueArray& KV() const;
 
-            Value& operator[](const Value&);
+            Value& operator[](const std::string&);
             Value& operator[](int);
 
             void push_back(Value v);

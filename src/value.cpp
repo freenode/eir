@@ -12,39 +12,10 @@
 using namespace eir;
 using namespace paludis;
 
-template class paludis::WrappedForwardIterator<KeyValueArray::KeyValueArrayIteratorTag, std::pair<const Value, Value> >;
-template class paludis::WrappedForwardIterator<KeyValueArray::KeyValueArrayIteratorTag, const std::pair<const Value, Value> >;
+template class paludis::WrappedForwardIterator<KeyValueArray::KeyValueArrayIteratorTag, std::pair<const std::string, Value> >;
+template class paludis::WrappedForwardIterator<KeyValueArray::KeyValueArrayIteratorTag, const std::pair<const std::string, Value> >;
 template class paludis::WrappedForwardIterator<ValueArray::ValueArrayIteratorTag, Value>;
 template class paludis::WrappedForwardIterator<ValueArray::ValueArrayIteratorTag, const Value>;
-
-namespace
-{
-    struct ValueCompare
-    {
-        bool operator()(const Value& lhs, const Value& rhs) const
-        {
-            if (lhs.Type() < rhs.Type())
-                return true;
-            if (lhs.Type() > rhs.Type())
-                return false;
-
-            switch (lhs.Type())
-            {
-                case Value::empty:
-                    return false;
-                case Value::integer:
-                    return lhs.Int() < rhs.Int();
-                case Value::string:
-                    return lhs.String() < rhs.String();
-                case Value::array:
-                    return &lhs.Array() < &rhs.Array();
-                case Value::kvarray:
-                    return &lhs.KV() < &rhs.KV();
-            }
-            return false;
-        }
-    };
-}
 
 namespace paludis
 {
@@ -130,7 +101,7 @@ namespace paludis
     template <>
     struct Implementation<KeyValueArray>
     {
-        std::map<Value, Value, ValueCompare> _map;
+        std::map<std::string, Value> _map;
     };
 }
 
@@ -339,28 +310,13 @@ Value& Value::operator[](int i)
 }
 
 
-Value& Value::operator[](const Value& v)
+Value& Value::operator[](const std::string& s)
 {
     if (Type() == empty)
-    {
-        switch (v.Type())
-        {
-            case integer:
-                _imp->NeedType(array);
-                break;
-            case string:
-                _imp->NeedType(kvarray);
-                break;
-            default:
-                break;
-        }
-    }
+        _imp->NeedType(kvarray);
 
     if (Type() == kvarray)
-        return KV()[v];
-
-    if (Type() == array)
-        return Array()[v.Int()];
+        return KV()[s];
 
     throw TypeMismatchException(array, Type());
 }
@@ -513,14 +469,14 @@ KeyValueArray::const_iterator KeyValueArray::end() const
     return _imp->_map.end();
 }
 
-KeyValueArray::iterator KeyValueArray::find(Value v)
+KeyValueArray::iterator KeyValueArray::find(std::string s)
 {
-    return _imp->_map.find(v);
+    return _imp->_map.find(s);
 }
 
-KeyValueArray::const_iterator KeyValueArray::find(Value v) const
+KeyValueArray::const_iterator KeyValueArray::find(std::string s) const
 {
-    return _imp->_map.find(v);
+    return _imp->_map.find(s);
 }
 
 size_t KeyValueArray::size() const
@@ -528,19 +484,19 @@ size_t KeyValueArray::size() const
     return _imp->_map.size();
 }
 
-bool KeyValueArray::insert(Value k, Value v)
+bool KeyValueArray::insert(std::string s, Value v)
 {
-    return _imp->_map.insert(std::make_pair(k, v)).second;
+    return _imp->_map.insert(std::make_pair(s, v)).second;
 }
 
-bool KeyValueArray::erase(Value v)
+bool KeyValueArray::erase(std::string s)
 {
-    return _imp->_map.erase(v) > 0;
+    return _imp->_map.erase(s) > 0;
 }
 
 void KeyValueArray::erase(KeyValueArray::iterator it)
 {
-    _imp->_map.erase(it.underlying_iterator<std::map<Value,Value,ValueCompare>::iterator>());
+    _imp->_map.erase(it.underlying_iterator<std::map<std::string,Value>::iterator>());
 }
 
 void KeyValueArray::clear()
@@ -553,9 +509,9 @@ bool KeyValueArray::empty() const
     return _imp->_map.empty();
 }
 
-Value& KeyValueArray::operator[](Value k)
+Value& KeyValueArray::operator[](std::string s)
 {
-    return _imp->_map[k];
+    return _imp->_map[s];
 }
 
 bool Value::operator!() const

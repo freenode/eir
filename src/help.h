@@ -28,7 +28,7 @@ namespace eir
             Value& help_root = GlobalSettingsManager::get_instance()->get("help_root");
             if (help_root.Type() != Value::kvarray)
                 return;
-            help_root.KV().erase(Value(name));
+            help_root.KV().erase(name);
         }
     };
     struct HelpIndexHolder
@@ -47,7 +47,7 @@ namespace eir
             Value& help_index = GlobalSettingsManager::get_instance()->get("help_index");
             if (help_index.Type() != Value::kvarray)
                 return;
-            help_index.KV().erase(Value(name));
+            help_index.KV().erase(name);
         }
     };
 }

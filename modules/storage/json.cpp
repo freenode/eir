@@ -40,7 +40,7 @@ namespace
                     for (eir::KeyValueArray::const_iterator it = v.KV().begin(), it_e = v.KV().end();
                             it != it_e; ++it)
                     {
-                        ret[it->first.String()] = EirValueToJsonValue(it->second);
+                        ret[it->first] = EirValueToJsonValue(it->second);
                     }
                     return ret;
                 }
