@@ -403,8 +403,12 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
         StorageManager::get_instance()->Save(old, "expireddonotvoice");
     }
 
+    void do_shutdown(const Message *)
+    {
+        save_lists();
+    }
 
-    CommandHolder add, remove, list, info, check, voice, clear, change, match_client;
+    CommandHolder add, remove, list, info, check, voice, clear, change, match_client, shutdown;
     EventHolder check_event, save_event;
     HelpTopicHolder voicebothelp, voicehelp, checkhelp, matchhelp, addhelp, removehelp, edithelp;
     HelpIndexHolder index;
@@ -435,6 +439,8 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
                             &voicebot::do_change);
         match_client = add_handler(filter_command_type("match", sourceinfo::IrcCommand).requires_privilege("voiceadmin"),
                             &voicebot::do_match);
+        shutdown = add_handler(filter_command_type("shutting_down", sourceinfo::Internal),
+                            &voicebot::do_shutdown);
 
         check_event = add_recurring_event(60, &voicebot::check_expiry);
         save_event = add_recurring_event(300, &voicebot::save_lists);
