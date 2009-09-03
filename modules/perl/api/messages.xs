@@ -72,34 +72,34 @@ OUTPUT:
     RETVAL
 
 int
-Filter::match(Message *m)
+Filter::match(const Message *m)
 
 
 MODULE = Eir            PACKAGE = Eir::Message
 
 Bot *
-Message::bot()
+Message::bot() const
 CODE:
     RETVAL = THIS->bot;
 OUTPUT:
     RETVAL
 
 string
-Message::command()
+Message::command() const
 CODE:
     RETVAL = THIS->command;
 OUTPUT:
     RETVAL
 
 string
-Message::raw()
+Message::raw() const
 CODE:
     RETVAL = THIS->raw;
 OUTPUT:
     RETVAL
 
 SV *
-Message::args()
+Message::args() const
 CODE:
     AV *ret = newAV();
     for (auto it = THIS->args.begin(); it != THIS->args.end(); ++it)
@@ -109,7 +109,7 @@ OUTPUT:
     RETVAL
 
 SV *
-Message::source()
+Message::source() const
 CODE:
     HV *ret = newHV();
     hv_store(ret, "type", 4, newSViv(THIS->source.type), 0);
@@ -125,7 +125,7 @@ OUTPUT:
     RETVAL
 
 void
-Message::reply(const char *str)
+Message::reply(const char *str) const
 CODE:
     THIS->source.reply(str);
 

@@ -5,7 +5,7 @@ Channel *               O_OBJECT
 Membership *            O_OBJECT
 
 Filter *                O_OBJECT
-Message *               O_OBJECT
+const Message *         O_OBJECT
 
 BotClientHash *         O_OBJECT
 BotChannelHash *        O_OBJECT
@@ -24,7 +24,8 @@ O_STDSTRING
 
 INPUT
 O_OBJECT
-    if (sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) )
+    if (sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) &&
+            sv_derived_from($arg, PerlClassMap<${(my $ntt=$ntype)=~s/Ptr$/*/;\$ntt}>::name()))
         $var = ($type)SvIV((SV*)SvRV($arg));
     else
     {
