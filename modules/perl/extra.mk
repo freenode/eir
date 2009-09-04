@@ -18,11 +18,11 @@ modules/perl/perlxsi.c:
 
 modules/perl/perl.so: | $(APIDIR)/Eir.so
 
-PERLAPI_SOURCES = api_XS.cpp HashWrappers.cpp perl_helpers.cpp
+PERLAPI_SOURCES = api_XS.cpp HashWrappers.cpp perl_helpers.cpp value_wrapper.cpp
 
 .PRECIOUS: $(APIDIR)/%_XS.cpp
 
-$(APIDIR)/%_XS.cpp: $(APIDIR)/%.xs $(APIDIR)/typemap
+$(APIDIR)/%_XS.cpp: $(APIDIR)/%.xs $(APIDIR)/typemap $(wildcard $(APIDIR)/*.xs)
 	xsubpp -csuffix _XS.cpp -typemap typemap $< >$@ || rm -f $@
 
 PERLAPI_OBJS = $(addprefix $(APIDIR)/,$(addsuffix .o,$(basename $(PERLAPI_SOURCES))))

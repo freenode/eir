@@ -7,7 +7,7 @@ struct PerlClassMap
 };
 
 #define TYPE_MAP_(t, n) \
-    SV* sv_from(pTHX_ t *p) { \
+    inline SV* sv_from(pTHX_ t *p) { \
         SV *ret = newSV(0); \
         sv_setref_pv(ret, n, (void*)p); \
         return sv_2mortal(ret); \
@@ -34,5 +34,8 @@ TYPE_MAP_INTERNAL(BotChannelHash)
 TYPE_MAP_INTERNAL(ClientMembershipHash)
 TYPE_MAP_INTERNAL(ChannelMembershipHash)
 TYPE_MAP_INTERNAL(PerlHolder)
+
+TYPE_MAP_INTERNAL(ArrayValueWrapper)
+TYPE_MAP_INTERNAL(HashValueWrapper)
 
 #endif

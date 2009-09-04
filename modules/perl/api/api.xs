@@ -8,6 +8,7 @@
 
 #include "HashWrappers.h"
 #include "perl_helpers.hh"
+#include "value_wrapper.hh"
 
 #include <functional>
 using namespace std::placeholders;
@@ -49,4 +50,5 @@ INCLUDE: clients.xs
 INCLUDE: helpers.xs
 INCLUDE: messages.xs
 INCLUDE: handlers.xs
+INCLUDE: value.xs
 

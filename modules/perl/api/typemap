@@ -13,6 +13,9 @@ ClientMembershipHash *  O_OBJECT
 ChannelMembershipHash * O_OBJECT
 PerlHolder *            O_OBJECT
 
+ArrayValueWrapper *     O_OBJECT
+HashValueWrapper *      O_OBJECT
+
 string                  O_STDSTRING
 
 OUTPUT
