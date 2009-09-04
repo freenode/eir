@@ -399,6 +399,31 @@ void ValueArray::push_back(Value v)
     _imp->_array.push_back(v);
 }
 
+void ValueArray::pop_back()
+{
+    _imp->_array.pop_back();
+}
+
+Value& ValueArray::back()
+{
+    return _imp->_array.back();
+}
+
+const Value& ValueArray::back() const
+{
+    return _imp->_array.back();
+}
+
+void ValueArray::insert(ValueArray::iterator it, const Value& v)
+{
+    _imp->_array.insert(it.underlying_iterator<std::vector<Value>::iterator>(), v);
+}
+
+void ValueArray::insert(size_t idx, const Value& v)
+{
+    _imp->_array.insert(_imp->_array.begin() + idx, v);
+}
+
 void ValueArray::erase(ValueArray::iterator it)
 {
     _imp->_array.erase(it.underlying_iterator<std::vector<Value>::iterator>());

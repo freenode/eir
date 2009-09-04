@@ -33,7 +33,12 @@ namespace eir
             bool empty() const;
 
             void push_back(Value);
+            void pop_back();
+            Value& back();
+            const Value& back() const;
 
+            void insert(iterator, const Value&);
+            void insert(size_t, const Value&);
             void erase(iterator);
             void erase(size_t);
             void clear();
