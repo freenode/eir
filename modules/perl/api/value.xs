@@ -61,6 +61,8 @@ CODE:
     for (int i=1; i < items; ++i)
         THIS->UNSHIFT(ST(i));
 
+void
+ArrayValueWrapper::DESTROY()
 
 MODULE = Eir            PACKAGE = Eir::Internal::HashValueWrapper
 
@@ -84,3 +86,6 @@ HashValueWrapper::FIRSTKEY()
 
 SV *
 HashValueWrapper::NEXTKEY(SV *prevkey)
+
+void
+HashValueWrapper::DESTROY()
