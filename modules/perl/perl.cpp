@@ -12,6 +12,8 @@
 
 #include "util/call_perl.hh"
 
+#include <paludis/util/join.hh>
+
 // Include the xs_init definition here, as i'm too lazy to make the build system
 // include two source files for this .so
 extern "C" {
@@ -45,6 +47,18 @@ struct PerlModule : CommandHandlerBase<PerlModule>, Module
         }
         call_perl<PerlContext::Void>(aTHX_ "Eir::Init::unload_script", m->args[0]);
         m->source.reply("Successfully unloaded " + m->args[0]);
+    }
+
+    void do_script_exec(const Message *m)
+    {
+        if (m->args.empty())
+        {
+            m->source.error("I can't execute nothing.");
+            return;
+        }
+        call_perl<PerlContext::Void>(aTHX_ "Eir::Init::do_eval", 
+                                        paludis::join(m->args.begin(), m->args.end()," "));
+        m->source.reply("Done.");
     }
 
     void startup()
@@ -91,7 +105,7 @@ struct PerlModule : CommandHandlerBase<PerlModule>, Module
             dlclose(libperl_handle);
     }
 
-    CommandHolder load_id, unload_id;
+    CommandHolder load_id, unload_id, exec_id;
 
     PerlModule()
         : my_perl(0)
@@ -101,6 +115,8 @@ struct PerlModule : CommandHandlerBase<PerlModule>, Module
                 &PerlModule::do_script_load);
         unload_id = add_handler(filter_command_privilege("unloadscript", "admin").or_config(),
                 &PerlModule::do_script_unload);
+        exec_id = add_handler(filter_command_privilege("execscript", "admin"),
+                &PerlModule::do_script_exec);
     }
 
     ~PerlModule()

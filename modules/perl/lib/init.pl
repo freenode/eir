@@ -82,6 +82,11 @@ sub unload_script {
     delete $Scripts{$packagename};
 }
 
+sub do_eval {
+    my ($text) = @_;
+    call_wrapper(sub { use Eir; eval "$text"; die $@ if $@; });
+}
+
 sub call_wrapper {
     my $sub = shift;
     my $saved_alarm=$SIG{ALRM};
