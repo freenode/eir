@@ -27,13 +27,11 @@ using std::string;
 MODULE = Eir            PACKAGE = Eir
 
 Bot *
-find_bot(name)
-    char *name
+find_bot(const char *name)
 CODE:
     RETVAL = BotManager::get_instance()->find(name);
 OUTPUT:
     RETVAL
-
 
 MODULE = Eir            PACKAGE = Eir::Bot
 
