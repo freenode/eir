@@ -83,8 +83,16 @@ sub unload_script {
 }
 
 sub do_eval {
-    my ($text) = @_;
-    call_wrapper(sub { use Eir; eval "$text"; die $@ if $@; });
+    my ($text, $message) = @_;
+    my $sub = sub {
+            use Eir;
+            sub reply { $message->reply(shift); }
+            sub bot { $message->bot; }
+            sub client { $message->source->{"client"} }
+            eval "$text";
+            die $@ if $@;
+        };
+    call_wrapper($sub);
 }
 
 sub call_wrapper {

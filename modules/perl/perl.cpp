@@ -10,8 +10,6 @@
 
 #include "definitions.h"
 
-#include "util/call_perl.hh"
-
 #include <paludis/util/join.hh>
 
 // Include the xs_init definition here, as i'm too lazy to make the build system
@@ -21,6 +19,10 @@ extern "C" {
 }
 
 using namespace eir;
+
+#define TYPE_MAPS_LIGHT
+#include "util/type_maps.h"
+#include "util/call_perl.hh"
 
 struct PerlModule : CommandHandlerBase<PerlModule>, Module
 {
@@ -57,7 +59,7 @@ struct PerlModule : CommandHandlerBase<PerlModule>, Module
             return;
         }
         call_perl<PerlContext::Void>(aTHX_ "Eir::Init::do_eval", 
-                                        paludis::join(m->args.begin(), m->args.end()," "));
+                                        paludis::join(m->args.begin(), m->args.end()," "), m);
         m->source.reply("Done.");
     }
 

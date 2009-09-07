@@ -28,6 +28,7 @@ TYPE_MAP(CommandRegistry)
 
 TYPE_MAP_(const Message, "Eir::Message")
 
+#ifndef TYPE_MAPS_LIGHT
 
 TYPE_MAP_INTERNAL(BotClientHash)
 TYPE_MAP_INTERNAL(BotChannelHash)
@@ -37,5 +38,7 @@ TYPE_MAP_INTERNAL(PerlHolder)
 
 TYPE_MAP_INTERNAL(ArrayValueWrapper)
 TYPE_MAP_INTERNAL(HashValueWrapper)
+
+#endif
 
 #endif
