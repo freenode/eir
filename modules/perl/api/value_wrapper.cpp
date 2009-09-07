@@ -89,7 +89,7 @@ ArrayValueWrapper::ArrayValueWrapper(pTHX_ Value *v)
     : _value(v)
 {
     if (v->Type() != Value::array)
-        Perl_croak("Can't use an array wrapper for a value that's not an array");
+        Perl_croak(aTHX_ "Can't use an array wrapper for a value that's not an array");
 }
 
 SV *ArrayValueWrapper::FETCH(pTHX_ int idx)
@@ -131,7 +131,7 @@ void ArrayValueWrapper::DELETE(pTHX_ int idx)
     _value->Array().erase(idx);
 }
 
-void ArrayValueWrapper::CLEAR(pTHX_ pTHX)
+void ArrayValueWrapper::CLEAR(pTHX)
 {
     *_value = Value(Value::array);
 }
@@ -164,7 +164,7 @@ HashValueWrapper::HashValueWrapper(pTHX_ Value *v)
     : _value(v)
 {
     if (v->Type() != Value::kvarray)
-        Perl_croak("Can't use a hash wrapper for a value that isn't a k-v array");
+        Perl_croak(aTHX_ "Can't use a hash wrapper for a value that isn't a k-v array");
 }
 
 SV* HashValueWrapper::FETCH(pTHX_ SV *key)
