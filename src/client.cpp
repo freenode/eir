@@ -59,11 +59,24 @@ const std::string& Client::nuh() const
 
 void Client::change_nick(std::string newnick)
 {
+    // The correct logic for this is somewhat non-trivial, due to the various
+    // objects that index client objects by nickname. These all need to be
+    // properly update.
+    //
+    // So, three stages. Remove the old nickname from all such indices, then
+    // change the nickname, then re-add the new nickname.
+    for (auto it = _imp->channels.begin(); it != _imp->channels.end(); ++it)
+        it->second->channel->remove_member(it->second);
+
     _imp->bot->remove_client(shared_from_this());
+
     _imp->nick = newnick;
     _imp->nuh_cached = false;
+
     _imp->bot->add_client(shared_from_this());
 
+    for (auto it = _imp->channels.begin(); it != _imp->channels.end(); ++it)
+        it->second->channel->add_member(it->second);
 }
 
 Client::AttributeIterator Client::attr_begin()
