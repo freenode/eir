@@ -51,4 +51,5 @@ INCLUDE: helpers.xs
 INCLUDE: messages.xs
 INCLUDE: handlers.xs
 INCLUDE: value.xs
+INCLUDE: logger.xs
 
