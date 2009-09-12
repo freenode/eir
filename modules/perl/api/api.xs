@@ -25,6 +25,16 @@ using std::string;
 
 #include "util/call_perl.hh"
 
+
+// Macros used to turn xsubpp's exception-handling stubs into something vaguely useful.
+#define TRY try
+#define BEGHANDLERS catch (eir::Exception & e) \
+                        { snprintf(errbuf, sizeof errbuf, "%s (%s)", e.message().c_str(), e.what()); } \
+                    catch (std::exception & e) \
+                        { snprintf(errbuf, sizeof errbuf, "Unknown exception (%s)", e.what()); }
+#define CATCHALL    catch (...) { const char *Xname = "Unknown error", *Xreason = "";
+#define ENDHANDLERS }
+
 MODULE = Eir            PACKAGE = Eir
 
 Bot *
