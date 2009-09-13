@@ -1,9 +1,11 @@
 #include "storage.h"
+#include "handler.h"
 
 #include <paludis/util/private_implementation_pattern-impl.hh>
 #include <paludis/util/instantiation_policy-impl.hh>
 
 #include <list>
+#include <set>
 
 using namespace eir;
 using namespace paludis;
@@ -71,6 +73,46 @@ namespace paludis
         }
 
         BackendData *default_backend;
+
+        std::set<std::pair<const Value *, std::string>> auto_saves;
+
+        void do_auto_save(const Value *v, std::string dest)
+        {
+            auto_saves.insert(make_pair(v, dest));
+        }
+
+        void do_auto_saves(const Message *)
+        {
+            for (auto it = auto_saves.begin(); it != auto_saves.end(); ++it)
+            {
+                do_save(*it->first, it->second);
+            }
+        }
+
+        void do_save(const eir::Value & v, std::string dest)
+        {
+            std::string type, destination;
+            split_storage_dest(dest, type, destination);
+
+            BackendList::iterator it = find_by_type(type);
+
+            if (it == backends.end())
+                throw StorageError("No such storage type '" + type + "' has been loaded");
+
+            it->be->Save(v, destination);
+        }
+
+        EventHolder auto_save_event;
+        CommandHolder shutdown_save_command;
+
+        Implementation()
+        {
+            auto_save_event = EventManager::get_instance()->add_recurring_event(120,
+                                std::bind(&Implementation<StorageManager>::do_auto_saves, this, (const Message *)0));
+            shutdown_save_command = CommandRegistry::get_instance()->add_handler(
+                                filter_command_type("shutting_down", sourceinfo::Internal),
+                                std::bind(&Implementation<StorageManager>::do_auto_saves, this, std::placeholders::_1));
+        }
     };
 }
 
@@ -107,17 +149,14 @@ StorageManager::BackendId StorageManager::register_backend(std::string type, Sto
     return data.id;
 }
 
+void StorageManager::auto_save(const eir::Value * v, std::string dest)
+{
+    _imp->do_auto_save(v, dest);
+}
+
 void StorageManager::Save(const eir::Value & v, std::string dest)
 {
-    std::string type, destination;
-    _imp->split_storage_dest(dest, type, destination);
-
-    BackendList::iterator it = _imp->find_by_type(type);
-
-    if (it == _imp->backends.end())
-        throw StorageError("No such storage type '" + type + "' has been loaded");
-
-    it->be->Save(v, destination);
+    _imp->do_save(v, dest);
 }
 
 eir::Value StorageManager::Load(std::string src)

@@ -20,6 +20,7 @@ namespace eir
         public:
             void Save(const eir::Value &, std::string);
             eir::Value Load(std::string);
+            void auto_save(const eir::Value *, std::string);
 
             typedef unsigned int BackendId;
             BackendId register_backend(std::string, StorageBackend *);
