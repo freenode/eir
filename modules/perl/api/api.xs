@@ -62,4 +62,5 @@ INCLUDE: messages.xs
 INCLUDE: handlers.xs
 INCLUDE: value.xs
 INCLUDE: logger.xs
+INCLUDE: storage.xs
 
