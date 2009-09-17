@@ -4,8 +4,7 @@ MODULE = Eir            PACKAGE = Eir::Settings
 void
 Add(const char *name, SV *val)
 CODE:
-    if (!GlobalSettingsManager::get_instance()->add(name, value_from_sv(aTHX_ val)))
-        Perl_croak(aTHX_ "Failed to add setting");
+    GlobalSettingsManager::get_instance()->add(name, value_from_sv(aTHX_ val));
 
 
 SV*
