@@ -7,6 +7,7 @@ namespace eir
     {
         SV *sv_from_value(Value *);
         Value value_from_sv(SV *);
+        Value* value_star_from_sv(SV *);
 
         struct ArrayValueWrapper
         {
