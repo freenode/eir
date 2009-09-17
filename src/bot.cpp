@@ -357,6 +357,10 @@ void Bot::send(std::string line)
     if (!_imp->_connected || !_imp->_server)
         throw NotConnectedException();
 
+    std::string::size_type idx = line.find_first_of("\r\n");
+    if (idx != std::string::npos)
+        line.erase(idx);
+
     Logger::get_instance()->Log(this, NULL, Logger::Raw, "--> " + line);
 
     _imp->_server->send(line);
