@@ -191,12 +191,12 @@ HashValueWrapper::HashValueWrapper(pTHX_ Value *v)
 
 SV* HashValueWrapper::FETCH(pTHX_ SV *key)
 {
-    return sv_from_value(&_value->KV()[SvPV_nolen(key)]);
+    return sv_from_value(aTHX_ &_value->KV()[SvPV_nolen(key)]);
 }
 
 void HashValueWrapper::STORE(pTHX_ SV *key, SV *value)
 {
-    _value->KV()[SvPV_nolen(key)] = value_from_sv(value);
+    _value->KV()[SvPV_nolen(key)] = value_from_sv(aTHX_ value);
 }
 
 void HashValueWrapper::DELETE(pTHX_ SV *key)

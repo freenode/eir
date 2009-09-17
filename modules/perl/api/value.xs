@@ -4,14 +4,14 @@ MODULE = Eir            PACKAGE = Eir::Settings
 void
 Add(const char *name, SV *val)
 CODE:
-    if (!GlobalSettingsManager::get_instance()->add(name, value_from_sv(val)))
+    if (!GlobalSettingsManager::get_instance()->add(name, value_from_sv(aTHX_ val)))
         Perl_croak(aTHX_ "Failed to add setting");
 
 
 SV*
 Find(const char *name)
 CODE:
-    RETVAL = sv_from_value(&GlobalSettingsManager::get_instance()->get(name));
+    RETVAL = sv_from_value(aTHX_ &GlobalSettingsManager::get_instance()->get(name));
 OUTPUT:
     RETVAL
 

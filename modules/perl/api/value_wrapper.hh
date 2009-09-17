@@ -5,9 +5,9 @@ namespace eir
 {
     namespace perl
     {
-        SV *sv_from_value(Value *);
-        Value value_from_sv(SV *);
-        Value* value_star_from_sv(SV *);
+        SV *sv_from_value(pTHX_ Value *);
+        Value value_from_sv(pTHX_ SV *);
+        Value* value_star_from_sv(pTHX_ SV *);
 
         struct ArrayValueWrapper
         {
