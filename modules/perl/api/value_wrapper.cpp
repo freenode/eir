@@ -17,7 +17,7 @@ using namespace eir::perl;
 namespace eir { namespace perl {
     Value* value_star_from_sv(pTHX_ SV *sv)
     {
-        if (SvMAGICAL(SvRV(sv)))
+        if (SvROK(sv) && SvMAGICAL(SvRV(sv)))
         {
             MAGIC *mg = mg_find(SvRV(sv), PERL_MAGIC_tied);
             if (!mg || !mg->mg_obj)
