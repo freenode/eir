@@ -17,15 +17,30 @@ using namespace eir::perl;
 namespace eir { namespace perl {
     Value value_from_sv(pTHX_ SV *sv)
     {
-        if (sv_isobject(sv) && (SvTYPE(SvRV(sv)) == SVt_PVMG) && sv_derived_from(sv, "Eir::Value"))
-            return *((Value*)SvIV((SV*)SvRV(sv)));
-        else if (SvIOK(sv) && SvIOKp(sv))
+        if (SvIOK(sv) && SvIOKp(sv))
             return Value(SvIV(sv));
         else if (SvPOK(sv) && SvPOKp(sv))
             return Value(SvPV_nolen(sv));
         else if (SvROK(sv))
         {
-            if (SvTYPE(SvRV(sv)) == SVt_PVAV)
+            if (SvMAGICAL(SvRV(sv)))
+            {
+                MAGIC *mg = mg_find(SvRV(sv), PERL_MAGIC_tied);
+                if (!mg || !mg->mg_obj)
+                    return Value(Value::empty);
+
+                SV *obj = mg->mg_obj;
+                if (!sv_isobject(obj) || SvTYPE(SvRV(obj)) != SVt_PVMG)
+                    return Value(Value::empty);
+
+                if (sv_derived_from(obj, PerlClassMap<ArrayValueWrapper*>::name()))
+                    return *((ArrayValueWrapper*)SvIV((SV*)SvRV(obj)))->_value;
+                else if (sv_derived_from(obj, PerlClassMap<HashValueWrapper*>::name()))
+                    return *((HashValueWrapper*)SvIV((SV*)SvRV(obj)))->_value;
+
+                return Value(Value::empty);
+            }
+            else if (SvTYPE(SvRV(sv)) == SVt_PVAV)
             {
                 Value ret(Value::array);
                 AV *array = (AV*)SvRV(sv);
