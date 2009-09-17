@@ -136,34 +136,48 @@ int
 RawIrc()
 CODE:
     RETVAL = sourceinfo::RawIrc;
+OUTPUT:
+    RETVAL
 
 int
 ConfigFile()
 CODE:
     RETVAL = sourceinfo::ConfigFile;
+OUTPUT:
+    RETVAL
 
 int
 SystemConsole()
 CODE:
     RETVAL = sourceinfo::SystemConsole;
+OUTPUT:
+    RETVAL
 
 int
 Signal()
 CODE:
     RETVAL = sourceinfo::Signal;
+OUTPUT:
+    RETVAL
 
 int
 Internal()
 CODE:
     RETVAL = sourceinfo::Internal;
+OUTPUT:
+    RETVAL
 
 int
 IrcCommand()
 CODE:
     RETVAL = sourceinfo::IrcCommand;
+OUTPUT:
+    RETVAL
 
 int
 Any()
 CODE:
     RETVAL = sourceinfo::Any;
+OUTPUT:
+    RETVAL
 
