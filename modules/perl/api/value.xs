@@ -1,10 +1,13 @@
 
 MODULE = Eir            PACKAGE = Eir::Settings
 
-void
+SV*
 Add(const char *name, SV *val)
 CODE:
     GlobalSettingsManager::get_instance()->add(name, value_from_sv(aTHX_ val));
+    RETVAL = sv_from_value(aTHX_ &GlobalSettingsManager::get_instance()->get(name));
+OUTPUT:
+    RETVAL
 
 
 SV*
