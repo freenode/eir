@@ -64,6 +64,7 @@ namespace paludis
         SettingsMap _settings;
 
         bool _connected;
+        bool _registered;
 
         ISupport _supported;
 
@@ -81,6 +82,21 @@ namespace paludis
             _pass = pass;
         }
 
+        CommandHolder _001_handler, nick_in_use_handler;
+
+        void handle_001(const Message *m)
+        {
+            _nick = m->source.destination;
+            _registered = true;
+            nick_in_use_handler = 0;
+        }
+
+        void handle_433(const Message *)
+        {
+            _nick.append("_");
+            _server->send("NICK " + _nick);
+        }
+
         void set_server(const Message *m);
 
         std::string config_filename;
@@ -96,6 +112,10 @@ namespace paludis
                                       &Implementation<Bot>::handle_set);
             rehash_handler = add_handler(filter_command_privilege("rehash", "admin").from_bot(bot),
                                          &Implementation<Bot>::rehash);
+            _001_handler = add_handler(filter_command_type("001", sourceinfo::RawIrc).from_bot(bot),
+                                        &Implementation<Bot>::handle_001);
+            nick_in_use_handler = add_handler(filter_command_type("433", sourceinfo::RawIrc).from_bot(bot),
+                                        &Implementation<Bot>::handle_433);
         }
     };
 }
@@ -339,6 +359,7 @@ void Bot::run()
     _imp->_server->connect(_imp->_host, _imp->_port);
 
     _imp->_connected = true;
+    _imp->_registered = false;
 
     Message m(this, "on_connect");
     CommandRegistry::get_instance()->dispatch(&m);
