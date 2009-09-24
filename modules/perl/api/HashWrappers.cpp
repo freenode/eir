@@ -1,4 +1,10 @@
+#include "stupid_perl_workarounds.h"
+
+#include <EXTERN.h>
+#include <perl.h>
+
 #include "HashWrappers.h"
+#include "value_wrapper.hh"
 
 #include <map>
 
@@ -54,6 +60,53 @@ const char* BotChannelHash::NEXTKEY(char *prevname)
     if (it == _bot->end_channels())
         return 0;
     return (*it)->name().c_str();
+}
+
+BotSettingsHash::BotSettingsHash(Bot *b)
+    : _bot(b)
+{
+}
+
+SV* BotSettingsHash::FETCH(char *name)
+{
+    Value v = _bot->get_setting_with_default(name, Value(Value::empty));
+    return sv_from_value(&v);
+}
+
+void BotSettingsHash::STORE(char *name, SV *value)
+{
+    _bot->add_setting(name, value_from_sv(value));
+}
+
+void BotSettingsHash::DELETE(char *name)
+{
+    _bot->remove_setting(std::string(name));
+}
+
+bool BotSettingsHash::EXISTS(char *name)
+{
+    return _bot->find_setting(name) != _bot->end_settings();
+}
+
+std::string BotSettingsHash::FIRSTKEY()
+{
+    return _bot->begin_settings()->first;
+}
+
+std::string BotSettingsHash::NEXTKEY(char *prevname)
+{
+    auto it = _bot->find_setting(prevname);
+    if (it == _bot->end_settings())
+        return 0;
+    ++it;
+    if (it == _bot->end_settings())
+        return 0;
+    return it->first;
+}
+
+int BotSettingsHash::SCALAR()
+{
+    return _bot->begin_settings() != _bot->end_settings();
 }
 
 

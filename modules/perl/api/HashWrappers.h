@@ -32,6 +32,20 @@ namespace eir
                 int SCALAR();
         };
 
+        class BotSettingsHash
+        {
+            Bot *_bot;
+            public:
+                BotSettingsHash(Bot *b);
+                SV* FETCH(char *name);
+                void STORE(char *name, SV *value);
+                void DELETE(char *name);
+                bool EXISTS(char *name);
+                std::string FIRSTKEY();
+                std::string NEXTKEY(char *prevname);
+                int SCALAR();
+        };
+
         class ClientMembershipHash
         {
             Client *_client;

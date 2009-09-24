@@ -32,6 +32,7 @@ TYPE_MAP_(const Message, "Eir::Message")
 
 TYPE_MAP_INTERNAL(BotClientHash)
 TYPE_MAP_INTERNAL(BotChannelHash)
+TYPE_MAP_INTERNAL(BotSettingsHash)
 TYPE_MAP_INTERNAL(ClientMembershipHash)
 TYPE_MAP_INTERNAL(ChannelMembershipHash)
 TYPE_MAP_INTERNAL(PerlHolder)

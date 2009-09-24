@@ -74,6 +74,40 @@ int
 BotChannelHash::SCALAR()
 
 
+MODULE = Eir            PACKAGE = Eir::Internal::BotSettingsHash
+
+BotSettingsHash *
+TIEHASH(char *classname, Bot* bot)
+CODE:
+    RETVAL = new BotSettingsHash(bot);
+OUTPUT:
+    RETVAL
+
+SV *
+BotSettingsHash::FETCH(char *nick)
+
+void
+BotSettingsHash::STORE(char *nick, SV *value)
+
+void
+BotSettingsHash::DELETE(char *nick)
+
+int
+BotSettingsHash::EXISTS(char *nick)
+
+string
+BotSettingsHash::FIRSTKEY()
+
+string
+BotSettingsHash::NEXTKEY(char *prev)
+
+void
+BotSettingsHash::DESTROY()
+
+int
+BotSettingsHash::SCALAR()
+
+
 MODULE = Eir            PACKAGE = Eir::Internal::ClientMembershipHash
 
 ClientMembershipHash *

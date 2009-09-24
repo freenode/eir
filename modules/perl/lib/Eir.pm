@@ -23,6 +23,13 @@ sub Channels {
     return $ret;
 }
 
+sub Settings {
+    my ($self) = @_;
+    my $ret = {};
+    tie %$ret, 'Eir::Internal::BotSettingsHash', $self;
+    return $ret;
+}
+
 package Eir::Client;
 
 sub Channels {

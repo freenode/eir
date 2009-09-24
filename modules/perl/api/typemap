@@ -9,6 +9,7 @@ const Message *         O_OBJECT
 
 BotClientHash *         O_OBJECT
 BotChannelHash *        O_OBJECT
+BotSettingsHash *       O_OBJECT
 ClientMembershipHash *  O_OBJECT
 ChannelMembershipHash * O_OBJECT
 PerlHolder *            O_OBJECT
