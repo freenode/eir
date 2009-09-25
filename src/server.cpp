@@ -34,8 +34,6 @@ namespace paludis
 
         Server::Handler _handler;
 
-        int _burst;
-
         void maybe_send_stuff();
         void io_event();
         void do_receive_stuff();
@@ -45,7 +43,11 @@ namespace paludis
         char recvbuf[bufsize];
         int recvpos;
 
-        Implementation(Server::Handler h) : _handler(h), _burst(0), recvpos(0)
+        int cur_burst;
+        int max_burst, rate_time, rate_num;
+
+        Implementation(Server::Handler h) : _handler(h), recvpos(0), cur_burst(0),
+                                            max_burst(4), rate_time(2), rate_num(1)
         {
         }
 
@@ -130,19 +132,19 @@ void Server::send(std::string line)
 
 void Implementation<Server>::maybe_send_stuff()
 {
-    while(_burst < 4 && ! _send_queue.empty())
+    while(cur_burst < max_burst && ! _send_queue.empty())
     {
         std::string line = _send_queue.front();
         write(socketfd, line.c_str(), line.size());
         _send_queue.pop();
-        ++_burst;
+        ++cur_burst;
     }
 }
 
 void Implementation<Server>::io_event()
 {
-    if (_burst > 0)
-        --_burst;
+    if (cur_burst > 0)
+        cur_burst = std::max(0, cur_burst - rate_num);
     maybe_send_stuff();
 }
 
@@ -206,7 +208,7 @@ void Implementation<Server>::run()
 {
     Context c("In main message loop");
 
-    EventManager::id _send_id = EventManager::get_instance()->add_recurring_event(2,
+    EventManager::id _send_id = EventManager::get_instance()->add_recurring_event(rate_time,
                                     std::tr1::bind(&Implementation<Server>::io_event, this));
 
     do_receive_stuff();

@@ -24,6 +24,8 @@ namespace eir
 
             void run();
 
+            void set_throttle(int burst, int time, int num);
+
         private:
             Server();
             Server (const Server &);
