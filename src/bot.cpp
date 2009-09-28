@@ -10,6 +10,7 @@
 #include <paludis/util/private_implementation_pattern-impl.hh>
 #include <paludis/util/instantiation_policy-impl.hh>
 #include <paludis/util/tokeniser.hh>
+#include <paludis/util/destringify.hh>
 
 #include <fstream>
 
@@ -97,6 +98,30 @@ namespace paludis
             _server->send("NICK " + _nick);
         }
 
+        CommandHolder throttle_handler;
+        void handle_throttle(const Message *m)
+        {
+            if (!_server)
+                throw ConfigurationError("Must specify a server before throttle settings");
+
+            if (m->args.size() < 3)
+                throw ConfigurationError("Need at least three arguments for throttle settings");
+
+            int burst = paludis::destringify<int>(m->args[0]);
+            int rate  = paludis::destringify<int>(m->args[1]);
+            int num   = paludis::destringify<int>(m->args[2]);
+
+            if (burst < 1)
+                throw ConfigurationError("Maximum burst must be at least one");
+            if (rate < 0)
+                throw ConfigurationError("Throttle rate must not be negative");
+            if (num < 1)
+                throw ConfigurationError("Throttle multiplier must be at least one");
+
+            _server->set_throttle(burst, rate, num);
+        }
+
+
         void set_server(const Message *m);
 
         std::string config_filename;
@@ -116,6 +141,8 @@ namespace paludis
                                         &Implementation<Bot>::handle_001);
             nick_in_use_handler = add_handler(filter_command_type("433", sourceinfo::RawIrc).from_bot(bot),
                                         &Implementation<Bot>::handle_433);
+            throttle_handler = add_handler(filter_command_type("throttle", sourceinfo::ConfigFile).from_bot(bot),
+                                        &Implementation<Bot>::handle_throttle);
         }
     };
 }

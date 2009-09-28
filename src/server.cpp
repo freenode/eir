@@ -66,6 +66,13 @@ Server::~Server()
 {
 }
 
+void Server::set_throttle(int burst, int time, int number)
+{
+    _imp->max_burst = burst;
+    _imp->rate_time = time;
+    _imp->rate_num  = number;
+}
+
 void Server::connect(std::string host, std::string port)
 {
     _imp->servername = host;
