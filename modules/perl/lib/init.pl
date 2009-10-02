@@ -70,13 +70,15 @@ sub do_load_script {
 }
 
 sub unload_script {
-    my ($filename) = @_;
+    my ($filename, $message) = @_;
     my $packagename = package_name_ify($filename);
 
     if (!defined $Scripts{$packagename})
     {
         die "$filename is not loaded";
     }
+
+    eval "${packagename}::unload(\$message)";
 
     delete_package($packagename);
     delete $Scripts{$packagename};

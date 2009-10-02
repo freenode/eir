@@ -47,7 +47,7 @@ struct PerlModule : CommandHandlerBase<PerlModule>, Module
             m->source.error("I need a file name to unload.");
             return;
         }
-        call_perl<PerlContext::Void>(aTHX_ "Eir::Init::unload_script", m->args[0]);
+        call_perl<PerlContext::Void>(aTHX_ "Eir::Init::unload_script", m->args[0], m);
         m->source.reply("Successfully unloaded " + m->args[0]);
     }
 
