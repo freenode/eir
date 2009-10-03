@@ -10,7 +10,7 @@ struct Operer : CommandHandlerBase<Operer>, Module
     void oper(const Message *m)
     {
         Bot::SettingsIterator it = m->bot->find_setting("oper_pass");
-        if(it == m->bot->end_settings())
+        if (it == m->bot->end_settings())
             return;
 
         std::string pass = it->second;
@@ -23,10 +23,22 @@ struct Operer : CommandHandlerBase<Operer>, Module
         m->bot->send("OPER " + user + " " + pass);
     }
 
-    CommandHolder _id;
+    void set_umode(const Message *m)
+    {
+        Bot::SettingsIterator it = m->bot->find_setting("oper_mode");
+        if (it == m->bot->end_settings())
+            return;
+
+        std::string mode = it->second;
+
+        m->bot->send("MODE " + m->bot->nick() + " " + mode);
+    }
+
+    CommandHolder connect_id, oper_up_id;
 
     Operer() {
-        _id = add_handler(filter_command_type("001", sourceinfo::RawIrc), &Operer::oper);
+        connect_id = add_handler(filter_command_type("001", sourceinfo::RawIrc), &Operer::oper);
+        oper_up_id = add_handler(filter_command_type("381", sourceinfo::RawIrc), &Operer::set_umode);
     }
 };
 
