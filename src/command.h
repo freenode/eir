@@ -19,7 +19,7 @@ namespace eir
 
             void dispatch(const Message *, bool = false);
 
-            id add_handler(Filter, const handler &, Message::Order = Message::normal);
+            id add_handler(Filter, const handler &, bool = false, Message::Order = Message::normal);
             void remove_handler(id);
 
             CommandRegistry();

@@ -2,12 +2,20 @@
 MODULE = Eir            PACKAGE = Eir::CommandRegistry
 
 PerlHolder *
-add_handler(Filter *filter, SV *func)
+add_handler(Filter *filter, SV *func, ...)
 CODE:
+    bool quiet = false;
+    Message::Order order = Message::normal;
+    if (items > 2)
+        quiet = (bool)SvIV(ST(2));
+    if (items > 3)
+        order = (Message::Order)SvIV(ST(3));
     CommandRegistry::id id = CommandRegistry::get_instance()->add_handler(
                                 *filter,
                                 std::bind(call_perl<PerlContext::Void, const char *, SV*, const Message *>,
-                                            aTHX_ "Eir::Init::call_wrapper", func, _1));
+                                            aTHX_ "Eir::Init::call_wrapper", func, _1),
+                                quiet,
+                                order);
     RETVAL = new PerlCommandHolder(aTHX_ id, func);
 OUTPUT:
     RETVAL
