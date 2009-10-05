@@ -53,6 +53,9 @@ OUTPUT:
 void
 Log(...)
 PPCODE:
+    if (items < 2)
+        Perl_croak(aTHX_ "usage: Eir::Logger::Log([bot,[client,]] type, text)");
+
     Bot *bot = 0;
     Client *client = 0;
     int type = 0;
@@ -68,6 +71,9 @@ PPCODE:
             ++argc;
         }
     }
+    if (items < argc + 2)
+        Perl_croak(aTHX_ "usage: Eir::Logger::Log([bot,[client,]] type, text)");
+
     type = SvIV(ST(argc));
     ++argc;
     text = SvPV_nolen(ST(argc));
