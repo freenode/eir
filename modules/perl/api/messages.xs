@@ -77,6 +77,27 @@ Filter::match(const Message *m)
 
 MODULE = Eir            PACKAGE = Eir::Message
 
+int
+First()
+CODE:
+    RETVAL = Message::first;
+OUTPUT:
+    RETVAL
+
+int
+Normal()
+CODE:
+    RETVAL = Message::normal;
+OUTPUT:
+    RETVAL
+
+int
+Last()
+CODE:
+    RETVAL = Message::last;
+OUTPUT:
+    RETVAL
+
 Bot *
 Message::bot() const
 CODE:
