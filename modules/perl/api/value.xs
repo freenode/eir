@@ -61,7 +61,7 @@ CODE:
     THIS->CLEAR(aTHX);
 
 void
-ArrayValueWrapper::PUSH()
+ArrayValueWrapper::PUSH(...)
 CODE:
     // Start at 1; assume ST(0) == THIS
     for (int i=1; i < items; ++i)
