@@ -74,7 +74,7 @@ namespace eir { namespace perl {
         return Value(Value::empty);
     }
 
-    SV *sv_from_value(pTHX_ Value *v)
+    SV *sv_from_value(pTHX_ Value *v, bool owned /* = false */)
     {
         switch (v->Type())
         {
@@ -89,7 +89,7 @@ namespace eir { namespace perl {
                     AV *array = newAV();
                     SV *tie = newSV(0);
                     sv_setref_pv(tie, PerlClassMap<ArrayValueWrapper*>::name(),
-                                    new ArrayValueWrapper(aTHX_ v));
+                                    new ArrayValueWrapper(aTHX_ v, owned));
                     hv_magic(array, tie, PERL_MAGIC_tied);
                     return newRV_noinc((SV*)array);
                 }
@@ -98,7 +98,7 @@ namespace eir { namespace perl {
                     HV *hash = newHV();
                     SV *tie = newSV(0);
                     sv_setref_pv(tie, PerlClassMap<HashValueWrapper*>::name(),
-                                    new HashValueWrapper(aTHX_ v));
+                                    new HashValueWrapper(aTHX_ v, owned));
                     hv_magic(hash, tie, PERL_MAGIC_tied);
                     return newRV_noinc((SV*)hash);
                 }
@@ -107,11 +107,17 @@ namespace eir { namespace perl {
     }
 } }
 
-ArrayValueWrapper::ArrayValueWrapper(pTHX_ Value *v)
-    : _value(v)
+ArrayValueWrapper::ArrayValueWrapper(pTHX_ Value *v, bool o)
+    : _value(v), _owned(o)
 {
     if (v->Type() != Value::array)
         Perl_croak(aTHX_ "Can't use an array wrapper for a value that's not an array");
+}
+
+ArrayValueWrapper::~ArrayValueWrapper()
+{
+    if (_owned)
+        delete _value;
 }
 
 SV *ArrayValueWrapper::FETCH(pTHX_ int idx)
@@ -182,11 +188,17 @@ void ArrayValueWrapper::UNSHIFT(pTHX_ SV *sv)
     _value->Array().insert(0, value_from_sv(aTHX_ sv));
 }
 
-HashValueWrapper::HashValueWrapper(pTHX_ Value *v)
-    : _value(v)
+HashValueWrapper::HashValueWrapper(pTHX_ Value *v, bool o)
+    : _value(v), _owned(o)
 {
     if (v->Type() != Value::kvarray)
         Perl_croak(aTHX_ "Can't use a hash wrapper for a value that isn't a k-v array");
+}
+
+HashValueWrapper::~HashValueWrapper()
+{
+    if (_owned)
+        delete _value;
 }
 
 SV* HashValueWrapper::FETCH(pTHX_ SV *key)

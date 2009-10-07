@@ -5,15 +5,17 @@ namespace eir
 {
     namespace perl
     {
-        SV *sv_from_value(pTHX_ Value *);
+        SV *sv_from_value(pTHX_ Value *, bool owned = false);
         Value value_from_sv(pTHX_ SV *);
         Value* value_star_from_sv(pTHX_ SV *);
 
         struct ArrayValueWrapper
         {
             Value *_value;
+            bool _owned;
 
-            ArrayValueWrapper(pTHX_ Value *);
+            ArrayValueWrapper(pTHX_ Value *, bool = false);
+            ~ArrayValueWrapper();
             SV *FETCH(pTHX_ int);
             void STORE(pTHX_ int, SV *);
             void STORESIZE(pTHX_ int);
@@ -30,8 +32,10 @@ namespace eir
         struct HashValueWrapper
         {
             Value *_value;
+            bool _owned;
 
-            HashValueWrapper(pTHX_ Value *);
+            HashValueWrapper(pTHX_ Value *, bool = false);
+            ~HashValueWrapper();
             SV *FETCH(pTHX_ SV*);
             void STORE(pTHX_ SV*, SV*);
             void DELETE(pTHX_ SV*);
