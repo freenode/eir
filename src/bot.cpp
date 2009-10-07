@@ -533,7 +533,7 @@ Value Bot::get_setting(std::string name)
 {
     SettingsIterator it = find_setting(name);
     if(it == end_settings())
-        return "";
+        throw NotFoundError("No such setting " + name);
     return it->second;
 }
 

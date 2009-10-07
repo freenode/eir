@@ -19,6 +19,7 @@ namespace {
         InternalError g("");
         StorageError h("");
         IOError i("");
+        NotFoundError j("");
     }
 }
 

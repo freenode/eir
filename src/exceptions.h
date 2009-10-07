@@ -72,6 +72,11 @@ namespace eir {
         IOError(std::string s) : Exception(s) { }
     };
 
+    struct NotFoundError : public Exception
+    {
+        NotFoundError(std::string s) : Exception(s) { }
+    };
+
 }
 
 #endif

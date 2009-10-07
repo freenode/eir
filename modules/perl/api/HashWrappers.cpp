@@ -69,8 +69,15 @@ BotSettingsHash::BotSettingsHash(Bot *b)
 
 SV* BotSettingsHash::FETCH(char *name)
 {
-    Value v = _bot->get_setting_with_default(name, Value(Value::empty));
-    return sv_from_value(&v);
+    try
+    {
+        Value v = _bot->get_setting(name);
+        return sv_from_value(&v);
+    }
+    catch (NotFoundError & e)
+    {
+        return &PL_sv_undef;
+    }
 }
 
 void BotSettingsHash::STORE(char *name, SV *value)
