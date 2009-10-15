@@ -146,6 +146,12 @@ OUTPUT:
     RETVAL
 
 void
+Message::error(const char *str) const
+CODE:
+    THIS->source.error(str);
+
+
+void
 Message::reply(const char *str) const
 CODE:
     THIS->source.reply(str);
