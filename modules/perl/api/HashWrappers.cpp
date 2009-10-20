@@ -67,12 +67,12 @@ BotSettingsHash::BotSettingsHash(Bot *b)
 {
 }
 
-SV* BotSettingsHash::FETCH(char *name)
+SV* BotSettingsHash::FETCH(pTHX_ char *name)
 {
     try
     {
         Value v = _bot->get_setting(name);
-        return sv_from_value(&v);
+        return sv_from_value(aTHX_ &v);
     }
     catch (NotFoundError & e)
     {
@@ -80,9 +80,9 @@ SV* BotSettingsHash::FETCH(char *name)
     }
 }
 
-void BotSettingsHash::STORE(char *name, SV *value)
+void BotSettingsHash::STORE(pTHX_ char *name, SV *value)
 {
-    _bot->add_setting(name, value_from_sv(value));
+    _bot->add_setting(name, value_from_sv(aTHX_ value));
 }
 
 void BotSettingsHash::DELETE(char *name)

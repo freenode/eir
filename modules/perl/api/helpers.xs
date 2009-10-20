@@ -84,16 +84,22 @@ OUTPUT:
     RETVAL
 
 SV *
-BotSettingsHash::FETCH(char *nick)
+BotSettingsHash::FETCH(char *name)
+CODE:
+    RETVAL = THIS->FETCH(aTHX_ name);
+OUTPUT:
+    RETVAL
 
 void
-BotSettingsHash::STORE(char *nick, SV *value)
+BotSettingsHash::STORE(char *name, SV *value)
+CODE:
+    THIS->STORE(aTHX_ name, value);
 
 void
-BotSettingsHash::DELETE(char *nick)
+BotSettingsHash::DELETE(char *name)
 
 int
-BotSettingsHash::EXISTS(char *nick)
+BotSettingsHash::EXISTS(char *name)
 
 string
 BotSettingsHash::FIRSTKEY()
