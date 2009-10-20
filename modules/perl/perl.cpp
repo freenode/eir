@@ -36,17 +36,8 @@ struct PerlModule : CommandHandlerBase<PerlModule>, Module
             m->source.error("I need a file name to load.");
             return;
         }
-        try
-        {
-            call_perl<PerlContext::Void>(aTHX_ "Eir::Init::load_script", m->args[0]);
-            m->source.reply("Successfully loaded " + m->args[0]);
-        }
-        catch (Exception & e)
-        {
-            if (m->source.type != sourceinfo::ConfigFile)
-                throw;
-            m->source.error(m->args[0] + " is already loaded.");
-        }
+        call_perl<PerlContext::Void>(aTHX_ "Eir::Init::load_script", m->args[0], m, 1);
+        m->source.reply("Successfully loaded " + m->args[0]);
     }
 
     void do_script_unload(const Message *m)

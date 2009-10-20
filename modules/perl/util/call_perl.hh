@@ -21,6 +21,10 @@ namespace eir
     };
 }
 
+SV* sv_from(pTHX_ int i)
+{
+    return sv_2mortal(newSViv(i));
+}
 SV* sv_from(pTHX_ long i)
 {
     return sv_2mortal(newSViv(i));

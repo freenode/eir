@@ -40,11 +40,16 @@ sub load_script {
 }
 
 sub do_load_script {
-    my ($filename) = @_;
+    my ($filename, $message, $nonfatal) = @_;
     my $packagename = package_name_ify($filename);
 
     if (defined $Scripts{$packagename})
     {
+        if ($nonfatal) {
+            $message->reply("$filename is already loaded");
+            return;
+        }
+
         # This will always be called with G_EVAL, so this die can be translated
         # into a C++ exception.
         die "$filename is already loaded.";
