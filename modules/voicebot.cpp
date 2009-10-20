@@ -160,7 +160,9 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
         std::string mask = *it++;
 
         if ((*it)[0] == '~')
-            expires = time(NULL) + parse_time(*it++);
+            expires = parse_time(*it++);
+        if (expires > 0)
+            expires += time(NULL);
 
         std::string reason = paludis::join(it, m->args.end(), " ");
 
