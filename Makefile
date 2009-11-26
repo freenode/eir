@@ -56,7 +56,7 @@ libjson.so: $(libjson_OBJS)
 	g++ $(CXXFLAGS) -fPIC -shared -o $@ $^
 
 clean:
-	rm -f $(eir_OBJS) eir $(mod_MODULES) libpaludisutil.so $(libpaludisutil_OBJS)
+	rm -f $(eir_OBJS) eir $(mod_MODULES) libpaludisutil.so $(libpaludisutil_OBJS) libjson.so $(libjson_OBJS)
 
 
 ### Some magic to allow extra compiler flags for particular modules

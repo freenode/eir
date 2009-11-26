@@ -44,5 +44,10 @@ $(APIDIR)/Eir.so: $(PERLAPI_OBJS)
 $(APIDIR)/.depend: $(addprefix $(APIDIR)/,$(PERLAPI_SOURCES))
 	g++ -MM -MG $(CXXFLAGS) $(PERL_INCLUDES) $(mod_INCLUDES) $^ 2>/dev/null | sed 's!\(^[^ ]*\.o\):!$(APIDIR)/\1:!' >$@
 
+clean_perl:
+	rm -f modules/perl/api/Eir.so $(PERLAPI_OBJS)
+
+clean: clean_perl
+
 
 -include $(APIDIR)/.depend
