@@ -26,6 +26,17 @@ PrivilegeSet::iterator PrivilegeSet::end()
     return _imp->privs.end();
 }
 
+bool PrivilegeSet::has_privilege(std::string c, std::string p)
+{
+    return _imp->privs.find(make_pair(c, p)) != _imp->privs.end() ||
+           _imp->privs.find(make_pair("", p)) != _imp->privs.end();
+}
+
+void PrivilegeSet::add_privilege(std::string c, std::string p)
+{
+    _imp->privs.insert(make_pair(c, p));
+}
+
 bool PrivilegeSet::has_privilege(std::string p)
 {
     return _imp->privs.find(make_pair("", p)) != _imp->privs.end();
