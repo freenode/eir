@@ -8,6 +8,8 @@
 
 #include "exceptions.h"
 
+#include <signal.h>
+
 #include <iostream>
 
 using namespace eir;
@@ -23,6 +25,9 @@ int main(int, char **argv)
 
     if (argv[1] && argv[1][0])
         botname = argv[1];
+
+    // We want a regular write error, not a SIGPIPE, if the socket is closed.
+    signal(SIGPIPE, SIG_IGN);
 
     Bot bot(botname);
 
