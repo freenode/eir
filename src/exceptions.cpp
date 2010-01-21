@@ -20,6 +20,7 @@ namespace {
         StorageError h("");
         IOError i("");
         NotFoundError j("");
+        DisconnectedException k("");
     }
 }
 

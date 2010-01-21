@@ -35,6 +35,12 @@ namespace eir {
         { }
     };
 
+    struct DisconnectedException : public Exception
+    {
+        DisconnectedException(std::string s) : Exception(s, true)
+        { }
+    };
+
     struct NotConnectedException : public Exception
     {
         NotConnectedException() : Exception("Not connected to server")
