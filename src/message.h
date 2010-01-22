@@ -48,7 +48,8 @@ namespace eir {
         sourceinfo(unsigned int t, Client::ptr c)
             : type(t), client(c), name(c->nick())
         { }
-        sourceinfo() { };
+        sourceinfo() : type(Internal)
+        { }
     };
 
     struct Message {
