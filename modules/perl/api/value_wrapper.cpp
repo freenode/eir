@@ -63,7 +63,7 @@ namespace eir { namespace perl {
                 hv_iterinit(hash);
                 SV *value;
                 char *key;
-                int keylen;
+                I32 keylen;
                 while ((value = hv_iternextsv(hash, &key, &keylen)))
                 {
                     ret[key] = value_from_sv(aTHX_ value);
