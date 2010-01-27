@@ -106,6 +106,7 @@ namespace paludis
         CommandHolder shutdown_save_command;
 
         Implementation()
+            : default_backend(0)
         {
             auto_save_event = EventManager::get_instance()->add_recurring_event(120,
                                 std::bind(&Implementation<StorageManager>::do_auto_saves, this, (const Message *)0));
