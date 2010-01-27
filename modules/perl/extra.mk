@@ -1,4 +1,4 @@
-PERL_INCLUDES := $(shell perl -MExtUtils::Embed -e ccopts) -Imodules/perl/
+PERL_INCLUDES := $(shell perl -MExtUtils::Embed -e ccopts) -Imodules/perl/ -Wno-format-security
 PERL_LDFLAGS := $(shell perl -MExtUtils::Embed -e ldopts)
 
 APIDIR=modules/perl/api
