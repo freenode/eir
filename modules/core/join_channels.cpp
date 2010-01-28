@@ -26,6 +26,12 @@ struct JoinChannels : CommandHandlerBase<JoinChannels>, Module
 
     void remove_channel(const Message *m)
     {
+        if (m->args.empty())
+        {
+            m->source.reply("Part where?");
+            return;
+        }
+
         for (std::list<std::string>::iterator it = bot_channels.begin();
                 it != bot_channels.end(); ++it)
         {
