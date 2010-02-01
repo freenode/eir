@@ -391,11 +391,14 @@ void Bot::run()
     Message m(this, "on_connect");
     CommandRegistry::get_instance()->dispatch(&m);
 
+    std::string ident = get_setting_with_default("ident", "eir");
+    std::string realname = get_setting_with_default("realname", "eir version 0.0.1");
+
     if (_imp->_pass.length() > 0)
         send("PASS " + _imp->_pass);
 
     send("NICK " + _imp->_nick);
-    send("USER eir * * :eir version 0.0.1");
+    send("USER " + ident + " * * :" + realname);
 
     _imp->_server->run();
 }
