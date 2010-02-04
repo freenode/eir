@@ -33,27 +33,27 @@ all: eir modules libpaludisutil.so libjson.so
 eir: libpaludisutil.so
 
 eir: $(eir_OBJS)
-	g++ $(LDFLAGS) -o $@ $(eir_OBJS) -ldl -lpaludisutil -L. -Wl,--rpath `pwd`
+	$(CXX) $(LDFLAGS) -o $@ $(eir_OBJS) -ldl -lpaludisutil -L. -Wl,--rpath `pwd`
 
 .PHONY: modules
 
 modules: $(mod_MODULES)
 
 modules/%.so: modules/%.cpp
-	g++ $(CXXFLAGS) $(EXTRA_CXXFLAGS_$(dir $@)) $(mod_INCLUDES) -fPIC -shared -o $@.tmp $<
+	$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS_$(dir $@)) $(mod_INCLUDES) -fPIC -shared -o $@.tmp $<
 	mv $@.tmp $@
 
 paludis/util/%.o: paludis/util/%.cc
-	g++ $(CXXFLAGS) -fPIC -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -fPIC -c -o $@ $<
 
 libpaludisutil.so: $(libpaludisutil_OBJS)
-	g++ $(CXXFLAGS) -fPIC -shared -o $@ $^
+	$(CXX) $(CXXFLAGS) -fPIC -shared -o $@ $^
 
 libjson/%.o: libjson/%.cpp
-	g++ $(CXXFLAGS) -fPIC -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -fPIC -c -o $@ $<
 
 libjson.so: $(libjson_OBJS)
-	g++ $(CXXFLAGS) -fPIC -shared -o $@ $^
+	$(CXX) $(CXXFLAGS) -fPIC -shared -o $@ $^
 
 clean:
 	rm -f $(eir_OBJS) eir $(mod_MODULES) libpaludisutil.so $(libpaludisutil_OBJS) libjson.so $(libjson_OBJS)
@@ -80,12 +80,12 @@ CXXFLAGS += $(SUBDIR_CXXFLAGS_$(dir $@)) $(MODULE_CXXFLAGS_$@)
 # While eir includes no generated headers, we use -MG nonetheless so that individual modules can
 # use extra include paths without triggering errors during dependency generation
 src/.depend: $(eir_SOURCES) $(eir_HEADERS)
-	g++ -MM -MG $(CXXFLAGS) $(eir_SOURCES) | sed 's!\(^[^ ]*.o:\)!src/\1!' >$@
+	$(CXX) -MM -MG $(CXXFLAGS) $(eir_SOURCES) | sed 's!\(^[^ ]*.o:\)!src/\1!' >$@
 
 modules/.depend: $(mod_SOURCES) $(eir_HEADERS)
-	g++ -MM -MG $(CXXFLAGS) $(mod_INCLUDES) $(mod_SOURCES) 2>/dev/null | sed 's!\(^[^ ]*\)\.o:!modules/\1.so:!' >$@
+	$(CXX) -MM -MG $(CXXFLAGS) $(mod_INCLUDES) $(mod_SOURCES) 2>/dev/null | sed 's!\(^[^ ]*\)\.o:!modules/\1.so:!' >$@
 
 paludis/util/.depend: $(paludisutil_SOURCES) $(paludisutil_HEADERS)
-	g++ -MM -MG $(CXXFLAGS) $(paludisutil_CXXFLAGS) $(paludisutil_SOURCES) | sed 's!\(^[^ ]*.o:\)!paludis/util/\1!' >$@
+	$(CXX) -MM -MG $(CXXFLAGS) $(paludisutil_CXXFLAGS) $(paludisutil_SOURCES) | sed 's!\(^[^ ]*.o:\)!paludis/util/\1!' >$@
 
 -include src/.depend modules/.depend paludis/util/.depend

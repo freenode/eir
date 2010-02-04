@@ -32,17 +32,17 @@ $(APIDIR)/%_XS.cpp: $(APIDIR)/%.xs $(APIDIR)/typemap $(wildcard $(APIDIR)/*.xs)
 PERLAPI_OBJS = $(addprefix $(APIDIR)/,$(addsuffix .o,$(basename $(PERLAPI_SOURCES))))
 
 $(APIDIR)/%.o: $(APIDIR)/%.cpp
-	g++ $(CXXFLAGS) $(mod_INCLUDES) $(PERL_INCLUDES) \
+	$(CXX) $(CXXFLAGS) $(mod_INCLUDES) $(PERL_INCLUDES) \
 	    -Wno-unused-variable -Wno-write-strings -Wno-unused \
 	    -DPERL_GCC_PEDANTIC \
 	    -fPIC -c -o$@ $<
 
 $(APIDIR)/Eir.so: $(PERLAPI_OBJS)
-	g++ -shared -o $@ $^
+	$(CXX) -shared -o $@ $^
 
 
 $(APIDIR)/.depend: $(addprefix $(APIDIR)/,$(PERLAPI_SOURCES))
-	g++ -MM -MG $(CXXFLAGS) $(PERL_INCLUDES) $(mod_INCLUDES) $^ 2>/dev/null | sed 's!\(^[^ ]*\.o\):!$(APIDIR)/\1:!' >$@
+	$(CXX) -MM -MG $(CXXFLAGS) $(PERL_INCLUDES) $(mod_INCLUDES) $^ 2>/dev/null | sed 's!\(^[^ ]*\.o\):!$(APIDIR)/\1:!' >$@
 
 clean_perl:
 	rm -f modules/perl/api/Eir.so $(PERLAPI_OBJS)
