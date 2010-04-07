@@ -125,6 +125,11 @@ SV *ArrayValueWrapper::FETCH(pTHX_ int idx)
     return sv_from_value(aTHX_ &_value->Array()[idx]);
 }
 
+int ArrayValueWrapper::FETCHSIZE(pTHX)
+{
+    return _value->Array().size();
+}
+
 void ArrayValueWrapper::STORE(pTHX_ int idx, SV *sv)
 {
     _value->Array()[idx] = value_from_sv(aTHX_ sv);

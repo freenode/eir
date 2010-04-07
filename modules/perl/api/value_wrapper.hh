@@ -17,6 +17,7 @@ namespace eir
             ArrayValueWrapper(pTHX_ Value *, bool = false);
             ~ArrayValueWrapper();
             SV *FETCH(pTHX_ int);
+            int FETCHSIZE(pTHX);
             void STORE(pTHX_ int, SV *);
             void STORESIZE(pTHX_ int);
             void _EXTEND(pTHX_ int);

@@ -28,6 +28,13 @@ CODE:
 OUTPUT:
     RETVAL
 
+int
+ArrayValueWrapper::FETCHSIZE()
+CODE:
+    RETVAL = THIS->FETCHSIZE(aTHX);
+OUTPUT:
+    RETVAL
+
 void
 ArrayValueWrapper::STORE(int idx, SV *sv)
 CODE:
