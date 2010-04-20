@@ -1,0 +1,53 @@
+COMMANDS
+
+These may be sent in PM to the bot, or in channel by prefixing them with !
+Note if you use the commands in channel the reply will be sent to the channel.
+
+btinfo (index|nick|#channel)
+
+  This will show you information about one ban if
+  btinfo index is used.
+
+  However, if btinfo nick is used, then it will show all the
+  active bans set by the nick, and how many bans the nick has set in total.
+
+  If btinfo #channel is used, the it will return a list of all the recorded bans
+  set in a channel (warning, this may be a long list).
+
+btcheck #channel (nick|fullMask)
+
+  This will return a list of active bans on the #channel that match the user
+  either by nick or full mask (nick will use the bot's internal list)
+
+btpending (#channel|nick)
+
+  This command will list all of the bans that are both active and uncommented
+  for the #channel or set by the nick.
+
+btexpired #channel
+
+ This command will list all of the bans in #channel that are active and
+ expired.
+
+
+btset index [~time]|[reason]
+
+  Sets the ban expire time and/or the reason for the ban by index.
+
+REASONS
+
+ When you set a ban, the bot will PM you requesting a comment on the ban. Simply
+ reply to the comment, whatever you send will be recorded. If you have set more
+ than one ban you will be promted for each in turn.
+
+ If you wish to extend the default ban time (channel dependent, typically 24 hours),
+ type this when you enter your comment: ~time comment - e.g. "~14d Trolling".
+
+TIME SPECIFICATION
+
+ When commenting or using the btset command times can be specified in days, hours, minutes, seconds or any combination.
+
+ ~1h       For 1 hour from the time set.
+ ~4h1m4s   For 4 hours, 1 minute and 4 seconds from the time set.
+ ~48h      For 48 hours from the time set, (can also use ~2d).
+ ~14d      For 2 weeks (or 14 days) from the time set.

@@ -1,0 +1,40 @@
+Authorised users can configure bantracker by way of the 'btconfig' command.
+
+Note that changes affect the in-memory configuration - to commit changes to disk issue the command 'btsaveconfig'.
+
+BOT SETTINGS
+
+these are set in eir's configuration file, or with the 'set' command
+
+bantracker_dsn             A perl DBI dsn defining the database that bantracker will use
+bantracker_dbuser          The username to be used when connecting to the database, if required.
+bantracker_dbpass          The password to be used when connecting to the database, if required.
+bantracker_dbtype          The type of database in use - currently sqlite and mysql are supported.
+bantracker_admins          A regular expression specifying who may configure bantracker (change with caution)
+bantracker_debug           If set to '1', enable debuging commands and output
+bantracker_enable_logging  If set to '1', enable channel logging features (experimental)
+bantracker_urlprefix       URL prefix for public log access
+
+CHANNEL SETTINGS
+
+The follow can be set on a per-channel basis using "btconfig #channel <setting> <value>"
+
+enabled    If set, bantracker will follow bans on this channel
+report     If set, bantracker will report the addition, removal and expiry of bans to the named channel or user
+reporton   Comma separated list defining which events bantracker should send to the report target available (new,exp,rem)
+frequency  How often should bantracker check for expired bans
+admins     A regular expression specifying which users may edit bans other than those they set for this channel
+query      A regular expression specifying which users may query the database for bans other than their own
+bantime    Default expiry time for new bans
+ops        If set, bantracker will not relinquish operator status after removing bans - s
+trackmodes Defines which channel modes bantracker will monitor - 'qb' will follow quiets and bans
+action     What should bantracker do when a ban expires - see below
+
+ACTIONS
+
+The 'action' channel setting defines what bantracker should do when a ban expires on the specified channel.
+
+'0' instructs bantracker to report the expired ban to the report channel only, or do nothing if there is no report channel
+'1' instructs bantracker to remove the ban if it has operator status, or report the ban as above
+'2' instructs bantracker to try and obtain operator status to remove the ban. If this is not possible no action will be taken.
+
