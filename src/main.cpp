@@ -29,13 +29,16 @@ int main(int, char **argv)
     // We want a regular write error, not a SIGPIPE, if the socket is closed.
     signal(SIGPIPE, SIG_IGN);
 
-    Bot bot(botname);
+    std::tr1::shared_ptr<Bot> bot;
 
     while (true)
     {
         try
         {
-            bot.run();
+            if (!bot)
+                bot.reset(new Bot(botname));
+
+            bot->run();
         }
         catch (DisconnectedException &e)
         {
