@@ -18,8 +18,11 @@ struct CtcpHandler : CommandHandlerBase<CtcpHandler>, Module
             return;
 
         text = text.substr(1);
-        text.erase(text.rfind('\001'));
-        std::string::size_type pos = text.find(' ');
+        std::string::size_type pos = text.rfind('\001');
+        if (pos != std::string::npos)
+            text.erase(pos);
+
+        pos = text.find(' ');
         std::string command = text.substr(0, pos);
         std::string arg = text.substr(pos + 1);
 
