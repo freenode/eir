@@ -132,6 +132,12 @@ int ArrayValueWrapper::FETCHSIZE(pTHX)
 
 void ArrayValueWrapper::STORE(pTHX_ int idx, SV *sv)
 {
+    if (idx < 0)
+        idx += _value->Array().size();
+
+    if (_value->Array().size() <= (size_t)idx)
+        _value->Array().resize(idx+1);
+
     _value->Array()[idx] = value_from_sv(aTHX_ sv);
 }
 

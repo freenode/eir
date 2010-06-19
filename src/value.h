@@ -31,6 +31,7 @@ namespace eir
 
             size_t size() const;
             bool empty() const;
+            void resize(size_t newsize);
 
             void push_back(Value);
             void pop_back();

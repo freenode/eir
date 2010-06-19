@@ -394,6 +394,11 @@ size_t ValueArray::size() const
     return _imp->_array.size();
 }
 
+void ValueArray::resize(size_t newsize)
+{
+    _imp->_array.resize(newsize);
+}
+
 void ValueArray::push_back(Value v)
 {
     _imp->_array.push_back(v);
