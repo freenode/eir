@@ -17,7 +17,7 @@ use strict;
 use Eir;
 use MIME::Base64;
 
-our $bot=Eir::find_bot('eir');
+our $bot;
 
 our %sasl_auth;
 our %mech = ();
@@ -36,7 +36,8 @@ our @handlers = (
     );
 
 sub server_connected {
-    our $bot;
+  my ($message) = @_;
+  our $bot=$message->bot;
     $bot->send('CAP LS');
 }
 
@@ -72,6 +73,7 @@ sub event_cap {
                $timeout=Eir::EventManager::add_event(time()+10, \&timeout);
            }else{
                print 'SASL: attempted to start unknown mechanism "' . $sasl_auth{mech} . '"' . "\n";
+               $bot->send("CAP END");
            }
        }
     } elsif ($subcmd eq 'NAK') {
@@ -138,11 +140,12 @@ $mech{PLAIN} = sub {
     join("\0", $u, $u, $p);
 };
 
+
 eval {
-    use Crypt::OpenSSL::Bignum;
-    use Crypt::DH;
-    use Crypt::Blowfish;
-    use Math::BigInt;
+    require Crypt::OpenSSL::Bignum;
+    require Crypt::DH;
+    require Crypt::Blowfish;
+    require Math::BigInt;
     sub bin2bi { return Crypt::OpenSSL::Bignum->new_from_bin(shift)->to_decimal } # binary to BigInt
     sub bi2bin { return Crypt::OpenSSL::Bignum->new_from_decimal((shift)->bstr)->to_bin } # BigInt to binary
     $mech{'DH-BLOWFISH'} = sub {
