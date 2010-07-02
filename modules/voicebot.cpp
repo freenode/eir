@@ -41,13 +41,21 @@ namespace
         return parse_time(time);
     }
 
+    time_t get_revoice_expiry(Bot *b)
+    {
+        std::string time = b->get_setting_with_default("revoice_expiry", default_expiry);
+        return parse_time(time);
+    }
+
     const char *help_voicebot =
         "The voicebot module exists to manage a moderated channel. It maintains a list of hostmask entries that "
         "will not be voiced (the \002DNV\002 list), and voices, on request, all unvoiced users in the channel that "
         "do not match any of those entries.\n"
-        "Available voicebot commands are: voice check match add remove edit.\n"
+        "If voicebot_enable_revoicing is set users who leave the channel while voiced will be revoiced automatically "
+        "should they return before the time specified in revoice_expiry has elapsed.\n "
+        "Available voicebot commands are: voice check match add remove edit.\n "
         "Relevant settings are \037voicebot_channel\037, \037voicebot_admin_channel\037, \037default_voice_expiry\037, "
-        "and \037voice_time_format\037.";
+        "\037voicebot_enable_revoicing\037, \037revoice_expiry\037 and \037voice_time_format\037.";
     const char *help_voice =
         "\002voice\002. Voices all users who are in \037voicebot_channel\037 and do not match a DNV list entry.";
     const char *help_check =
@@ -83,6 +91,15 @@ namespace
         return v;
     }
 
+    Value lostvoiceentry(std::string bot, std::string mask, time_t expires)
+    {
+        Value v(Value::kvarray);
+        v["bot"] = bot;
+        v["mask"] = mask;
+        v["expires"] = expires;
+        return v;
+    }
+
     struct Removed
     {
         bool operator() (const Value& v)
@@ -101,7 +118,7 @@ namespace
 
 struct voicebot : CommandHandlerBase<voicebot>, Module
 {
-    Value &dnv, &old;
+    Value &dnv, &old, &lostvoices;
 
     void do_add(const Message *m)
     {
@@ -376,8 +393,16 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
                 (*it)["removed"] = 1;
             }
         }
+        for (ValueArray::iterator it = lostvoices.begin(); it != lostvoices.end(); ++it)
+        {
+            if ((*it)["expires"].Int() != 0 && (*it)["expires"].Int() < currenttime)
+            {
+                (*it)["removed"] = 1;
+            }
+        }
 
         do_removals(dnv);
+        do_removals(lostvoices);
     }
 
     void load_lists()
@@ -386,20 +411,207 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
         {
             dnv = StorageManager::get_instance()->Load("donotvoice");
             old = StorageManager::get_instance()->Load("expireddonotvoice");
+            lostvoices = StorageManager::get_instance()->Load("lostvoices");
         }
         catch (StorageError &)
         {
             dnv = Value(Value::array);
             old = Value(Value::array);
+            lostvoices = Value(Value::array);
         }
         catch (IOError &)
         {
             dnv = Value(Value::array);
             old = Value(Value::array);
+            lostvoices = Value(Value::array);
         }
     }
 
-    CommandHolder add, remove, list, info, check, voice, clear, change, match_client, shutdown;
+    std::string build_revoice_mask (Client::ptr c)
+    {
+    /* This is freenode specific, so may need to be changed if running on a network
+       with different vhost policies
+
+       in English:
+
+       Uncloaked users are matched on their full nick!user@host mask
+       Gateway cloaked users are matched on nick!user@gateway/type/name, minus the x-NNNNNNNNNNNNNNNN session ID
+       Authenticated gateway cloaked users (currently only tor-sasl), and regular cloaked users are matched on *!*@cloak
+
+    */
+
+        if (c->host().find("/") == std::string::npos)
+        {
+            // normal user, return full nuh
+            return c->nuh();
+        } else if (c->host().find("gateway/tor-sasl/") == 0) {
+            // tor-sasl user, return *!*@cloak
+            return "*!*@" + c->host();
+        } else if (c->host().find("gateway/") == 0 ||
+                   c->host().find("conference/") == 0 ||
+                   c->host().find("nat/") == 0 )
+        {
+            // gateway user
+            std::string suffix=c->nuh().substr(c->nuh().find_last_of("/"));
+            if (suffix=="/session" || suffix.substr(0,3) == "/x-" || suffix.substr(0,4)== "/ip.")
+            {
+                // strip session ID
+                return c->nuh().substr(0,c->nuh().find_last_of("/")) + "/*";
+            } else {
+                // got an unrecognised suffix - don't return a revoice mask
+                return "";
+            }
+        } else {
+            // cloaked user, return *!*@cloak
+            return "*!*@" + c->host();
+        }
+    }
+
+
+
+    void irc_join(const Message *m)
+    {
+        std::string revoicing = m->bot->get_setting("voicebot_enable_revoicing");
+        std::string channelname = m->bot->get_setting("voicebot_channel");
+
+        if (m->source.name == m->bot->nick())
+        {
+            return;
+        }
+
+        if (m->source.destination != channelname)
+        {
+            return;
+        }
+
+        for (ValueArray::iterator it = lostvoices.begin(); it != lostvoices.end(); ++it)
+        {
+            if (mask_match((*it)["mask"], m->source.raw))
+            {
+                Client::ptr c = m->bot->find_client(m->source.name);
+                if (c)
+                {
+                    std::tr1::weak_ptr<Client> w(c);
+                    Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** Matched lost voice for " + m->source.raw + "(" + (*it)["mask"] + ")");
+                    Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** Queueing revoice for " + m->source.name);
+                    add_event(time(NULL)+5, std::tr1::bind(revoice, m->bot, w, it, lostvoices, channelname));
+                }
+            }
+        }
+    }
+
+    void irc_nick(const Message *m)
+    {
+        std::string revoicing = m->bot->get_setting("voicebot_enable_revoicing");
+        std::string channelname = m->bot->get_setting("voicebot_channel");
+
+        if (m->source.name == m->bot->nick())
+        {
+            return;
+        }
+
+        for (ValueArray::iterator it = lostvoices.begin(); it != lostvoices.end(); ++it)
+        {
+            if (mask_match((*it)["mask"], m->source.client->nuh()))
+            {
+                std::tr1::weak_ptr<Client> w(m->source.client);
+                Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** Matched lost voice for " + m->source.raw + "(" + (*it)["mask"] + ")");
+                Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** Queueing revoice for " + m->source.destination );
+                add_event(time(NULL)+5, std::tr1::bind(revoice, m->bot, w, it, lostvoices, channelname));
+            }
+        }
+    }
+
+    void irc_depart (const Message *m)
+    {
+        std::string revoicing = m->bot->get_setting("voicebot_enable_revoicing");
+        std::string channelname = m->bot->get_setting("voicebot_channel");
+
+        if (m->source.name == m->bot->nick())
+        {
+            return;
+        }
+
+        Channel::ptr channel = m->bot->find_channel(channelname);
+        if (!channel)
+        {
+            return;
+        }
+
+        Membership::ptr mem = m->source.client->find_membership(channelname);
+        if (mem && mem->has_mode('v')) {
+            if (m->command == "PART" && m->source.destination == channelname )
+            {
+                if (m->args.size() >= 1 && m->args[0].substr(0,9) == "requested")
+                {
+                    // user was ejected from the channel with REMOVE
+                    Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** " + m->source.client->nick()  + "was removed from channel - will not revoice");
+                    return;
+                }
+            } else if (m->command == "QUIT") {
+                if (!m->source.destination.empty())
+                {
+                    std::string q = m->source.destination.substr(0,m->source.destination.find(" "));
+                    if (q == "Killed" ||  q == "K-Lined" ||  q == "Changing" ||  q == "*.net")
+                    {
+                        // Abnormal quit - ignore
+                        Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** " + m->source.client->nick()  + "left network abnormally - will not revoice");
+                        return;
+                    }
+                }
+            } else {
+                // Wrong channel, or something odd happened
+                return;
+            }
+            // User left the channel or network normally while voiced - put them on the lost voices list
+            std::string mask = m->source.raw;
+            mask=build_revoice_mask(m->source.client);
+            if (!mask.empty())
+            {
+                // check we don't already have this mask
+                for (ValueArray::iterator it = lostvoices.begin(); it != lostvoices.end(); ++it)
+                {
+                    if ((*it)["mask"] == mask)
+                    {
+                        Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** " + mask + " is already on lostvoices list, skipping");
+                        return;
+                    }
+                }
+                lostvoices.push_back(lostvoiceentry(m->bot->name(), mask, get_revoice_expiry(m->bot)+time(NULL)));
+                Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** " + m->source.client->nick() + "(" + mask + ")" + " left " + channelname + " with voice");
+            }
+        }
+    }
+
+    static void revoice(Bot *bot, std::tr1::weak_ptr<Client> w, ValueArray::iterator it, Value& lv, std::string channel)
+    {
+        Client::ptr c = w.lock();
+        if (!c)
+        {
+            return;
+        }
+
+        Membership::ptr mem=c->find_membership(channel);
+        if (!mem)
+        {
+            return;
+        }
+
+        if (mem->has_mode('v'))
+        {
+            Logger::get_instance()->Log(bot, NULL, Logger::Debug, "**** " + c->nick() + " is alreadly voiced on " + channel +", skipping");
+        } else {
+            Logger::get_instance()->Log(bot, NULL, Logger::Debug, "*** Revoicing " + c->nick() + " on "+ channel);
+            Logger::get_instance()->Log(bot, NULL, Logger::Admin, "*** Revoicing " + c->nick() + " on "+ channel);
+            bot->send("MODE " + channel + " +v " + c->nick());
+            if (it != lv.end()) {
+                (*it)["removed"]=1;
+                do_removals(lv);
+            }
+        }
+    }
+
+    CommandHolder add, remove, list, info, check, voice, clear, change, match_client, shutdown, join, part, quit, nick;
     EventHolder check_event;
     HelpTopicHolder voicebothelp, voicehelp, checkhelp, matchhelp, addhelp, removehelp, edithelp;
     HelpIndexHolder index;
@@ -407,6 +619,7 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
     voicebot()
         : dnv(GlobalSettingsManager::get_instance()->get("voicebot:donotvoice")),
           old(GlobalSettingsManager::get_instance()->get("voicebot:expireddonotvoice")),
+          lostvoices(GlobalSettingsManager::get_instance()->get("voicebot:lostvoices")),
           voicebothelp("voicebot", "voiceadmin", help_voicebot),
           voicehelp("voice", "voiceadmin", help_voice),
           checkhelp("check", "voiceadmin", help_check),
@@ -430,11 +643,16 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
                             &voicebot::do_change);
         match_client = add_handler(filter_command_type("match", sourceinfo::IrcCommand).requires_privilege("voiceadmin"),
                             &voicebot::do_match);
+        quit = add_handler(filter_command_type("QUIT", sourceinfo::RawIrc),&voicebot::irc_depart, true, Message::first);
+        part = add_handler(filter_command_type("PART", sourceinfo::RawIrc),&voicebot::irc_depart, true, Message::first);
+        join = add_handler(filter_command_type("JOIN", sourceinfo::RawIrc),&voicebot::irc_join,true);
+        nick = add_handler(filter_command_type("NICK", sourceinfo::RawIrc),&voicebot::irc_nick,true);
 
         check_event = add_recurring_event(60, &voicebot::check_expiry);
 
         StorageManager::get_instance()->auto_save(&dnv, "donotvoice");
         StorageManager::get_instance()->auto_save(&old, "expireddonotvoice");
+        StorageManager::get_instance()->auto_save(&lostvoices, "lostvoices");
 
         load_lists();
     }
