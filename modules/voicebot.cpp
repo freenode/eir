@@ -480,8 +480,11 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void irc_join(const Message *m)
     {
-        std::string revoicing = m->bot->get_setting("voicebot_enable_revoicing");
+        std::string revoicing = m->bot->get_setting_with_default("voicebot_enable_revoicing", "");
         std::string channelname = m->bot->get_setting("voicebot_channel");
+
+        if (revoicing.empty())
+            return;
 
         if (m->source.name == m->bot->nick())
         {
@@ -511,8 +514,11 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void irc_nick(const Message *m)
     {
-        std::string revoicing = m->bot->get_setting("voicebot_enable_revoicing");
+        std::string revoicing = m->bot->get_setting_with_default("voicebot_enable_revoicing", "");
         std::string channelname = m->bot->get_setting("voicebot_channel");
+
+        if (revoicing.empty())
+            return;
 
         if (m->source.name == m->bot->nick())
         {
@@ -533,8 +539,11 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
     void irc_depart (const Message *m)
     {
-        std::string revoicing = m->bot->get_setting("voicebot_enable_revoicing");
+        std::string revoicing = m->bot->get_setting_with_default("voicebot_enable_revoicing", "");
         std::string channelname = m->bot->get_setting("voicebot_channel");
+
+        if (revoicing.empty())
+            return;
 
         if (m->source.name == m->bot->nick())
         {
