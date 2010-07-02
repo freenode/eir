@@ -1,7 +1,8 @@
 #ifndef server_h
 #define server_h
 
-#include <tr1/functional>
+#include <string>
+#include <functional>
 #include <paludis/util/private_implementation_pattern.hh>
 #include <ctime>
 
@@ -10,7 +11,7 @@ namespace eir
     class Server : private paludis::PrivateImplementationPattern<Server>
     {
         public:
-            typedef std::tr1::function<void(std::string)> Handler;
+            typedef std::function<void(std::string)> Handler;
             Server(const Handler&);
             ~Server();
 

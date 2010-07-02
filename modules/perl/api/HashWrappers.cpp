@@ -13,7 +13,7 @@ using namespace eir::perl;
 
 BotClientHash::BotClientHash(Bot *b) : _bot(b) { }
 Client *BotClientHash::FETCH(char *nick) { return _bot->find_client(nick).get(); }
-bool BotClientHash::EXISTS(char *nick) { return _bot->find_client(nick); }
+bool BotClientHash::EXISTS(char *nick) { return (bool)_bot->find_client(nick); }
 int BotClientHash::SCALAR() { return _bot->begin_clients() != _bot->end_clients(); }
 
 const char* BotClientHash::FIRSTKEY()
@@ -39,7 +39,7 @@ const char* BotClientHash::NEXTKEY(char *prevnick)
 
 BotChannelHash::BotChannelHash(Bot *b) : _bot(b) { }
 Channel *BotChannelHash::FETCH(char *name) { return _bot->find_channel(name).get(); }
-bool BotChannelHash::EXISTS(char *name) { return _bot->find_channel(name); }
+bool BotChannelHash::EXISTS(char *name) { return (bool)_bot->find_channel(name); }
 int BotChannelHash::SCALAR() { return _bot->begin_channels() != _bot->end_channels(); }
 
 const char* BotChannelHash::FIRSTKEY()
@@ -119,7 +119,7 @@ int BotSettingsHash::SCALAR()
 
 ClientMembershipHash::ClientMembershipHash(Client *c) : _client(c) { }
 Membership *ClientMembershipHash::FETCH(char *name) { return _client->find_membership(name).get(); }
-bool ClientMembershipHash::EXISTS(char *name) { return _client->find_membership(name); }
+bool ClientMembershipHash::EXISTS(char *name) { return (bool)_client->find_membership(name); }
 int ClientMembershipHash::SCALAR() { return _client->begin_channels() != _client->end_channels(); }
 
 const char* ClientMembershipHash::FIRSTKEY()
@@ -145,7 +145,7 @@ const char* ClientMembershipHash::NEXTKEY(char *prevname)
 
 ChannelMembershipHash::ChannelMembershipHash(Channel *c) : _channel(c) { }
 Membership *ChannelMembershipHash::FETCH(char *name) { return _channel->find_member(name).get(); }
-bool ChannelMembershipHash::EXISTS(char *name) { return _channel->find_member(name); }
+bool ChannelMembershipHash::EXISTS(char *name) { return (bool)_channel->find_member(name); }
 int ChannelMembershipHash::SCALAR() { return _channel->begin_members() != _channel->end_members(); }
 
 const char* ChannelMembershipHash::FIRSTKEY()

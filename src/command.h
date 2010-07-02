@@ -3,7 +3,7 @@
 
 #include <map>
 #include <list>
-#include <tr1/functional>
+#include <functional>
 #include "message.h"
 #include <paludis/util/instantiation_policy.hh>
 
@@ -14,7 +14,7 @@ namespace eir
         public paludis::PrivateImplementationPattern<CommandRegistry>
     {
         public:
-            typedef std::tr1::function<void(const Message *)> handler;
+            typedef std::function<void(const Message *)> handler;
             typedef struct _id { } *id;
 
             void dispatch(const Message *, bool = false);

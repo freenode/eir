@@ -1,6 +1,6 @@
 #include "event.h"
 #include <list>
-#include <tr1/memory>
+#include <memory>
 
 namespace eir
 {
@@ -24,7 +24,7 @@ namespace eir
                 event(id i, time_t t, time_t in, event_func f)
                     : _id(i), next_time(t), interval(in), func(f)
                 { }
-                typedef std::tr1::shared_ptr<event> ptr;
+                typedef std::shared_ptr<event> ptr;
             };
             typedef std::list<event::ptr> event_list;
             event_list events;

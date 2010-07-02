@@ -29,7 +29,7 @@ int main(int, char **argv)
     // We want a regular write error, not a SIGPIPE, if the socket is closed.
     signal(SIGPIPE, SIG_IGN);
 
-    std::tr1::shared_ptr<Bot> bot;
+    std::shared_ptr<Bot> bot;
 
     while (true)
     {

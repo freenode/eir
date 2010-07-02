@@ -2,7 +2,6 @@
 #include "handler.h"
 
 using namespace eir;
-using namespace std::tr1::placeholders;
 
 struct echo : CommandHandlerBase<echo>, Module
 {

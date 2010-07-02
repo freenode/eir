@@ -3,7 +3,6 @@
 #include <functional>
 
 using namespace eir;
-using namespace std::tr1::placeholders;
 
 struct Operer : CommandHandlerBase<Operer>, Module
 {

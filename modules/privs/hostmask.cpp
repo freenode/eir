@@ -3,7 +3,6 @@
 #include "match.h"
 
 using namespace eir;
-using namespace std::tr1::placeholders;
 
 struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
 {

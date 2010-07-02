@@ -1,7 +1,7 @@
 #include "eir.h"
 
 using namespace eir;
-using namespace std::tr1::placeholders;
+using namespace std::placeholders;
 
 #include <list>
 #include "match.h"
@@ -491,10 +491,10 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
                 Client::ptr c = m->bot->find_client(m->source.name);
                 if (c)
                 {
-                    std::tr1::weak_ptr<Client> w(c);
+                    std::weak_ptr<Client> w(c);
                     Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** Matched lost voice for " + m->source.raw + "(" + (*it)["mask"] + ")");
                     Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** Queueing revoice for " + m->source.name);
-                    add_event(time(NULL)+5, std::tr1::bind(revoice, m->bot, w, it, lostvoices, channelname));
+                    add_event(time(NULL)+5, std::bind(revoice, m->bot, w, it, lostvoices, channelname));
                 }
             }
         }
@@ -514,10 +514,10 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
         {
             if (mask_match((*it)["mask"], m->source.client->nuh()))
             {
-                std::tr1::weak_ptr<Client> w(m->source.client);
+                std::weak_ptr<Client> w(m->source.client);
                 Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** Matched lost voice for " + m->source.raw + "(" + (*it)["mask"] + ")");
                 Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** Queueing revoice for " + m->source.destination );
-                add_event(time(NULL)+5, std::tr1::bind(revoice, m->bot, w, it, lostvoices, channelname));
+                add_event(time(NULL)+5, std::bind(revoice, m->bot, w, it, lostvoices, channelname));
             }
         }
     }
@@ -583,7 +583,7 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
         }
     }
 
-    static void revoice(Bot *bot, std::tr1::weak_ptr<Client> w, ValueArray::iterator it, Value& lv, std::string channel)
+    static void revoice(Bot *bot, std::weak_ptr<Client> w, ValueArray::iterator it, Value& lv, std::string channel)
     {
         Client::ptr c = w.lock();
         if (!c)

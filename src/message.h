@@ -3,8 +3,8 @@
 
 #include <vector>
 #include <string>
-#include <tr1/memory>
-#include <tr1/functional>
+#include <memory>
+#include <functional>
 
 #include "client.h"
 
@@ -37,7 +37,7 @@ namespace eir {
         std::string destination;
 
         // Function to send a reply to this.
-        std::tr1::function<void(std::string)> reply_func, error_func;
+        std::function<void(std::string)> reply_func, error_func;
         void reply(std::string text) const {
             if(reply_func) reply_func(text);
         }

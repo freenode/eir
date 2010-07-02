@@ -216,7 +216,7 @@ void Implementation<Server>::run()
     Context c("In main message loop");
 
     EventManager::id _send_id = EventManager::get_instance()->add_recurring_event(rate_time,
-                                    std::tr1::bind(&Implementation<Server>::io_event, this));
+                                    std::bind(&Implementation<Server>::io_event, this));
 
     do_receive_stuff();
 

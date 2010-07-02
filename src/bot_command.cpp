@@ -4,7 +4,6 @@
 
 #include <paludis/util/tokeniser.hh>
 
-using namespace std::tr1::placeholders;
 using namespace eir;
 
 namespace {

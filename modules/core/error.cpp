@@ -2,7 +2,6 @@
 
 #include "handler.h"
 
-using namespace std::tr1::placeholders;
 using namespace eir;
 
 struct ErrorHandler : CommandHandlerBase<ErrorHandler>, Module

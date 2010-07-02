@@ -7,7 +7,6 @@
 #include "json/json.h"
 
 using namespace eir;
-using namespace std::tr1::placeholders;
 
 namespace
 {

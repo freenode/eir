@@ -5,7 +5,7 @@
 #include "value.h"
 
 #include <string>
-#include <tr1/memory>
+#include <memory>
 
 #include <paludis/util/private_implementation_pattern.hh>
 #include <paludis/util/wrapped_forward_iterator.hh>
@@ -15,15 +15,15 @@ namespace eir
     class Bot;
 
     struct Channel;
-    typedef std::tr1::shared_ptr<Channel> ChannelPtr;
+    typedef std::shared_ptr<Channel> ChannelPtr;
     struct Client;
-    typedef std::tr1::shared_ptr<Client> ClientPtr;
+    typedef std::shared_ptr<Client> ClientPtr;
     struct Membership;
-    typedef std::tr1::shared_ptr<Membership> MembershipPtr;
+    typedef std::shared_ptr<Membership> MembershipPtr;
 
     struct Client : private paludis::PrivateImplementationPattern<Client>,
                     private paludis::InstantiationPolicy<Client, paludis::instantiation_method::NonCopyableTag>,
-                    public std::tr1::enable_shared_from_this<Client>
+                    public std::enable_shared_from_this<Client>
     {
         const std::string& nick() const;
         const std::string& user() const;
@@ -59,12 +59,12 @@ namespace eir
 
         PrivilegeSet& privs();
 
-        typedef std::tr1::shared_ptr<Client> ptr;
+        typedef std::shared_ptr<Client> ptr;
     };
 
     struct Channel : private paludis::PrivateImplementationPattern<Channel>,
                      private paludis::InstantiationPolicy<Channel, paludis::instantiation_method::NonCopyableTag>,
-                     public std::tr1::enable_shared_from_this<Channel>
+                     public std::enable_shared_from_this<Channel>
     {
         const std::string& name();
 
@@ -91,7 +91,7 @@ namespace eir
         Channel(std::string);
         ~Channel();
 
-        typedef std::tr1::shared_ptr<Channel> ptr;
+        typedef std::shared_ptr<Channel> ptr;
     };
 
     struct Membership : private paludis::InstantiationPolicy<Membership, paludis::instantiation_method::NonCopyableTag>
@@ -103,7 +103,7 @@ namespace eir
 
         bool has_mode(char m) { return modes.find(m) != std::string::npos; }
 
-        typedef std::tr1::shared_ptr<Membership> ptr;
+        typedef std::shared_ptr<Membership> ptr;
 
         Membership(Client::ptr cl, Channel::ptr ch)
             : client(cl), channel(ch)

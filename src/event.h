@@ -1,7 +1,7 @@
 #ifndef event_h
 #define event_h
 
-#include <tr1/functional>
+#include <functional>
 #include <ctime>
 
 namespace eir
@@ -9,7 +9,7 @@ namespace eir
     class EventManager
     {
         public:
-            typedef std::tr1::function<void ()> event_func;
+            typedef std::function<void ()> event_func;
             typedef unsigned int id;
 
             virtual id add_event(time_t t, event_func f) = 0;

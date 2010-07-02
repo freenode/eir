@@ -18,8 +18,8 @@
 #include <cstring>
 
 using namespace eir;
+using namespace std::placeholders;
 
-using namespace std::tr1::placeholders;
 using namespace paludis;
 
 template class paludis::WrappedForwardIterator<Bot::ClientIteratorTag, const Client::ptr>;
@@ -55,7 +55,7 @@ namespace paludis
 
         std::string _name;
 
-        std::tr1::shared_ptr<Server> _server;
+        std::shared_ptr<Server> _server;
         std::string _host, _port, _nick, _pass;
 
         Client::ptr _me;
@@ -76,7 +76,7 @@ namespace paludis
 
         void connect(std::string host, std::string port, std::string nick, std::string pass)
         {
-            _server.reset(new Server(std::tr1::bind(&Implementation<Bot>::handle_message, this, _1)));
+            _server.reset(new Server(std::bind(&Implementation<Bot>::handle_message, this, _1)));
             _host = host;
             _port = port;
             _nick = nick;
@@ -126,7 +126,7 @@ namespace paludis
 
         std::string config_filename;
         CommandHolder rehash_handler;
-        void load_config(std::tr1::function<void(std::string)>, bool cold = false);
+        void load_config(std::function<void(std::string)>, bool cold = false);
         void rehash(const Message *m);
 
         Implementation(Bot *b, std::string n)
@@ -188,7 +188,7 @@ void Implementation<Bot>::set_server(const Message *m)
     connect(m->args[0], m->args[1], m->args[2], pass);
 }
 
-void Implementation<Bot>::load_config(std::tr1::function<void(std::string)> reply_func, bool cold /* = false */)
+void Implementation<Bot>::load_config(std::function<void(std::string)> reply_func, bool cold /* = false */)
 {
     CommandHolder server_id;
 
@@ -303,9 +303,9 @@ void Implementation<Bot>::handle_message(std::string line)
     }
 
     if (m.source.destination.find_first_of("#&") != std::string::npos)
-        m.source.reply_func = std::tr1::bind(notice_to, bot, m.source.destination, _1);
+        m.source.reply_func = std::bind(notice_to, bot, m.source.destination, _1);
     else
-        m.source.reply_func = std::tr1::bind(notice_to, bot, m.source.name, _1);
+        m.source.reply_func = std::bind(notice_to, bot, m.source.name, _1);
 
     m.source.error_func = m.source.reply_func;
 

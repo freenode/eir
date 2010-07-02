@@ -8,7 +8,6 @@
 #include <algorithm>
 
 using namespace eir;
-using namespace std::tr1::placeholders;
 
 namespace
 {

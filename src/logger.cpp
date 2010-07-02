@@ -127,7 +127,7 @@ void Logger::Log(Bot *bot, Client *source, Type type, std::string text)
     }
 }
 
-void Logger::Log(Bot *b, std::tr1::shared_ptr<Client> s, Type t, std::string text)
+void Logger::Log(Bot *b, std::shared_ptr<Client> s, Type t, std::string text)
 {
     Log(b, s.get(), t, text);
 }

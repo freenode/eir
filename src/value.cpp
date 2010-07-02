@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <map>
-#include <tr1/memory>
+#include <memory>
 
 #include <paludis/util/private_implementation_pattern-impl.hh>
 #include <paludis/util/wrapped_forward_iterator-impl.hh>
@@ -27,8 +27,8 @@ namespace paludis
         mutable Value::ValueType _type;
         int _intval;
         std::string _stringval;
-        std::tr1::shared_ptr<ValueArray> _array;
-        std::tr1::shared_ptr<KeyValueArray> _kv_array;
+        std::shared_ptr<ValueArray> _array;
+        std::shared_ptr<KeyValueArray> _kv_array;
 
         Implementation(Value::ValueType t)
             : _type(t)

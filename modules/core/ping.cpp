@@ -4,7 +4,6 @@
 #include <functional>
 
 using namespace eir;
-using namespace std::tr1::placeholders;
 
 struct Ponger : CommandHandlerBase<Ponger>, Module
 {

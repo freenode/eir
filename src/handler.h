@@ -5,7 +5,7 @@
 #include "event.h"
 #include "logger.h"
 #include "storage.h"
-#include <tr1/functional>
+#include <functional>
 
 
 namespace eir
@@ -17,7 +17,7 @@ namespace eir
         CommandRegistry::id add_handler(Filter f, F_ h, bool quiet = false, Message::Order o = Message::normal)
         {
             return eir::CommandRegistry::get_instance()->add_handler(f,
-                    std::tr1::bind(h, static_cast<T_*>(this), std::tr1::placeholders::_1),
+                    std::bind(h, static_cast<T_*>(this), std::placeholders::_1),
                     quiet, o);
         }
 
@@ -25,14 +25,14 @@ namespace eir
         EventManager::id add_event(time_t t, F_ h)
         {
             return EventManager::get_instance()->add_event(t,
-                    std::tr1::bind(h, static_cast<T_*>(this)));
+                    std::bind(h, static_cast<T_*>(this)));
         }
 
         template <class F_>
         EventManager::id add_recurring_event(time_t t, F_ h)
         {
             return EventManager::get_instance()->add_recurring_event(t,
-                    std::tr1::bind(h, static_cast<T_*>(this)));
+                    std::bind(h, static_cast<T_*>(this)));
         }
     };
 

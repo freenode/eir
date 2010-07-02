@@ -5,8 +5,8 @@
 #include <paludis/util/instantiation_policy.hh>
 
 #include <string>
-#include <tr1/functional>
-#include <tr1/memory>
+#include <functional>
+#include <memory>
 
 namespace eir
 {
@@ -47,7 +47,7 @@ namespace eir
             typedef unsigned int Type;
 
             void Log(Bot *, Client *, Type, std::string);
-            void Log(Bot *, std::tr1::shared_ptr<Client>, Type, std::string);
+            void Log(Bot *, std::shared_ptr<Client>, Type, std::string);
 
             typedef unsigned int BackendId;
             BackendId register_backend(std::string, LogBackend *);
