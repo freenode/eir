@@ -77,5 +77,34 @@ sub new {
     return $self;
 }
 
+package Eir::Help;
+
+sub AddTopic {
+    my ($name, $text, $privilege) = @_;
+    $privilege ||= "";
+    my $topic = { name => $name, priv => $privilege, text => $text };
+    my $helproot = Eir::Settings::Find("help_root");
+
+    $helproot->{$name} = $topic;
+
+    return bless \$name;
+}
+
+sub AddIndex {
+    my ($name, $text, $privilege) = @_;
+    $privilege ||= "";
+    my $ret = AddTopic(@_);
+    my $index = Eir::Settings::Find("help_index");
+    $index->{$name} = $privilege;
+    return $ret;
+}
+
+sub DESTROY {
+    my ($self) = @_;
+    my $help_root = Eir::Settings::Find("help_root");
+    delete $help_root->{$$self};
+    my $index = Eir::Settings::find("help_index");
+    delete $index->{$$self};
+}
 
 1;
