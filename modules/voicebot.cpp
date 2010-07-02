@@ -405,26 +405,35 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
         do_removals(lostvoices);
     }
 
-    void load_lists()
+    void load_list(Value & v, std::string name)
     {
         try
         {
-            dnv = StorageManager::get_instance()->Load("donotvoice");
-            old = StorageManager::get_instance()->Load("expireddonotvoice");
-            lostvoices = StorageManager::get_instance()->Load("lostvoices");
+            v = StorageManager::get_instance()->Load(name);
+            if (v.Type() != Value::array)
+                throw "wrong type";
         }
         catch (StorageError &)
         {
-            dnv = Value(Value::array);
-            old = Value(Value::array);
-            lostvoices = Value(Value::array);
+            v = Value(Value::array);
         }
         catch (IOError &)
         {
-            dnv = Value(Value::array);
-            old = Value(Value::array);
-            lostvoices = Value(Value::array);
+            v = Value(Value::array);
         }
+        catch (const char *)
+        {
+            Logger::get_instance()->Log(NULL, NULL, Logger::Warning,
+                    "Loaded voice list " + name + "has wrong type; ignoring");
+            v = Value(Value::array);
+        }
+    }
+
+    void load_lists()
+    {
+        load_list(dnv, "donotvoice");
+        load_list(old, "expireddonotvoice");
+        load_list(lostvoices, "lostvoices");
     }
 
     std::string build_revoice_mask (Client::ptr c)
