@@ -485,16 +485,12 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
         if (revoicing.empty())
             return;
-
+        if (!m->source.client)
+            return;
         if (m->source.name == m->bot->nick())
-        {
             return;
-        }
-
         if (m->source.destination != channelname)
-        {
             return;
-        }
 
         for (ValueArray::iterator it = lostvoices.begin(); it != lostvoices.end(); ++it)
         {
@@ -519,11 +515,10 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
         if (revoicing.empty())
             return;
-
-        if (m->source.name == m->bot->nick())
-        {
+        if (!m->source.client)
             return;
-        }
+        if (m->source.name == m->bot->nick())
+            return;
 
         for (ValueArray::iterator it = lostvoices.begin(); it != lostvoices.end(); ++it)
         {
@@ -544,17 +539,14 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
         if (revoicing.empty())
             return;
-
-        if (m->source.name == m->bot->nick())
-        {
+        if (!m->source.client)
             return;
-        }
+        if (m->source.name == m->bot->nick())
+            return;
 
         Channel::ptr channel = m->bot->find_channel(channelname);
         if (!channel)
-        {
             return;
-        }
 
         Membership::ptr mem = m->source.client->find_membership(channelname);
         if (mem && mem->has_mode('v')) {
