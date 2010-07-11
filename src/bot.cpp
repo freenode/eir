@@ -76,7 +76,7 @@ namespace paludis
 
         void connect(std::string host, std::string port, std::string nick, std::string pass)
         {
-            _server.reset(new Server(std::bind(&Implementation<Bot>::handle_message, this, _1)));
+            _server.reset(new Server(std::bind(&Implementation<Bot>::handle_message, this, _1), bot));
             _host = host;
             _port = port;
             _nick = nick;

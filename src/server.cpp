@@ -1,6 +1,7 @@
 #include "server.h"
 #include "exceptions.h"
 #include "event_internal.h"
+#include "logger.h"
 
 #include <paludis/util/private_implementation_pattern-impl.hh>
 
@@ -33,6 +34,7 @@ namespace paludis
         std::queue<std::string> _send_queue;
 
         Server::Handler _handler;
+        Bot *_bot;
 
         void maybe_send_stuff();
         void io_event();
@@ -46,8 +48,9 @@ namespace paludis
         int cur_burst;
         int max_burst, rate_time, rate_num;
 
-        Implementation(Server::Handler h) : _handler(h), recvpos(0), cur_burst(0),
-                                            max_burst(4), rate_time(2), rate_num(1)
+        Implementation(Server::Handler h, Bot *b)
+                : _handler(h), _bot(b),
+                  recvpos(0), cur_burst(0), max_burst(4), rate_time(2), rate_num(1)
         {
         }
 
@@ -57,8 +60,8 @@ namespace paludis
     };
 }
 
-Server::Server(const Handler& handler)
-    : paludis::PrivateImplementationPattern<Server>(new paludis::Implementation<Server>(handler))
+Server::Server(const Handler& handler, Bot *bot)
+    : paludis::PrivateImplementationPattern<Server>(new paludis::Implementation<Server>(handler, bot))
 {
 }
 
@@ -242,7 +245,18 @@ void Implementation<Server>::run()
 
         do_receive_stuff();
 
-        static_cast<EventManagerImpl*>(EventManager::get_instance())->run_events();
+        try
+        {
+            static_cast<EventManagerImpl*>(EventManager::get_instance())->run_events();
+        }
+        catch (eir::Exception &e)
+        {
+            if (e.fatal())
+                throw;
+
+            Logger::get_instance()->Log(_bot, 0, Logger::Warning,
+                    "Error running events: " + e.message() + " (" + e.what() + ")");
+        }
     }
 
     EventManager::get_instance()->remove_event(_send_id);

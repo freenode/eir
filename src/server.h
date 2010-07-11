@@ -6,13 +6,15 @@
 #include <paludis/util/private_implementation_pattern.hh>
 #include <ctime>
 
+#include "bot.h"
+
 namespace eir
 {
     class Server : private paludis::PrivateImplementationPattern<Server>
     {
         public:
             typedef std::function<void(std::string)> Handler;
-            Server(const Handler&);
+            Server(const Handler&, Bot *);
             ~Server();
 
             void connect(std::string host, std::string port);
