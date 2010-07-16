@@ -485,8 +485,6 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
         if (revoicing.empty())
             return;
-        if (!m->source.client)
-            return;
         if (m->source.name == m->bot->nick())
             return;
         if (m->source.destination != channelname)
