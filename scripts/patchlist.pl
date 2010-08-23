@@ -138,7 +138,8 @@ sub patchdone {
         $message->reply("No patches found matching $match");
         return;
     }
-    $message->reply("Marked " . pluralise_patch($deleted) . " done.");
+    $message->reply("Marked " . pluralise_patch($deleted) . " done. " .
+        "Now " . pluralise_patch(scalar @$patches) . " in queue.");
 }
 
 sub patchalldone {
