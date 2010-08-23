@@ -122,7 +122,7 @@ sub patchdone {
 
     my @tmp;
     my $deleted = 0;
-    foreach my $i (0 .. scalar(@$patches)-1) {
+    foreach my $i (reverse(0 .. scalar(@$patches)-1)) {
         if (match_patch($patches->[$i], $match))
         {
             $deleted++;
