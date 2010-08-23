@@ -63,6 +63,11 @@ sub patchqueue {
     my @args = @{$message->args};
     my ($url, $saneurl, $repo, $comment);
 
+    if ($message->source->{destination} !~ /^#/) {
+        $message->reply("Use " . $message->command . " in a public channel.");
+        return;
+    }
+
     if ($args[0] =~ /^http:/) {
         $url = shift @args;
     }
@@ -114,6 +119,11 @@ sub patchqueue {
 sub patchdone {
     my $message = shift;
     my $match = $message->args->[0];
+
+    if ($message->source->{destination} !~ /^#/) {
+        $message->reply("Use " . $message->command . " in a public channel.");
+        return;
+    }
 
     if (!$match) {
         $message->reply("Tell me what to mark done.");
