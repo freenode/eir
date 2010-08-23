@@ -47,10 +47,28 @@ sub patchlist {
     my $message = shift;
     my $match = $message->args->[0];
 
-    $message->reply(pluralise_patch(scalar @$patches) . " in queue:");
+    #$message->reply(pluralise_patch(scalar @$patches) . " in queue:");
 
-    foreach my $patch (@$patches) {
-        if (!$match || match_patch($patch, $match)) {
+    my $matches;
+    my $matching = "";
+
+    if (!$match) {
+        $matches = $patches;
+    } else {
+        $matching = "matching ";
+        foreach my $patch (@$patches) {
+            if (match_patch($patch, $match)) {
+                push @$matches, $patch;
+            }
+        }
+    }
+
+    if (scalar @$matches > 4 && $message->source->{destination} =~ /^#/) {
+        $message->reply(scalar @$matches . " ${matching}patches in queue. Use " .
+            $message->command . " in private for a full list.");
+    } else {
+        $message->reply(scalar @$matches . " ${matching}patches in queue:");
+        foreach my $patch (@$matches) {
             send_patch($message, $patch);
         }
     }
