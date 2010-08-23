@@ -47,7 +47,7 @@ sub patchlist {
     my $message = shift;
     my $match = $message->args->[0];
 
-    $message->reply(@$patches . " " . pluralise_patch(@$patches) . " in queue:");
+    $message->reply(pluralise_patch(scalar @$patches) . " in queue:");
 
     foreach my $patch (@$patches) {
         if (!$match || match_patch($patch, $match)) {
@@ -107,8 +107,7 @@ sub patchqueue {
                 comment => $comment,
             };
     $summary = "Queued '" . $summary . "' in $repo. " if $summary;
-    $message->reply($summary . "Now " . @$patches . " "
-                  . pluralise_patch(scalar @$patches)
+    $message->reply($summary . "Now " . pluralise_patch(scalar @$patches)
                   . " in queue" );
 }
 
@@ -139,7 +138,7 @@ sub patchdone {
         $message->reply("No patches found matching $match");
         return;
     }
-    $message->reply("Marked $deleted " . pluralise_patch($deleted) . " done.");
+    $message->reply("Marked " . pluralise_patch($deleted) . " done.");
 }
 
 sub patchalldone {
@@ -161,7 +160,7 @@ sub slacker_alert {
         ++$repo{$patch->{repo}};
     }
 
-    my $msg = @$patches . " " . pluralise_patch(scalar @$patches) . " in queue ... slackers!";
+    my $msg = pluralise_patch(scalar @$patches) . " in queue ... slackers!";
 
     if (scalar keys %repo) {
         $msg .= " (" . (join ", ", map {$repo{$_} . " in $_"} keys %repo) . ")";
@@ -173,10 +172,11 @@ sub slacker_alert {
 }
 
 sub pluralise_patch {
-    if ( shift == 1 ) {
-        return 'patch';
+    my $num = shift;
+    if ( $num == 1 ) {
+        return '1 patch';
     }
-    return 'patches';
+    return "$num patches";
 }
 
 sub match_patch {
