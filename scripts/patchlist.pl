@@ -56,6 +56,7 @@ sub patchlist {
         $matches = $patches;
     } else {
         $matching = "matching ";
+        $matches = [];
         foreach my $patch (@$patches) {
             if (match_patch($patch, $match)) {
                 push @$matches, $patch;
