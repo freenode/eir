@@ -96,13 +96,13 @@ sub patchqueue {
     $comment = join " ", @args;
 
     if (my ( $id ) = ($url =~ qr|^http://dpaste.com/(\d+)(?:/(?:plain(?:/)?)?)?(\s+.*)?$|)) {
-        $saneurl = "http://dpaste.com/$id/plain";
+        $saneurl = "http://dpaste.com/$id/plain/";
     }
     elsif (( $id ) = ($url =~ qr|^http://ix.io/(\w+)|)) {
         $saneurl = "http://ix.io/$id";
     }
     elsif (( $id ) = ($url =~ qr|^http://paste.pocoo.org/(?:show\|raw)/(\d+)|)) {
-        $saneurl = "http://paste.pocoo.org/raw/$id";
+        $saneurl = "http://paste.pocoo.org/raw/$id/";
     }
 
     if ($saneurl) {
