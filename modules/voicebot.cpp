@@ -500,10 +500,12 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
                     std::weak_ptr<Client> w(c);
                     Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** Matched lost voice for " + m->source.raw + "(" + (*it)["mask"] + ")");
                     Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** Queueing revoice for " + m->source.name);
-                    add_event(time(NULL)+5, std::bind(revoice, m->bot, w, it, lostvoices, channelname));
+                    add_event(time(NULL)+5, std::bind(revoice, m->bot, w, channelname));
+                    (*it)["removed"]=1;
                 }
             }
         }
+        do_removals(lostvoices);
     }
 
     void irc_nick(const Message *m)
@@ -525,9 +527,11 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
                 std::weak_ptr<Client> w(m->source.client);
                 Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** Matched lost voice for " + m->source.raw + "(" + (*it)["mask"] + ")");
                 Logger::get_instance()->Log(m->bot, NULL, Logger::Debug, "*** Queueing revoice for " + m->source.destination );
-                add_event(time(NULL)+5, std::bind(revoice, m->bot, w, it, lostvoices, channelname));
+                add_event(time(NULL)+5, std::bind(revoice, m->bot, w, channelname));
+                (*it)["removed"]=1;
             }
         }
+        do_removals(lostvoices);
     }
 
     void irc_depart (const Message *m)
@@ -591,7 +595,7 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
         }
     }
 
-    static void revoice(Bot *bot, std::weak_ptr<Client> w, ValueArray::iterator it, Value& lv, std::string channel)
+    static void revoice(Bot *bot, std::weak_ptr<Client> w, std::string channel)
     {
         Client::ptr c = w.lock();
         if (!c)
@@ -612,10 +616,6 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
             Logger::get_instance()->Log(bot, NULL, Logger::Debug, "*** Revoicing " + c->nick() + " on "+ channel);
             Logger::get_instance()->Log(bot, NULL, Logger::Admin, "*** Revoicing " + c->nick() + " on "+ channel);
             bot->send("MODE " + channel + " +v " + c->nick());
-            if (it != lv.end()) {
-                (*it)["removed"]=1;
-                do_removals(lv);
-            }
         }
     }
 
