@@ -27,7 +27,7 @@ PERLAPI_SOURCES = api_XS.cpp HashWrappers.cpp perl_helpers.cpp value_wrapper.cpp
 # -except handling (using '\0' in a heredoc), causing it to put NUL characters into the
 # generated source file. GCC does not like this.
 $(APIDIR)/%_XS.cpp: $(APIDIR)/%.xs $(APIDIR)/typemap $(wildcard $(APIDIR)/*.xs)
-	xsubpp -csuffix _XS.cpp -typemap typemap -except $< | perl -pe 's/\0/\\0/g' >$@ ; [[ $$PIPESTATUS -eq 0 ]] || rm -f $@
+	xsubpp -csuffix _XS.cpp -typemap typemap -except $< | perl -pe 's/\0/\\0/g' >$@ ; [[ $$PIPESTATUS -eq 0 ]] || ( rm -f $@; false )
 
 PERLAPI_OBJS = $(addprefix $(APIDIR)/,$(addsuffix .o,$(basename $(PERLAPI_SOURCES))))
 
