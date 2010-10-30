@@ -143,6 +143,12 @@ struct voicebot : CommandHandlerBase<voicebot>, Module
 
         std::string reason = paludis::join(it, m->args.end(), " ");
 
+        if (reason.empty())
+        {
+            m->source.error("You need to specify a reason.");
+            return;
+        }
+
         // If this looks like a plain nick instead of a mask, treat it as a nickname
         // mask.
         if (mask.find_first_of("!@*") == std::string::npos)
