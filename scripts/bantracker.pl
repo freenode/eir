@@ -178,8 +178,6 @@ sub irc_367 {
   our %heap;
   my ($message) = @_;
   my @args=@{$message->args};
-  # banlist entry
-  # return unless $_[HEAP]->{'settings'}{$_[ARG2][0]}{'enabled'} eq 'yes';
   push (@{$heap{$args[0]}{'temp_list'}}, $args[1]);
 }
 
@@ -205,13 +203,28 @@ sub irc_368 {
   my ($message) = @_;
   my @args=@{$message->args};
   my $channel=$args[0];
-  # End of access list - push the contents of temp_list onto the correct list
-  #  return unless $_[HEAP]->{'settings'}{$channel}{'enabled'} eq 'yes';
   if ($args[1]=~/End of Channel (Ban|Quiet) List/ && defined @{$heap{$channel}{'temp_list'}}) {
     my $access_list=lc $1 . '_list';
-    push (@{$heap{$channel}{$access_list}},  @{$heap{$channel}{'temp_list'}});
+    @{$heap{$channel}{$access_list}} = @{$heap{$channel}{'temp_list'}};
     undef @{$heap{$channel}{'temp_list'}};
+    print Dumper(@{$heap{$channel}{$access_list}});
   }
+}
+
+sub irc_728 {
+  our %heap;
+  my ($message) = @_;
+  my @args=@{$message->args};
+  push (@{$heap{$args[0]}{'temp_quiet_list'}}, $args[2]);
+}
+
+sub irc_729 {
+  our %heap;
+  my ($message) = @_;
+  my @args=@{$message->args};
+  my $channel=$args[0];
+  @{$heap{$channel}{quiet_list}} = @{$heap{$channel}{'temp_quiet_list'}};
+  undef @{$heap{$channel}{'temp_quiet_list'}};
 }
 
 sub irc_mode {
