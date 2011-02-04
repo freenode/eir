@@ -8,6 +8,7 @@
 #include <paludis/util/private_implementation_pattern.hh>
 
 #include "supported.h"
+#include "capability.h"
 #include "client.h"
 #include "message.h"
 #include "value.h"
@@ -65,6 +66,7 @@ namespace eir
             void remove_setting(SettingsIterator it);
 
             const ISupport *supported() const;
+            Capabilities *capabilities();
 
             ~Bot();
     };

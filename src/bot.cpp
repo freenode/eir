@@ -68,6 +68,7 @@ namespace paludis
         bool _registered;
 
         ISupport _supported;
+        Capabilities _capabilities;
 
         void handle_message(std::string);
 
@@ -130,7 +131,7 @@ namespace paludis
         void rehash(const Message *m);
 
         Implementation(Bot *b, std::string n)
-            : bot(b), _name(n), _connected(false), _supported(b)
+            : bot(b), _name(n), _connected(false), _supported(b), _capabilities(b)
         {
             config_filename = _name + ".conf";
             set_handler = add_handler(filter_command_privilege("set", "admin").from_bot(bot).or_config(),
@@ -569,6 +570,11 @@ void Bot::remove_setting(Bot::SettingsIterator it)
 const ISupport* Bot::supported() const
 {
     return &_imp->_supported;
+}
+
+Capabilities* Bot::capabilities()
+{
+    return &_imp->_capabilities;
 }
 
 BotManager::BotManager() : PrivateImplementationPattern<BotManager>(new Implementation<BotManager>)
