@@ -17,6 +17,7 @@ struct ChannelHandler : CommandHandlerBase<ChannelHandler>, Module
     void handle_names_reply(const Message *);
     void handle_nick(const Message *);
     void handle_kick(const Message *);
+    void handle_account(const Message *);
     void handle_who_reply(const Message *);
     void handle_whox_reply(const Message *);
 
@@ -32,6 +33,7 @@ ChannelHandler::ChannelHandler()
     quit_id = add_handler(filter_command_type("QUIT", sourceinfo::RawIrc), &ChannelHandler::handle_quit);
     //names_id = add_handler("353", sourceinfo::RawIrc, &ChannelHandler::handle_names_reply);
     nick_id = add_handler(filter_command_type("NICK", sourceinfo::RawIrc), &ChannelHandler::handle_nick);
+    nick_id = add_handler(filter_command_type("ACCOUNT", sourceinfo::RawIrc), &ChannelHandler::handle_account);
     who_id = add_handler(filter_command_type("352", sourceinfo::RawIrc), &ChannelHandler::handle_who_reply);
     who_id = add_handler(filter_command_type("354", sourceinfo::RawIrc), &ChannelHandler::handle_whox_reply);
     kick_id = add_handler(filter_command_type("KICK", sourceinfo::RawIrc), &ChannelHandler::handle_kick);
@@ -236,6 +238,10 @@ void ChannelHandler::handle_whox_reply(const Message *m)
                 flags = m->args[5],
                 account = m->args[6];
 
+    // WHOX uses "0" for "no account", unlike account-notify which uses *
+    if (account == "0")
+        account = "";
+
     who_reply_common(m, chname, nick, user, host, flags, account);
 }
 
@@ -293,6 +299,17 @@ void ChannelHandler::handle_nick(const Message *m)
         return;
     std::string newnick(m->source.destination);
     m->source.client->change_nick(newnick);
+}
+
+void ChannelHandler::handle_account(const Message *m)
+{
+    Context ctx("Handling account change from " + m->source.name);
+
+    if (!m->source.client)
+        return;
+
+    std::string newaccount(m->source.destination);
+    m->source.client->set_account(newaccount);
 }
 
 MODULE_CLASS(ChannelHandler)
