@@ -55,6 +55,9 @@ Bot::nick()
 string
 Bot::name()
 
+Capabilities *
+Bot::capabilities()
+
 
 INCLUDE: clients.xs
 INCLUDE: helpers.xs
@@ -63,4 +66,5 @@ INCLUDE: handlers.xs
 INCLUDE: value.xs
 INCLUDE: logger.xs
 INCLUDE: storage.xs
+INCLUDE: capabilities.xs
 

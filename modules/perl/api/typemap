@@ -3,6 +3,7 @@ Bot *                   O_OBJECT
 Client *                O_OBJECT
 Channel *               O_OBJECT
 Membership *            O_OBJECT
+Capabilities *          O_OBJECT
 
 Filter *                O_OBJECT
 const Message *         O_OBJECT

@@ -25,6 +25,7 @@ TYPE_MAP(Channel)
 TYPE_MAP(Membership)
 TYPE_MAP(Filter)
 TYPE_MAP(CommandRegistry)
+TYPE_MAP(Capabilities)
 
 TYPE_MAP_(const Message, "Eir::Message")
 

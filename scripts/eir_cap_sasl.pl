@@ -23,65 +23,39 @@ our %sasl_auth;
 our %mech = ();
 
 # IRC event handlers
-our $timeout;
 our @handlers = (
     Eir::CommandRegistry::add_handler(Eir::Filter->new({command => 'on_connect',type => Eir::Source::Internal}),\&server_connected),
-    Eir::CommandRegistry::add_handler(Eir::Filter->new({command => 'CAP',type => Eir::Source::RawIrc}),\&event_cap),
+    Eir::CommandRegistry::add_handler(Eir::Filter->new({command => 'cap_enabled',type => Eir::Source::Internal}),\&event_cap_enabled),
     Eir::CommandRegistry::add_handler(Eir::Filter->new({command => 'AUTHENTICATE',type => Eir::Source::RawIrc}),\&event_authenticate),
     Eir::CommandRegistry::add_handler(Eir::Filter->new({command => '903',type => Eir::Source::RawIrc}),\&event_saslend),
     Eir::CommandRegistry::add_handler(Eir::Filter->new({command => '904',type => Eir::Source::RawIrc}),\&event_saslend),
     Eir::CommandRegistry::add_handler(Eir::Filter->new({command => '905',type => Eir::Source::RawIrc}),\&event_saslend),
     Eir::CommandRegistry::add_handler(Eir::Filter->new({command => '906',type => Eir::Source::RawIrc}),\&event_saslend),
     Eir::CommandRegistry::add_handler(Eir::Filter->new({command => '907',type => Eir::Source::RawIrc}),\&event_saslend)
-    );
+);
 
 sub server_connected {
-  my ($message) = @_;
-  our $bot=$message->bot;
-    $bot->send('CAP LS');
+    my ($message) = @_;
+    our $bot = $message->bot;
+    $bot->capabilities->request("sasl");
 }
 
-sub event_cap {
-    our %bot;
-    our %sasl_auth;
-    our $timeout;
+sub event_cap_enabled {
     my ($message) = @_;
-    my @args=@{$message->args};
-    my ($subcmd, $caps, $tosend);
 
-    $tosend = '';
-    $subcmd = $args[0];
-    $caps = ' '.$args[1].' ';
-    if ($subcmd eq 'LS') {
-       $tosend .= ' multi-prefix' if $caps =~ / multi-prefix /i;
-       $tosend .= ' sasl' if $caps =~ / sasl /i;
-       $tosend =~ s/^ //;
-       if ($tosend eq '') {
-           $bot->send("CAP END");
-       } else {
-           $bot->send("CAP REQ :$tosend");
-       }
-    } elsif ($subcmd eq 'ACK') {
-       if ($caps =~ / sasl /i) {
-           $sasl_auth{buffer} = '';
-           $sasl_auth{user}=$bot->Settings->{'sasl_user'};
-           $sasl_auth{password}=$bot->Settings->{'sasl_password'};
-           $sasl_auth{mech}=$bot->Settings->{'sasl_mechanism'};
+    return if ($message->args->[0] ne 'sasl');
 
-           if($mech{$sasl_auth{mech}}) {
-               $bot->send("AUTHENTICATE " . $sasl_auth{mech});
-               $timeout=Eir::EventManager::add_event(time()+10, \&timeout);
-           }else{
-               print 'SASL: attempted to start unknown mechanism "' . $sasl_auth{mech} . '"' . "\n";
-               $bot->send("CAP END");
-           }
-       }
-    } elsif ($subcmd eq 'NAK') {
-       print "CLICAP: refused:$caps\n";
-       $bot->send("CAP END");
-    } elsif ($subcmd eq 'LIST') {
-       print "CLICAP: currently enabled:$caps\n";
-       return;
+    $sasl_auth{buffer} = '';
+    $sasl_auth{user}=$bot->Settings->{'sasl_user'};
+    $sasl_auth{password}=$bot->Settings->{'sasl_password'};
+    $sasl_auth{mech}=uc $bot->Settings->{'sasl_mechanism'};
+
+    if($mech{$sasl_auth{mech}}) {
+        $bot->capabilities->hold;
+
+        $bot->send("AUTHENTICATE " . $sasl_auth{mech});
+    } else {
+        print 'SASL: attempted to start unknown mechanism "' . $sasl_auth{mech} . '"' . "\n";
     }
 }
 
@@ -97,7 +71,7 @@ sub event_authenticate {
            $args=$1;
     } else {
            print "SASL: Received AUTHENTICATE with no parameters, aborting\n";
-           timeout();
+           $bot->capabilities->finish;
     }
 
     $sasl->{buffer} .= $args;
@@ -122,14 +96,7 @@ sub event_authenticate {
 
 sub event_saslend {
     our %bot;
-    $bot->send("CAP END");
-    undef $timeout;
-}
-
-sub timeout {
-    our $bot;
-    print "SASL: authentication timed out\n";
-    $bot->send("CAP END");
+    $bot->capabilities->finish;
 }
 
 $mech{PLAIN} = sub {

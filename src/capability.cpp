@@ -26,6 +26,7 @@ namespace paludis
         std::set<std::string> caps_to_request, caps_requested;
 
         int cap_end_hold;
+        EventManager::id timeout_event_id;
 
         void on_connect(const Message * m);
         void on_cap_reply(const Message * m);
@@ -34,7 +35,8 @@ namespace paludis
 
         Implementation(Bot *b) :
             _bot(b),
-            cap_end_hold(0)
+            cap_end_hold(0),
+            timeout_event_id(0)
         {
             connect_holder = add_handler(filter_command_type("on_connect", sourceinfo::Internal).from_bot(b),
                     &Implementation<Capabilities>::on_connect);
@@ -98,7 +100,7 @@ void Implementation<Capabilities>::on_cap_reply(const Message *m)
         else
         {
             Bot *b = m->bot;
-            EventManager::get_instance()->add_event(5, [b](){ b->send("CAP END"); });
+            timeout_event_id = EventManager::get_instance()->add_event(time(NULL) + 5, [b](){ b->send("CAP END"); });
         }
     }
 }
@@ -120,7 +122,11 @@ void Capabilities::hold()
 void Capabilities::finish()
 {
     if (--_imp->cap_end_hold <= 0)
+    {
         _imp->_bot->send("CAP END");
+        EventManager::get_instance()->remove_event(_imp->timeout_event_id);
+        _imp->timeout_event_id = 0;
+    }
 }
 
 Capabilities::iterator Capabilities::begin_available() const
