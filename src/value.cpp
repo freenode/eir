@@ -346,11 +346,11 @@ void Value::push_back(Value v)
     _imp->_array->push_back(v);
 }
 
-void Value::erase(ValueArray::iterator it)
+ValueArray::iterator Value::erase(ValueArray::iterator it)
 {
     _imp->NeedType(array);
 
-    _imp->_array->erase(it);
+    return _imp->_array->erase(it);
 }
 
 void Value::clear()
@@ -447,9 +447,9 @@ void ValueArray::insert(size_t idx, const Value& v)
     _imp->_array.insert(_imp->_array.begin() + idx, v);
 }
 
-void ValueArray::erase(ValueArray::iterator it)
+ValueArray::iterator ValueArray::erase(ValueArray::iterator it)
 {
-    _imp->_array.erase(it.underlying_iterator<std::vector<Value>::iterator>());
+    return _imp->_array.erase(it.underlying_iterator<std::vector<Value>::iterator>());
 }
 
 void ValueArray::erase(size_t idx)
@@ -542,9 +542,9 @@ bool KeyValueArray::erase(std::string s)
     return _imp->_map.erase(s) > 0;
 }
 
-void KeyValueArray::erase(KeyValueArray::iterator it)
+KeyValueArray::iterator KeyValueArray::erase(KeyValueArray::iterator it)
 {
-    _imp->_map.erase(it.underlying_iterator<std::map<std::string,Value>::iterator>());
+    return _imp->_map.erase(it.underlying_iterator<std::map<std::string,Value>::iterator>());
 }
 
 void KeyValueArray::clear()

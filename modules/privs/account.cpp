@@ -16,7 +16,7 @@ struct AccountPrivilege : CommandHandlerBase<AccountPrivilege>, Module
             if ((*it)["type"] == "account" &&
                 (*it)["match"] == m->source.client->account())
             {
-                m->source.client->privs().add_privilege((*it)["priv"]);
+                m->source.client->privs().add_privilege((*it)["channel"], (*it)["priv"]);
             }
         }
     }

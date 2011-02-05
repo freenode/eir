@@ -9,11 +9,12 @@ struct PrivilegeHandler : CommandHandlerBase<PrivilegeHandler>, Module
     Value & priv_entries() { return GlobalSettingsManager::get_instance()->get("privileges")["global"]; }
     Value & priv_types() { return GlobalSettingsManager::get_instance()->get("privilege_types"); }
 
-    Value make_priv_entry(std::string type, std::string match, std::string priv, bool config = false)
+    Value make_priv_entry(std::string type, std::string match, std::string channel, std::string priv, bool config = false)
     {
         Value v(Value::kvarray);
         v["type"] = type;
         v["match"] = match;
+        v["channel"] = channel;
         v["priv"] = priv;
         v["is_config"] = config;
         return v;
@@ -27,13 +28,20 @@ struct PrivilegeHandler : CommandHandlerBase<PrivilegeHandler>, Module
             return;
         }
 
-        if (m->source.client)
-            Logger::get_instance()->Log(m->bot, m->source.client, Logger::Command, m->source.raw);
-
         std::vector<std::string>::const_iterator it = m->args.begin();
 
         std::string type = *it++;
         std::string match = *it++;
+        std::string channel;
+        if ((*it)[0] == '#')
+            channel = *it++;
+
+        // Now that we've decided what arguments are what, we can check channel-specific privileges
+        if (m->source.type != sourceinfo::ConfigFile
+            && (!m->source.client || !m->source.client->privs().has_privilege(channel, "admin")))
+        {
+            return;
+        }
 
         if (priv_types()[type] != 1)
         {
@@ -43,10 +51,13 @@ struct PrivilegeHandler : CommandHandlerBase<PrivilegeHandler>, Module
 
         for( ; it != m->args.end(); ++it)
         {
-            priv_entries().push_back(make_priv_entry(type, match, *it, m->source.type == sourceinfo::ConfigFile));
-            m->source.reply("Added privilege " + *it + " for " + match + " (" + type + ")");
-            Logger::get_instance()->Log(m->bot, m->source.client, Logger::Admin,
-                                        "Adding privilege " + *it + " for " + match + " (" + type + ")");
+            priv_entries().push_back(make_priv_entry(type, match, channel, *it, m->source.type == sourceinfo::ConfigFile));
+            std::string reply = "Added privilege " + *it;
+            if (!channel.empty())
+                reply += " in " + channel;
+            reply += " for " + match + " (" + type + ")";
+            m->source.reply(reply);
+            Logger::get_instance()->Log(m->bot, m->source.client, Logger::Admin, reply);
         }
 
         recalculate_privileges(m);
@@ -60,21 +71,45 @@ struct PrivilegeHandler : CommandHandlerBase<PrivilegeHandler>, Module
             return;
         }
 
-        for ( ValueArray::iterator it = priv_entries().begin(), ite = priv_entries().end(); it != ite; )
+        std::string match = m->args[0];
+        std::string channel, privs;
+        if (m->args[1][0] == '#')
         {
-            if ((*it)["match"] == m->args[0] && match(m->args[1], (*it)["priv"]))
+            channel = m->args[1];
+            if (m->args.size() < 3)
+                return;
+            privs = m->args[2];
+        }
+        else
+        {
+            privs = m->args[1];
+        }
+
+        // Now that we've decided what arguments are what, we can check channel-specific privileges
+        if (!m->source.client || !m->source.client->privs().has_privilege(channel, "admin"))
+        {
+            m->source.error("goat");
+            return;
+        }
+
+        for ( ValueArray::iterator it = priv_entries().begin(); it != priv_entries().end(); )
+        {
+            if ((*it)["match"] == match
+                && ::match(privs, (*it)["priv"])
+                && (channel.empty() || channel == (*it)["channel"]))
             {
                 if ((*it)["is_config"])
                 {
                     m->source.error("Privilege " + (*it)["priv"] + " for " + (*it)["match"] +
                             " is defined in the configuration file and must be removed there.");
+                    ++it;
                     continue;
                 }
 
                 Logger::get_instance()->Log(m->bot, m->source.client, Logger::Admin,
-                                            "Removing privilege " + (*it)["priv"] + " from " + (*it)["hostmask"]);
-                m->source.reply("Removing privilege " + (*it)["priv"] + " from " + (*it)["hostmask"]);
-                priv_entries().erase(it++);
+                                            "Removing privilege " + (*it)["priv"] + " from " + (*it)["match"]);
+                m->source.reply("Removing privilege " + (*it)["priv"] + " from " + (*it)["match"]);
+                it = priv_entries().erase(it);
             }
             else
                 ++it;
@@ -85,19 +120,32 @@ struct PrivilegeHandler : CommandHandlerBase<PrivilegeHandler>, Module
 
     void list_privs(const Message *m)
     {
+        std::string channel;
+        if (m->args.size() > 0 && m->args[0][0] == '#')
+            channel = m->args[0];
+
+        if (!m->source.client || !m->source.client->privs().has_privilege(channel, "admin"))
+            return;
+
         std::map<std::string, std::string> response, c_response;
 
         for (auto it = priv_entries().begin(); it != priv_entries().end(); ++it)
         {
-            if ((*it)["is_config"])
-                c_response[(*it)["match"]] += (*it)["priv"] + " ";
-            else
-                response[(*it)["match"]] += (*it)["priv"] + " ";
+            if (!channel.empty() && (*it)["channel"] != channel)
+                continue;
+
+            std::map<std::string, std::string> & r = (*it)["is_config"] ? c_response : response;
+
+            std::string privfmt = (*it)["priv"];
+            if ((*it)["channel"])
+                privfmt += "(" + (*it)["channel"] + ")";
+
+            r[(*it)["match"]] += privfmt + " ";
         }
 
         for (auto it = c_response.begin(); it != c_response.end(); ++it)
         {
-            m->source.reply(" - " + it->first + " has privileges " + it->second + " (config)");
+            m->source.reply(" - " + it->first + " has privileges " + it->second + "(config)");
         }
         for (auto it = response.begin(); it != response.end(); ++it)
         {
@@ -142,16 +190,17 @@ struct PrivilegeHandler : CommandHandlerBase<PrivilegeHandler>, Module
                                 &PrivilegeHandler::set_client_privileges_from);
         add_id = add_handler(filter_command_type("privilege", sourceinfo::ConfigFile),
                                 &PrivilegeHandler::add_privilege_entry);
-        add2_id = add_handler(filter_command_privilege("addpriv", "admin"),
-                                &PrivilegeHandler::add_privilege_entry);
-        remove_id = add_handler(filter_command_privilege("delpriv", "admin"),
-                                &PrivilegeHandler::remove_privilege_entry);
-        list_id = add_handler(filter_command_privilege("showprivs", "admin"),
-                                &PrivilegeHandler::list_privs);
         recalc_id = add_handler(filter_command_type("recalculate_privileges", sourceinfo::Internal),
                                 &PrivilegeHandler::recalculate_privileges);
         clear_id = add_handler(filter_command_type("clear_lists", sourceinfo::Internal),
                                 &PrivilegeHandler::clear_conf_privileges);
+        // These do their own privilege checking. The lack of privilege filter is intentional.
+        add2_id = add_handler(filter_command("addpriv"),
+                                &PrivilegeHandler::add_privilege_entry);
+        remove_id = add_handler(filter_command("delpriv"),
+                                &PrivilegeHandler::remove_privilege_entry);
+        list_id = add_handler(filter_command("showprivs"),
+                                &PrivilegeHandler::list_privs);
     }
 };
 

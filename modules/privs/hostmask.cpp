@@ -16,7 +16,7 @@ struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
             if ((*it)["type"] == "host" &&
                 match((*it)["match"], m->source.client->nuh()))
             {
-                m->source.client->privs().add_privilege((*it)["priv"]);
+                m->source.client->privs().add_privilege((*it)["channel"], (*it)["priv"]);
             }
         }
     }

@@ -40,7 +40,7 @@ namespace eir
 
             void insert(iterator, const Value&);
             void insert(size_t, const Value&);
-            void erase(iterator);
+            iterator erase(iterator);
             void erase(size_t);
             void clear();
 
@@ -76,7 +76,7 @@ namespace eir
             bool insert(std::string, Value);
 
             bool erase(std::string);
-            void erase(iterator);
+            iterator erase(iterator);
             void clear();
 
             Value& operator[](std::string);
@@ -133,7 +133,7 @@ namespace eir
             Value& operator[](int);
 
             void push_back(Value v);
-            void erase(ValueArray::iterator it);
+            ValueArray::iterator erase(ValueArray::iterator it);
 
             void clear();
 
