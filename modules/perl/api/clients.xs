@@ -13,9 +13,19 @@ string
 Client::nuh()
 
 int
-Client::has_privilege(const char *priv)
+Client::has_privilege(...)
 CODE:
-    RETVAL = THIS->privs().has_privilege(priv);
+    const char *channel = "", *priv;
+    if (items > 2)
+    {
+        channel = SvPV_nolen(ST(1));
+        priv = SvPV_nolen(ST(2));
+    }
+    else
+    {
+        priv = SvPV_nolen(ST(1));
+    }
+    RETVAL = THIS->privs().has_privilege(channel, priv);
 OUTPUT:
     RETVAL
 
