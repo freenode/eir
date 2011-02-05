@@ -158,11 +158,29 @@ namespace eir
     inline std::string operator+(const Value& lhs, const char *rhs)
     { return lhs.String() + rhs; }
 
+    inline bool operator==(const Value& lhs, int rhs)
+    { return lhs.Type() == Value::integer && lhs.Int() == rhs; }
+
+    inline bool operator==(int lhs, const Value& rhs)
+    { return rhs.Type() == Value::integer && lhs == rhs.Int(); }
+
     inline bool operator==(const Value& lhs, const std::string& rhs)
-    { return lhs.String() == rhs; }
+    { return lhs.Type() == Value::string && lhs.String() == rhs; }
 
     inline bool operator==(const std::string& lhs, const Value& rhs)
-    { return lhs == rhs.String(); }
+    { return rhs.Type() == Value::string && lhs == rhs.String(); }
+
+    inline bool operator!=(const Value& lhs, int rhs)
+    { return lhs.Type() != Value::integer || lhs.Int() != rhs; }
+
+    inline bool operator!=(int lhs, const Value& rhs)
+    { return rhs.Type() != Value::integer || lhs != rhs.Int(); }
+
+    inline bool operator!=(const Value& lhs, const std::string& rhs)
+    { return lhs.Type() != Value::string || lhs.String() != rhs; }
+
+    inline bool operator!=(const std::string& lhs, const Value& rhs)
+    { return rhs.Type() != Value::string || lhs != rhs.String(); }
 
     class TypeMismatchException : public Exception
     {
