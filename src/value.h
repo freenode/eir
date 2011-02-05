@@ -117,6 +117,7 @@ namespace eir
             // No operator int(), because C++ is immensely silly.
             //operator int() const;
             operator std::string() const;
+            explicit operator bool() const;
 
             ValueArray::iterator begin();
             ValueArray::iterator end();

@@ -232,6 +232,24 @@ Value::operator std::string() const
     return String();
 }
 
+Value::operator bool() const
+{
+    switch (Type())
+    {
+        case empty:
+            return false;
+        case integer:
+            return _imp->_intval != 0;
+        case string:
+            return !_imp->_stringval.empty();
+        case array:
+            return !_imp->_array->empty();
+        case kvarray:
+            return !_imp->_kv_array->empty();
+    }
+    throw InternalError("Don't know what type of value I am.");
+}
+
 int Value::Int() const
 {
     switch(Type())
