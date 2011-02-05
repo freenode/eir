@@ -70,6 +70,27 @@ namespace paludis
         ISupport _supported;
         Capabilities _capabilities;
 
+        bool have_whox;
+        bool have_account_notify;
+        bool have_extended_join;
+
+        CommandHolder cap_enabled_handler, isupport_enabled_handler;
+        void cap_enabled(const Message *m)
+        {
+            if (m->args.empty()) return;
+            if (m->args[0] == "account-notify")
+                have_account_notify = true;
+            if (m->args[0] == "extended-join")
+                have_extended_join = true;
+        }
+
+        void isupport_enabled(const Message *m)
+        {
+            if (m->args.empty()) return;
+            if (m->args[0] == "WHOX")
+                have_whox = true;
+        }
+
         void handle_message(std::string);
 
         CommandHolder set_handler;
@@ -144,6 +165,14 @@ namespace paludis
                                         &Implementation<Bot>::handle_433);
             throttle_handler = add_handler(filter_command_type("throttle", sourceinfo::ConfigFile).from_bot(bot),
                                         &Implementation<Bot>::handle_throttle);
+
+            cap_enabled_handler = add_handler(filter_command_type("cap_enabled", sourceinfo::Internal),
+                                        &Implementation<Bot>::cap_enabled);
+            isupport_enabled_handler = add_handler(filter_command_type("isupport_enabled", sourceinfo::Internal),
+                                        &Implementation<Bot>::isupport_enabled);
+
+            _capabilities.request("account-notify");
+            _capabilities.request("extended-join");
         }
     };
 }
@@ -575,6 +604,11 @@ const ISupport* Bot::supported() const
 Capabilities* Bot::capabilities()
 {
     return &_imp->_capabilities;
+}
+
+bool Bot::use_account_tracking() const
+{
+    return _imp->have_whox && _imp->have_account_notify && _imp->have_extended_join;
 }
 
 BotManager::BotManager() : PrivateImplementationPattern<BotManager>(new Implementation<BotManager>)

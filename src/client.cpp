@@ -1,6 +1,7 @@
 #include "client.h"
 #include "exceptions.h"
 #include "bot.h"
+#include "handler.h"
 
 #include <map>
 #include <set>
@@ -25,7 +26,7 @@ namespace paludis
     {
         Bot *bot;
 
-        std::string nick, user, host;
+        std::string nick, user, host, account;
 
         std::map<std::string, Value> attributes;
 
@@ -45,6 +46,7 @@ namespace paludis
 const std::string& Client::nick() const { return _imp->nick; }
 const std::string& Client::user() const { return _imp->user; }
 const std::string& Client::host() const { return _imp->host; }
+const std::string& Client::account() const { return _imp->account; }
 
 const std::string& Client::nuh() const
 {
@@ -61,7 +63,7 @@ void Client::change_nick(std::string newnick)
 {
     // The correct logic for this is somewhat non-trivial, due to the various
     // objects that index client objects by nickname. These all need to be
-    // properly update.
+    // properly updated.
     //
     // So, three stages. Remove the old nickname from all such indices, then
     // change the nickname, then re-add the new nickname.
@@ -77,6 +79,20 @@ void Client::change_nick(std::string newnick)
 
     for (auto it = _imp->channels.begin(); it != _imp->channels.end(); ++it)
         it->second->channel->add_member(it->second);
+}
+
+void Client::set_account(std::string accountname)
+{
+    // Protocol uses * to mean "no account name", so blank it out if that is found
+    if (accountname == "*")
+        accountname = "";
+
+    // Don't invalidate privileges if nothing changed
+    if (accountname == _imp->account)
+        return;
+
+    _imp->account = accountname;
+    dispatch_internal_message(_imp->bot, "recalculate_privileges");
 }
 
 Client::AttributeIterator Client::attr_begin()

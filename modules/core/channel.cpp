@@ -18,10 +18,11 @@ struct ChannelHandler : CommandHandlerBase<ChannelHandler>, Module
     void handle_nick(const Message *);
     void handle_kick(const Message *);
     void handle_who_reply(const Message *);
+    void handle_whox_reply(const Message *);
 
     ChannelHandler();
 
-    CommandHolder join_id, part_id, quit_id, names_id, nick_id, who_id, kick_id;
+    CommandHolder join_id, part_id, quit_id, names_id, nick_id, who_id, whox_id, kick_id;
 };
 
 ChannelHandler::ChannelHandler()
@@ -32,6 +33,7 @@ ChannelHandler::ChannelHandler()
     //names_id = add_handler("353", sourceinfo::RawIrc, &ChannelHandler::handle_names_reply);
     nick_id = add_handler(filter_command_type("NICK", sourceinfo::RawIrc), &ChannelHandler::handle_nick);
     who_id = add_handler(filter_command_type("352", sourceinfo::RawIrc), &ChannelHandler::handle_who_reply);
+    who_id = add_handler(filter_command_type("354", sourceinfo::RawIrc), &ChannelHandler::handle_whox_reply);
     kick_id = add_handler(filter_command_type("KICK", sourceinfo::RawIrc), &ChannelHandler::handle_kick);
 }
 
@@ -147,10 +149,19 @@ void ChannelHandler::handle_join(const Message *m)
     Client::ptr c = find_or_create_client(m);
     Channel::ptr ch = find_or_create_channel(m);
 
+    if (m->bot->use_account_tracking() && m->args.size() > 0)
+        c->set_account(m->args[0]);
+
     c->join_chan(ch);
 
     if (m->source.name == m->bot->nick())
-        m->bot->send("WHO " + m->source.destination);
+    {
+        std::string who_command = "WHO " + m->source.destination;
+        if (m->bot->use_account_tracking())
+            who_command += " %cnuhaft,524";
+
+        m->bot->send(who_command);
+    }
 }
 
 void ChannelHandler::handle_names_reply(const Message *m)
@@ -175,6 +186,27 @@ void ChannelHandler::handle_names_reply(const Message *m)
     }
 }
 
+static void who_reply_common(const Message *m,
+                             std::string chname, std::string nick, std::string user, std::string hostname,
+                             std::string flags, std::string account)
+{
+    Context ctx("Processing WHO reply for " + chname + " (" + nick + ")");
+    Client::ptr c = find_or_create_client(m->bot, nick, user, hostname);
+
+    if (m->bot->use_account_tracking() && !account.empty())
+        c->set_account(account);
+
+    Channel::ptr ch = find_or_create_channel(m->bot, chname);
+    Membership::ptr member = c->join_chan(ch);
+
+    for (std::string::iterator ch = flags.begin(); ch != flags.end(); ++ch)
+    {
+        char c = m->bot->supported()->get_prefix_mode(*ch);
+        if (c && !member->has_mode(c))
+            member->modes += c;
+    }
+}
+
 void ChannelHandler::handle_who_reply(const Message *m)
 {
     if (m->args.size() != 7) return;
@@ -186,17 +218,25 @@ void ChannelHandler::handle_who_reply(const Message *m)
                 nick = m->args[4],
                 flags = m->args[5];
 
-    Context ctx("Processing WHO reply for " + chname + " (" + nick + ")");
-    Client::ptr c = find_or_create_client(m->bot, nick, user, hostname);
-    Channel::ptr ch = find_or_create_channel(m->bot, chname);
-    Membership::ptr member = c->join_chan(ch);
+    who_reply_common(m, chname, nick, user, hostname, flags, "*");
+}
 
-    for (std::string::iterator ch = flags.begin(); ch != flags.end(); ++ch)
-    {
-        char c = m->bot->supported()->get_prefix_mode(*ch);
-        if (c && !member->has_mode(c))
-            member->modes += c;
-    }
+void ChannelHandler::handle_whox_reply(const Message *m)
+{
+    // Check that this was a reply from the same type of WHOX request that we sent on join
+    if (m->args.size() != 7)
+        return;
+    if (m->args[0] != "524")
+        return;
+
+    std::string chname = m->args[1],
+                user = m->args[2],
+                host = m->args[3],
+                nick = m->args[4],
+                flags = m->args[5],
+                account = m->args[6];
+
+    who_reply_common(m, chname, nick, user, host, flags, account);
 }
 
 void ChannelHandler::handle_part(const Message *m)

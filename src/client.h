@@ -29,8 +29,10 @@ namespace eir
         const std::string& user() const;
         const std::string& host() const;
         const std::string& nuh() const;
+        const std::string& account() const;
 
         void change_nick(std::string newnick);
+        void set_account(std::string accountname);
 
         struct AttributeIteratorTag;
         typedef paludis::WrappedForwardIterator<AttributeIteratorTag,

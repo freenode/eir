@@ -68,6 +68,8 @@ namespace eir
             const ISupport *supported() const;
             Capabilities *capabilities();
 
+            bool use_account_tracking() const;
+
             ~Bot();
     };
 
