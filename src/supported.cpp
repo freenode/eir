@@ -92,6 +92,8 @@ void Implementation<ISupport>::_populate(const eir::Message *m)
         if (token.find("are supported") != std::string::npos)
             continue;
 
+        Message isupport_enabled(m->bot, "isupport_enabled", sourceinfo::Internal);
+
         if ((idx = token.find('=')) != std::string::npos)
         {
             std::string name = token.substr(0, idx);
@@ -107,11 +109,17 @@ void Implementation<ISupport>::_populate(const eir::Message *m)
                 _max_modes = atoi(value.c_str());
 
             kv_tokens[name] = value;
+
+            isupport_enabled.args.push_back(name);
+            isupport_enabled.args.push_back(value);
         }
         else
         {
             simple_tokens.insert(simple_tokens.end(), token);
+            isupport_enabled.args.push_back(token);
         }
+
+        CommandRegistry::get_instance()->dispatch(&isupport_enabled);
     }
 }
 
