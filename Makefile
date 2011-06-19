@@ -1,4 +1,14 @@
+CXXFLAGS = -O0 -fno-inline-functions -ggdb3 -I. -Wall -Werror -Wextra -pedantic -std=c++0x
 
+SUBDIRS = \
+	  paludis/util \
+	  src \
+#	  modules \
+	  libjson \
+
+include ../bs/bs.mk
+
+ifeq (1,0)
 ### Global settings first
 
 CXXFLAGS = -O0 -fno-inline-functions -ggdb3 -I. -Wall -Werror -Wextra -pedantic -std=gnu++0x
@@ -89,3 +99,5 @@ paludis/util/.depend: $(paludisutil_SOURCES) $(paludisutil_HEADERS)
 	$(CXX) -MM -MG $(CXXFLAGS) $(paludisutil_CXXFLAGS) $(paludisutil_SOURCES) | sed 's!\(^[^ ]*.o:\)!paludis/util/\1!' >$@
 
 -include src/.depend modules/.depend paludis/util/.depend
+
+endif
