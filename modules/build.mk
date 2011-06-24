@@ -24,6 +24,6 @@ MODULES = \
 
 storage/json_CXXFLAGS = -Ilibjson
 
-SUBDIRS = perl
+SUBDIRS = $(ENABLE_PERL)
 
 CXXFLAGS = -Isrc -fPIC

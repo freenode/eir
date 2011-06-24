@@ -6,6 +6,8 @@ SUBDIRS = \
 	  libjson \
 	  modules
 
+include settings.mk
+
 include bs/target_module.mk
 include ../bs/bs.mk
 

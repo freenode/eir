@@ -9,5 +9,11 @@ tags
 modules/perl/perlxsi.c
 modules/perl/api/api_XS.cpp
 
+configure
+config.log
+config.status
+settings.mk
+autom4te.cache
+
 build
 intermediate

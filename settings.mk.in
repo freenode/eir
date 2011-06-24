@@ -1,0 +1,16 @@
+ENABLE_PERL = @ENABLE_PERL@
+PERL_CFLAGS = @PERL_CFLAGS@
+PERL_LIBS = @PERL_LIBS@
+
+# Really we want these uppercase, but autoconf will always set the lowercase one
+prefix          = @prefix@
+exec_prefix     = @exec_prefix@
+bindir          = @bindir@
+libdir          = @libdir@
+
+PREFIX = $(prefix)
+LIBDIR = $(libdir)
+BINDIR = $(bindir)
+
+MODDIR = @MODDIR@
+ETCDIR = @ETCDIR@
