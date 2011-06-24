@@ -34,6 +34,21 @@ AC_HELP_STRING([--with-confdir=DIR],
 )
 
 
+AC_MSG_CHECKING([whether to modify datadir])
+AC_ARG_WITH(datadir, 
+AC_HELP_STRING([--with-datadir=DIR],
+   [Location of data files.]),
+   [ DATADIR=`echo $withval | sed 's/\/$//'`
+     AC_MSG_RESULT(yes)
+     AC_DEFINE(DATADIR, DATADIR, [Location of data files.])
+     AC_SUBST([DATADIR]) ],
+   [ DATADIR='${prefix}/data'
+     AC_MSG_RESULT(no)
+     AC_DEFINE(DATADIR, DATADIR, [Location of data files.])
+     AC_SUBST([DATADIR])]
+)
+
+
 AC_ARG_ENABLE([perl],
         [AS_HELP_STRING([--disable-perl],[Disable building perl scripting module.])],
         [enable_perl=$enableval],

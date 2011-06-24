@@ -6,6 +6,7 @@
 #include <list>
 #include <stdint.h>
 
+#include <cstdlib>
 #include <dlfcn.h>
 
 using namespace eir;
@@ -21,6 +22,15 @@ namespace
             void *handle;
             Module *obj;
         };
+
+        std::string module_path()
+        {
+            const char *env = getenv("EIR_MODULE_DIR");
+            if (env)
+                return std::string(env);
+
+            return MODDIR;
+        }
 }
 
 namespace paludis
@@ -40,8 +50,15 @@ void ModuleRegistry::load(std::string name) throw(ModuleError)
     loaded_module mod;
 
     mod.name = name;
-    mod.handle = dlopen(name.c_str(), RTLD_LOCAL|RTLD_NOW);
     mod.obj = 0;
+
+    std::string path = module_path() + "/" + name;
+
+    mod.handle = dlopen(path.c_str(), RTLD_LOCAL|RTLD_NOW);
+
+    // If the above fails, perhaps it's an absolute path
+//    if (!mod.handle)
+//        mod.handle = dlopen(name.c_str(), RTLD_LOCAL|RTLD_NOW);
 
     if (!mod.handle)
         throw ModuleError(dlerror());

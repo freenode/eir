@@ -154,7 +154,7 @@ namespace paludis
         Implementation(Bot *b, std::string n)
             : bot(b), _name(n), _connected(false), _supported(b), _capabilities(b)
         {
-            config_filename = _name + ".conf";
+            config_filename = ETCDIR "/" + _name + ".conf";
             set_handler = add_handler(filter_command_privilege("set", "admin").from_bot(bot).or_config(),
                                       &Implementation<Bot>::handle_set);
             rehash_handler = add_handler(filter_command_privilege("rehash", "admin").from_bot(bot),
@@ -227,6 +227,9 @@ void Implementation<Bot>::load_config(std::function<void(std::string)> reply_fun
                                 &Implementation<Bot>::set_server);
 
     std::ifstream fs(config_filename.c_str());
+    if (!fs)
+        throw ConfigurationError("Couldn't open config file '" + config_filename + "'");
+
     std::string line;
 
     while(std::getline(fs, line))

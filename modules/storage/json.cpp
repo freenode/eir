@@ -98,7 +98,7 @@ struct JsonStorage : Module, StorageBackend
     {
         Json::Value jv = EirValueToJsonValue(v);
         Json::StyledWriter writer;
-        std::string filename("data/" + target);
+        std::string filename(DATADIR "/" + target);
         std::ofstream fs(filename.c_str());
         fs << writer.write(jv);
         if (!fs)
@@ -107,7 +107,7 @@ struct JsonStorage : Module, StorageBackend
 
     Value Load(std::string source)
     {
-        std::string filename("data/" + source);
+        std::string filename(DATADIR "/" + source);
         std::ifstream fs(filename.c_str());
         Json::Reader reader;
         Json::Value jv;

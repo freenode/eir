@@ -23,6 +23,8 @@ MODULES = \
 	  storage/json
 
 storage/json_CXXFLAGS = -Ilibjson
+storage/json_LDFLAGS = -Wl,--rpath $(LIBDIR)
+storage/json_LIBRARIES = libjson/json
 
 SUBDIRS = $(ENABLE_PERL)
 
