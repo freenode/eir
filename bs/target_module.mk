@@ -21,6 +21,8 @@ $(_BS_BUILD_TARGET_$(1)): $(_BS_OBJECTS_$(1)) | $(call dirname,$(_BS_BUILD_TARGE
 	rm -f $$@
 	$(CXX) -shared -o $$@ \
 	    $(call expand-target-variable,$(1),LDFLAGS) \
+	    -L$(BUILDDIR)/$(LIBDIR) \
+	    $(call expand-target-dependencies,$(1)) \
 	    $(_BS_OBJECTS_$(1))
 
 endef
