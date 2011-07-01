@@ -8,6 +8,6 @@ SUBDIRS = \
 
 include settings.mk
 
-include bs/target_module.mk
-include ../bs/bs.mk
+include bsextra/target_module.mk
+include bs/bs.mk
 

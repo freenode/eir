@@ -1,0 +1,3 @@
+[submodule "bs"]
+	path = bs
+	url = git://github.com/spb/bs.git
