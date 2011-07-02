@@ -20,5 +20,5 @@ eir_SOURCES = bot.cpp \
 	    supported.cpp \
 	    value.cpp \
 
-eir_LDFLAGS = -Wl,-export-dynamic -Wl,--rpath $(LIBDIR)
+eir_LDFLAGS = -Wl,-export-dynamic -Wl,-rpath,$(LIBDIR)
 eir_LIBRARIES = -ldl paludis/util/paludisutil

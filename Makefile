@@ -4,7 +4,8 @@ SUBDIRS = \
 	  paludis/util \
 	  src \
 	  libjson \
-	  modules
+	  modules \
+	  doc
 
 include settings.mk
 
