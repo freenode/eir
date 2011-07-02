@@ -14,3 +14,6 @@ CXXFLAGS = -fPIC -Isrc -Imodules/perl $(PERL_CFLAGS) \
 LDFLAGS = $(PERL_LIBS)
 
 XSFLAGS = -except -typemap typemap
+
+DATADIR = $(MODDIR)/perl
+DATA = lib
