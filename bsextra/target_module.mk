@@ -7,7 +7,7 @@ _BS_DEFAULT_OUTPUT_MODULE = $(MODDIR)/$(1).so
 
 define _BS_EXTRA_TARGET_SETTINGS_MODULE
 
-$(2)_SOURCES = $(2).cpp
+$(2)_SOURCES ?= $(2).cpp
 
 endef
 #= LIBRARY_NAME_$(1)/$(2) = $(2)

@@ -1,13 +1,6 @@
 .*.swp
 .*.swo
-*.o
-*.so
-eir
-.depend
 tags
-
-modules/perl/perlxsi.c
-modules/perl/api/api_XS.cpp
 
 configure
 config.log

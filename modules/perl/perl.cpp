@@ -12,17 +12,14 @@
 
 #include <paludis/util/join.hh>
 
-// Include the xs_init definition here, as i'm too lazy to make the build system
-// include two source files for this .so
-extern "C" {
-#include "perlxsi.c"
-}
-
 using namespace eir;
 
 #define TYPE_MAPS_LIGHT
 #include "util/type_maps.h"
 #include "util/call_perl.hh"
+
+// Defined in perlxsi.c, generated at build time
+extern "C" void xs_init(pTHX);
 
 struct PerlModule : CommandHandlerBase<PerlModule>, Module
 {
