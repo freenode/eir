@@ -6,7 +6,6 @@
 # bantracker_dbuser
 # bantracker_dbpass
 # bantracker_debug
-# bantracker_urlprefix
 # bantracker_enable_logging
 #
 # To make configuration changes the privilege 'bantracker' is required
@@ -16,6 +15,7 @@ use warnings;
 use Eir;
 use DBI;
 use Data::Dumper;
+use Time::Local;
 
 our %heap;
 our $bot=Eir::find_bot('eir');
@@ -96,10 +96,16 @@ $heap{'query'}       = {
 #
 # Connect to the database
 #
-our $dbh=DBI->connect($bot->Settings->{'bantracker_dsn'},
+our $dbh;
+
+eval {
+    my $alarm = alarm 0;
+    $dbh=DBI->connect($bot->Settings->{'bantracker_dsn'},
                      $bot->Settings->{'bantracker_dbuser'},
                      $bot->Settings->{'bantracker_dbpass'} ) or die $!;
-$dbh->{mysql_auto_reconnect} = 1;
+    $dbh->{mysql_auto_reconnect} = 1;
+    alarm $alarm;
+};
 
 
 #
@@ -108,10 +114,10 @@ $dbh->{mysql_auto_reconnect} = 1;
 our @handlers;
 @handlers = (
             # IRC event handlers
-            Eir::CommandRegistry::add_handler(Eir::Filter->new({command => '367',type => Eir::Source::RawIrc}),\&irc_367),
-            Eir::CommandRegistry::add_handler(Eir::Filter->new({command => '368', type => Eir::Source::RawIrc}),\&irc_368),
-            Eir::CommandRegistry::add_handler(Eir::Filter->new({command => 'JOIN',type => Eir::Source::RawIrc}),\&irc_join),
-            Eir::CommandRegistry::add_handler(Eir::Filter->new({command => 'mode_change',type => Eir::Source::Internal}),\&irc_mode),
+            Eir::CommandRegistry::add_handler(Eir::Filter->new({command => '367',type => Eir::Source::RawIrc}),\&irc_367,1),
+            Eir::CommandRegistry::add_handler(Eir::Filter->new({command => '368', type => Eir::Source::RawIrc}),\&irc_368,1),
+            Eir::CommandRegistry::add_handler(Eir::Filter->new({command => 'JOIN',type => Eir::Source::RawIrc}),\&irc_join,1),
+            Eir::CommandRegistry::add_handler(Eir::Filter->new({command => 'mode_change',type => Eir::Source::Internal}),\&irc_mode,1),
             Eir::CommandRegistry::add_handler(Eir::Filter->new({command => 'PRIVMSG', type => Eir::Source::RawIrc}),\&cmd_btcomment),
             # Command handlers
             Eir::CommandRegistry::add_handler(Eir::Filter->new({command => 'help', type => Eir::Source::IrcCommand}),\&cmd_help),
@@ -376,7 +382,7 @@ sub cmd_btconfig {
 
   if ($args[0] =~ /^(#+.+)/) {
     $channel=lc($1);
-    if ($args[1] =~ /^(enabled|report|frequency|admins|bantime|admins|ops|trackmodes|action|logging|reporton|query)$/) {
+    if ($args[1] =~ /^(enabled|report|frequency|admins|bantime|admins|ops|trackmodes|action|logging|reporton|query|urlprefix)$/) {
       $setting=$1;
     } elsif (! defined $args[1]) {
       my $count=0;
@@ -514,7 +520,6 @@ sub nag_expired {
   our %heap;
   our $bot;
   my ($now)=@_;
-
   my %modechar=reverse %{$heap{'chanmodes'}};
   my $channels=$bot->Channels();
   my $target;
@@ -714,6 +719,9 @@ sub describe_ban {
   if ($setDate=~/(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d).(\d+)/){
     $setDate=$1;
   }
+  my ($year,$mon,$mday,$hour,$min,$sec)=split /[-:\ ]/,$setDate;
+  $mon--;
+  my $unixSetDate=timegm($sec,$min,$hour,$mday,$mon,$year);
   if ($mask) {
     $text .= " \002$mask\002";
   }
@@ -727,8 +735,10 @@ sub describe_ban {
     $text .= ' and';
   }
   $text .= " had an expiry date of \002$actionDate.\002";
-  if ($heap{'settings'}{$channel}{'logging'} && $bot->Settings->{'bantracker_urlprefix'}) {
-    $text .= ' Log: ' . $bot->Settings->{'bantracker_urlprefix'} . $i;
+  if ($heap{'settings'}{$channel}{'urlprefix'}) {
+    my $uChannel=$channel;
+    $uChannel =~ s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg;
+    $text .= ' Log: ' . $heap{'settings'}{$channel}{'urlprefix'} . '?i=' . $i . '&ts=' . $unixSetDate . '&c=' . $uChannel;
   }
   return $text;
 }
