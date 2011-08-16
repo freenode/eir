@@ -369,10 +369,17 @@ sub cmd_btset {
   my $sender=$source->{'raw'};
   my $destination=$source->{'destination'};
   my @args = @{$message->args};
-  if (update_ban($sender,$destination, @args)) {
-    $message->reply('Done.');
-  } else {
-    $message->reply('You do not have permission to alter that record');
+  if (scalar @args < 2) {
+    $message->reply('Usage: btset banid [timespec] comment');
+    return;
+  }
+  if ($heap{'to_comment'}{$sender} &&  scalar @{$heap{'to_comment'}{$sender}} > 0) {
+    @{$heap{'to_comment'}{$sender}} = grep { $_ ne $args[0] } @{$heap{'to_comment'}{$sender}};
+  }
+
+  my $res=update_ban($sender,$destination, @args);
+  if ($res) {
+    $message->reply($res);
   }
 }
 
@@ -663,6 +670,9 @@ sub update_ban {
     my $query;
     my @placeholders;
     my @results=db_query($heap{query}{btinfo_ban}, [ $banid ]);
+    if (scalar @results == 0) {
+      return 'No such record.';
+    }
     my $row=shift @results;
     if ($data[0] eq ${$row}[4] || $data[0] =~ $heap{'settings'}{${$row}[3]}{'admins'}) {
       my $i=${$row}[0];
@@ -684,10 +694,10 @@ sub update_ban {
        db_update($query,\@placeholders);
       }
     } else {
-      return 0;
+      return 'You do not have permission to alter that record.';
     }
   }
-  return 1;
+  return 'Done.'
 }
 
 sub request_ban_comment {
