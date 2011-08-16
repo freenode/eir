@@ -227,6 +227,7 @@ sub irc_mode {
 
   return unless $heap{'settings'}{$destination}{'enabled'};
   return unless $destination=~/^#/ && $heap{'settings'}{$destination}{'trackmodes'};
+  return if $sender =~ $heap{'settings'}{$destination}{'ignore'};
   my $re='^([' . $heap{'settings'}{$destination}{'trackmodes'} . ']$)';
   if ($args[1] =~ $re && $heap{'chanmodes'}{$args[1]}) {
     $type=$heap{'chanmodes'}{$args[1]};
@@ -382,7 +383,7 @@ sub cmd_btconfig {
 
   if ($args[0] =~ /^(#+.+)/) {
     $channel=lc($1);
-    my @options=qw(enabled report frequency admins bantime admins ops trackmodes action logging reporton query urlprefix);
+    my @options=qw(enabled report frequency admins bantime admins ops trackmodes action logging reporton query urlprefix ignore);
     if ( grep {$_ eq $args[1] } @options ) {
       $setting=$args[1];
     } elsif (! defined $args[1]) {
