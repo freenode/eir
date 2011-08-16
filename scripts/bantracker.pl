@@ -382,8 +382,9 @@ sub cmd_btconfig {
 
   if ($args[0] =~ /^(#+.+)/) {
     $channel=lc($1);
-    if ($args[1] =~ /^(enabled|report|frequency|admins|bantime|admins|ops|trackmodes|action|logging|reporton|query|urlprefix)$/) {
-      $setting=$1;
+    my @options=qw(enabled report frequency admins bantime admins ops trackmodes action logging reporton query urlprefix);
+    if ( grep {$_ eq $args[1] } @options ) {
+      $setting=$args[1];
     } elsif (! defined $args[1]) {
       my $count=0;
       for $setting (keys %{$heap{'settings'}{$channel}}) {
@@ -395,7 +396,7 @@ sub cmd_btconfig {
       }
       return;
    } else {
-      $message->reply("Unknown setting: $args[1] (available settings: enabled, report, frequency, admins, bantime, ops, trackmodes, action)");
+      $message->reply("Unknown setting: $args[1] (available settings: (" . join(", ",@options) . ")");
       return;
     }
   }
