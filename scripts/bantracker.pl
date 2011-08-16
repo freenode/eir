@@ -166,7 +166,7 @@ sub irc_join {
   my ($message) = @_;
   my $source=$message->source();
   return unless ($source->{'name'} eq $bot->nick);
-  my $channel=$source->{'destination'};
+  my $channel=irclc($source->{'destination'});
   if ($heap{'settings'}{$channel}{'frequency'}) {
     $heap{$channel}{'nag_after'}=time()+$heap{'settings'}{$channel}{'frequency'};
   }
@@ -178,7 +178,7 @@ sub irc_367 {
   our %heap;
   my ($message) = @_;
   my @args=@{$message->args};
-  push (@{$heap{$args[0]}{'temp_list'}}, $args[1]);
+  push (@{$heap{irclc($args[0])}{'temp_list'}}, $args[1]);
 }
 
 sub irc_log {
@@ -187,7 +187,7 @@ sub irc_log {
   my $raw=$message->raw;
   my ($sender, $command, $target, $data) = split /\ /,$raw,4;
   if ($target=~/^:?(#.+)$/) {
-    my $channel=$1;
+    my $channel=irclc($1);
     return unless $heap{'settings'}{$channel}{'logging'};
     db_insert($heap{query}{log_entry}, [ $channel, $sender, $command, $data ]);
   } elsif (($command eq '332' || $command eq '333') && $data=~/^(#.+?) (.*)$/) {
@@ -202,7 +202,7 @@ sub irc_368 {
   our %heap;
   my ($message) = @_;
   my @args=@{$message->args};
-  my $channel=$args[0];
+  my $channel=irclc($args[0]);
   if ($args[1]=~/End of Channel (Ban|Quiet) List/ && defined @{$heap{$channel}{'temp_list'}}) {
     my $access_list=lc $1 . '_list';
     @{$heap{$channel}{$access_list}} = @{$heap{$channel}{'temp_list'}};
@@ -215,14 +215,14 @@ sub irc_728 {
   our %heap;
   my ($message) = @_;
   my @args=@{$message->args};
-  push (@{$heap{$args[0]}{'temp_quiet_list'}}, $args[2]);
+  push (@{$heap{irclc($args[0])}{'temp_quiet_list'}}, $args[2]);
 }
 
 sub irc_729 {
   our %heap;
   my ($message) = @_;
   my @args=@{$message->args};
-  my $channel=$args[0];
+  my $channel=irclc($args[0]);
   @{$heap{$channel}{quiet_list}} = @{$heap{$channel}{'temp_quiet_list'}};
   undef @{$heap{$channel}{'temp_quiet_list'}};
 }
@@ -231,9 +231,9 @@ sub irc_mode {
   our %heap;
   my ($message) = @_;
   my $source=$message->source();
-  my $sender=$source->{'raw'};
-  my $nick=$source->{'name'};
-  my $destination=$source->{'destination'};
+  my $sender=irclc($source->{'raw'});
+  my $nick=irclc($source->{'name'});
+  my $destination=irclc($source->{'destination'});
   my @args=@{$message->args};
   my $target=$heap{'settings'}{$destination}{'report'} || undef;
   my ($bantime, $action,$type);
@@ -314,23 +314,23 @@ sub cmd_btquery {
   my @placeholders;
 
   return unless $args[0];
-if ($args[0] =~ /^(#+[\w\-_\.]+)/) {
+  if ($args[0] =~ /^(#+\S+)/) {
     $query=$heap{query}{$command .'_channel'};
-    @placeholders= ( $1 );
+    @placeholders= ( irclc($1) );
     if ($command eq 'btcheck') {
-           if ($args[1]=~/@/) {
-                         push (@placeholders, $args[1] );
-           } else {
-                   push (@placeholders, $args[1] . "!%")
-           }
+      if ($args[1]=~/@/) {
+        push (@placeholders, irclc($args[1]) );
+      } else {
+        push (@placeholders, irclc($args[1]) . "!%")
+      }
     }
   } elsif ($args[0] =~ /^(\d+)/ && $command eq 'btinfo') {
     $query=$heap{query}{$command. '_ban'};
     @placeholders= ( $1 );
     $activeonly=0;
-  } elsif ($args[0] =~ /^(\w+)/ && $command ne 'btexpired') {
+  } elsif ($args[0] =~ /^(\D\S+)/ && $command ne 'btexpired') {
     $query=$heap{query}{$command . '_nick'};
-    @placeholders= ("$1!%");
+    @placeholders= (irclc($1) . "!%");
   } else {
     return;
   }
@@ -395,7 +395,7 @@ sub cmd_btconfig {
   my ($channel,$setting);
 
   if ($args[0] =~ /^(#+.+)/) {
-    $channel=lc($1);
+    $channel=irclc($1);
     my @options=qw(enabled report frequency admins bantime admins ops trackmodes action logging reporton query urlprefix ignore);
     if ( grep {$_ eq $args[1] } @options ) {
       $setting=$args[1];
@@ -553,7 +553,7 @@ sub nag_expired {
       my ($i,$mask,$action,$type,$nagged)=@$row[0,1,8,10,11];
       my $state='inactive';
       for my $ban (@{$heap{$channel}{$type .'_list'}}) {
-       if ($ban eq $mask) {
+       if (irclc($ban) eq $mask) {
          $state='active';
        }
       }
@@ -794,4 +794,11 @@ sub db_update {
   my @placeholders=@{$_[1]};
   my $sth = $dbh->prepare( $query ) or die $!;
   $sth->execute( @placeholders ) or die $!;
+}
+
+sub irclc {
+  # converts a string to lower case, using rfc1459 casemapping
+  my $s=shift;
+  $s=~tr/A-Z[]\^/a-z{}|~/;
+  return $s;
 }
