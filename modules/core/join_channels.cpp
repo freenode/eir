@@ -12,6 +12,12 @@ struct JoinChannels : CommandHandlerBase<JoinChannels>, Module
 
     void add_channel(const Message *m)
     {
+        if (m->args.empty())
+        {
+            m->source.error("I need a channel name to join");
+            return;
+        }
+
         bot_channels.push_back(m->args[0]);
         if (m->bot && m->bot->connected())
             m->bot->send("JOIN " + m->args[0]);
