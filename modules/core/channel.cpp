@@ -35,7 +35,7 @@ ChannelHandler::ChannelHandler()
     nick_id = add_handler(filter_command_type("NICK", sourceinfo::RawIrc), &ChannelHandler::handle_nick);
     nick_id = add_handler(filter_command_type("ACCOUNT", sourceinfo::RawIrc), &ChannelHandler::handle_account);
     who_id = add_handler(filter_command_type("352", sourceinfo::RawIrc), &ChannelHandler::handle_who_reply);
-    who_id = add_handler(filter_command_type("354", sourceinfo::RawIrc), &ChannelHandler::handle_whox_reply);
+    whox_id = add_handler(filter_command_type("354", sourceinfo::RawIrc), &ChannelHandler::handle_whox_reply);
     kick_id = add_handler(filter_command_type("KICK", sourceinfo::RawIrc), &ChannelHandler::handle_kick);
 }
 
