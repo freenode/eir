@@ -6,7 +6,7 @@ using namespace eir;
 
 struct HostmaskPrivilege : CommandHandlerBase<HostmaskPrivilege>, Module
 {
-    Value & priv_entries() { return GlobalSettingsManager::get_instance()->get("privileges")["global"]; }
+    Value & priv_entries() { return GlobalSettingsManager::get_instance()->get("privileges"); }
     Value & priv_types() { return GlobalSettingsManager::get_instance()->get("privilege_types"); }
 
     void calculate_hostmask_privileges(const Message *m)

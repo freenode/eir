@@ -2,11 +2,13 @@
 #include "handler.h"
 #include "match.h"
 
+#include <algorithm>
+
 using namespace eir;
 
 struct PrivilegeHandler : CommandHandlerBase<PrivilegeHandler>, Module
 {
-    Value & priv_entries() { return GlobalSettingsManager::get_instance()->get("privileges")["global"]; }
+    Value & priv_entries() { return GlobalSettingsManager::get_instance()->get("privileges"); }
     Value & priv_types() { return GlobalSettingsManager::get_instance()->get("privilege_types"); }
 
     Value make_priv_entry(std::string type, std::string match, std::string channel, std::string priv, bool config = false)
@@ -173,13 +175,10 @@ struct PrivilegeHandler : CommandHandlerBase<PrivilegeHandler>, Module
 
     void clear_conf_privileges(const Message *)
     {
-        for (auto it = priv_entries().begin(); it != priv_entries().end(); )
-        {
-            if ((*it)["is_config"])
-                priv_entries().erase(it++);
-            else
-                ++it;
-        }
+        Value new_privs(Value::array);
+        std::copy_if(priv_entries().Array().begin(), priv_entries().Array().end(), std::back_inserter(new_privs.Array()),
+                [](Value & v) -> bool { return !(v["is_config"]); });
+        priv_entries() = new_privs;
     }
 
     CommandHolder add_id, add2_id, remove_id, client_id, recalc_id, clear_id, list_id;
@@ -201,6 +200,26 @@ struct PrivilegeHandler : CommandHandlerBase<PrivilegeHandler>, Module
                                 &PrivilegeHandler::remove_privilege_entry);
         list_id = add_handler(filter_command("showprivs"),
                                 &PrivilegeHandler::list_privs);
+
+        // Load stored privileges. Maintain upgrade path from previous versions.
+        try
+        {
+            Value loaded_privs = StorageManager::get_instance()->Load("privileges");
+            if (loaded_privs.Type() == Value::kvarray)
+                priv_entries() = loaded_privs["global"];
+            else
+                priv_entries() = loaded_privs;
+        }
+        catch (std::exception &)
+        {
+            priv_entries() = Value(Value::array);
+        }
+
+        // Strip out old config file entries.
+        clear_conf_privileges(0);
+
+        // And set privs to auto-save
+        StorageManager::get_instance()->auto_save(&priv_entries(), "privileges");
     }
 };
 
