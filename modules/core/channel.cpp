@@ -23,7 +23,7 @@ struct ChannelHandler : CommandHandlerBase<ChannelHandler>, Module
 
     ChannelHandler();
 
-    CommandHolder join_id, part_id, quit_id, names_id, nick_id, who_id, whox_id, kick_id;
+    CommandHolder join_id, part_id, quit_id, names_id, nick_id, account_id, who_id, whox_id, kick_id;
 };
 
 ChannelHandler::ChannelHandler()
@@ -33,7 +33,7 @@ ChannelHandler::ChannelHandler()
     quit_id = add_handler(filter_command_type("QUIT", sourceinfo::RawIrc), &ChannelHandler::handle_quit);
     //names_id = add_handler("353", sourceinfo::RawIrc, &ChannelHandler::handle_names_reply);
     nick_id = add_handler(filter_command_type("NICK", sourceinfo::RawIrc), &ChannelHandler::handle_nick);
-    nick_id = add_handler(filter_command_type("ACCOUNT", sourceinfo::RawIrc), &ChannelHandler::handle_account);
+    account_id = add_handler(filter_command_type("ACCOUNT", sourceinfo::RawIrc), &ChannelHandler::handle_account);
     who_id = add_handler(filter_command_type("352", sourceinfo::RawIrc), &ChannelHandler::handle_who_reply);
     whox_id = add_handler(filter_command_type("354", sourceinfo::RawIrc), &ChannelHandler::handle_whox_reply);
     kick_id = add_handler(filter_command_type("KICK", sourceinfo::RawIrc), &ChannelHandler::handle_kick);
