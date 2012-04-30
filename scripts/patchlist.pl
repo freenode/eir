@@ -70,7 +70,7 @@ sub patchlist {
     } else {
         $message->reply(scalar @$matches . " ${matching}patches in queue:");
         foreach my $patch (@$matches) {
-            send_patch($message, $patch);
+            $message->reply(format_patch($patch));
         }
     }
 }
@@ -160,6 +160,9 @@ sub patchdone {
                         deleted_time => time,
                         deleted_by => $message->source->{name}
                     };
+
+            $message->reply("Done " . format_patch($patches->[$i]));
+
             delete $patches->[$i];
         }
     }
@@ -218,12 +221,12 @@ sub match_patch {
           or $patch->{summary} =~ /\Q$match\E/ );
 }
 
-sub send_patch {
-    my ($message, $patch) = @_;
+sub format_patch {
+    my ($patch) = @_;
     my $age = time - $patch->{time};
-    $message->reply($patch->{url} . " " . $patch->{repo} . " " . $patch->{comment} .
+    return $patch->{url} . " " . $patch->{repo} . " " . $patch->{comment} .
                     " (submitted by " . $patch->{nick} .
-                    " " . ago($age) . "): " . $patch->{summary});
+                    " " . ago($age) . "): " . $patch->{summary};
 }
 
 
