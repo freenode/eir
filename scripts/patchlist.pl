@@ -109,8 +109,11 @@ sub patchqueue {
     }
 
     if ($saneurl) {
-        my $ua = LWP::UserAgent->new;
+        my $ua = LWP::UserAgent->new(ssl_opts => { verify_hostname => 0 });;
         my $response = $ua->get($saneurl);
+
+        $ua->protocols_allowed( [ 'http', 'https'] );
+
         if ($response->is_success) {
             my $subject = "";
             my @lines = split(/\n/, $response->decoded_content);
