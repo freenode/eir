@@ -101,9 +101,6 @@ sub patchqueue {
     elsif (( $id ) = ($url =~ qr|^http://ix.io/(\w+)|)) {
         $saneurl = "http://ix.io/$id";
     }
-    elsif (( $id ) = ($url =~ qr|^http://paste.pocoo.org/(?:show\|raw)/(\d+)|)) {
-        $saneurl = "http://paste.pocoo.org/raw/$id/";
-    }
     elsif (( $id ) = ($url =~ qr|^https://(?:gist.github.com\|raw.github.com/gist)/(\d+)|)) {
         $saneurl = "https://raw.github.com/gist/$id/";
     }
