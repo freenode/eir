@@ -13,6 +13,7 @@ api_SRCDIRS = api
 api_CXXFLAGS = -Imodules/perl/api
 
 CPPFLAGS = -fPIC -Isrc -Imodules/perl $(PERL_CFLAGS) \
+	   -Wno-unused-parameter -Wno-unused-but-set-variable \
 	   -Wno-unused-variable -Wno-write-strings -Wno-format-security -DPERL_GCC_PEDANTIC
 
 LDFLAGS = $(PERL_LIBS)
