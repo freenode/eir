@@ -107,6 +107,7 @@ namespace eir {
             Filter& or_config();
 
             bool match(const Message *) const;
+            const std::string & command() const { return commandname; }
     };
 
     inline Filter filter_type(unsigned int type)
