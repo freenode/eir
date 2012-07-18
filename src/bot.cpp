@@ -12,6 +12,8 @@
 #include <paludis/util/tokeniser.hh>
 #include <paludis/util/destringify.hh>
 
+#include <map>
+#include <unordered_map>
 #include <fstream>
 
 #include "string_util.h"
@@ -47,8 +49,8 @@ namespace paludis
     template <>
     struct Implementation<Bot> : public CommandHandlerBase<Implementation<Bot> >
     {
-        typedef std::map<std::string, Client::ptr, cistringcompare> ClientMap;
-        typedef std::map<std::string, Channel::ptr, cistringcompare> ChannelMap;
+        typedef std::unordered_map<std::string, Client::ptr> ClientMap;
+        typedef std::unordered_map<std::string, Channel::ptr> ChannelMap;
         typedef std::map<std::string, Value> SettingsMap;
 
         Bot *bot;
@@ -152,7 +154,10 @@ namespace paludis
         void rehash(const Message *m);
 
         Implementation(Bot *b, std::string n)
-            : bot(b), _name(n), _connected(false), _supported(b), _capabilities(b)
+            : bot(b), _name(n),
+              _clients(512), _channels(512),
+              _connected(false),
+              _supported(b), _capabilities(b)
         {
             config_filename = ETCDIR "/" + _name + ".conf";
             set_handler = add_handler(filter_command_privilege("set", "admin").from_bot(bot).or_config(),
@@ -311,7 +316,7 @@ void Implementation<Bot>::handle_message(std::string line)
     if (bang != std::string::npos)
     {
         std::string nick = m.source.raw.substr(0, bang);
-        ClientMap::iterator c = _clients.find(nick);
+        ClientMap::iterator c = _clients.find(lowercase(nick));
         if (c != _clients.end())
             m.source.client = c->second;
 
@@ -464,12 +469,12 @@ Bot::ClientIterator Bot::end_clients()
 
 Bot::ClientIterator Bot::find_client_it(std::string nick)
 {
-    return second_iterator(_imp->_clients.find(nick));
+    return second_iterator(_imp->_clients.find(lowercase(nick)));
 }
 
 Client::ptr Bot::find_client(std::string nick)
 {
-    Implementation<Bot>::ClientMap::iterator it = _imp->_clients.find(nick);
+    Implementation<Bot>::ClientMap::iterator it = _imp->_clients.find(lowercase(nick));
     if (it == _imp->_clients.end())
         return Client::ptr();
     return it->second;
@@ -483,7 +488,7 @@ std::pair<Bot::ClientIterator, bool> Bot::add_client(Client::ptr c)
     if (!_imp->_me && c->nick() == nick())
         _imp->_me = c;
 
-    std::pair<Implementation<Bot>::ClientMap::iterator, bool> res = _imp->_clients.insert(make_pair(c->nick(), c));
+    std::pair<Implementation<Bot>::ClientMap::iterator, bool> res = _imp->_clients.insert(make_pair(lowercase(c->nick()), c));
     if (res.second)
     {
         Message m(this, "new_client", sourceinfo::Internal, c);
@@ -500,7 +505,7 @@ unsigned long Bot::remove_client(Client::ptr c)
     Message m(this, "client_remove", sourceinfo::Internal, c);
     CommandRegistry::get_instance()->dispatch(&m);
 
-    return _imp->_clients.erase(c->nick());
+    return _imp->_clients.erase(lowercase(c->nick()));
 }
 
 // Channel stuff
@@ -517,7 +522,7 @@ Bot::ChannelIterator Bot::end_channels()
 
 Bot::ChannelIterator Bot::find_channel_it(std::string name)
 {
-    return second_iterator(_imp->_channels.find(name));
+    return second_iterator(_imp->_channels.find(lowercase(name)));
 }
 
 Channel::ptr Bot::find_channel(std::string name)
@@ -532,14 +537,14 @@ Channel::ptr Bot::find_channel(std::string name)
 std::pair<Bot::ChannelIterator, bool> Bot::add_channel(Channel::ptr c)
 {
     Context ctx("Adding channel " + c->name());
-    std::pair<Implementation<Bot>::ChannelMap::iterator, bool> res = _imp->_channels.insert(make_pair(c->name(), c));
+    std::pair<Implementation<Bot>::ChannelMap::iterator, bool> res = _imp->_channels.insert(make_pair(lowercase(c->name()), c));
     return make_pair(second_iterator(res.first), res.second);
 }
 
 unsigned long Bot::remove_channel(Channel::ptr c)
 {
     Context ctx("Removing channel " + c->name());
-    return _imp->_channels.erase(c->name());
+    return _imp->_channels.erase(lowercase(c->name()));
 }
 
 void Bot::remove_channel(Bot::ChannelIterator c)
