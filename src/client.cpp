@@ -208,7 +208,7 @@ namespace paludis
         typedef std::map<std::string, Membership::ptr>::iterator MemberIterator;
         std::map<std::string, Membership::ptr> members;
 
-        Implementation(std::string n) : name(lowercase(n))
+        Implementation(std::string n) : name(n)
         { }
     };
 }

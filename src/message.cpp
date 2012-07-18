@@ -13,7 +13,7 @@ Filter::Filter()
 Filter& Filter::is_command(std::string c)
 {
     matches |= match_command;
-    commandname = lowercase(c);
+    commandname = c;
     return *this;
 }
 
@@ -68,7 +68,7 @@ bool Filter::match(const Message *m) const
 {
     if (matches & match_source_type && 0 == (sourcetype & m->source.type))
         return false;
-    if (matches & match_command && commandname != lowercase(m->command))
+    if (matches & match_command && ! cistring::equal(commandname, m->command))
         return false;
     if (matches & match_bot && bot != m->bot)
         return false;

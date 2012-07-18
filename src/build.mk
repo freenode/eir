@@ -17,6 +17,7 @@ eir_SOURCES = bot.cpp \
 	    server.cpp \
 	    settings.cpp \
 	    storage.cpp \
+	    string_util.cpp \
 	    supported.cpp \
 	    value.cpp \
 

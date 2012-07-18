@@ -30,15 +30,6 @@ template class paludis::WrappedForwardIterator<Bot::SettingsIteratorTag, const s
 
 namespace paludis
 {
-    struct cistringcompare
-    {
-        bool operator() (std::string lhs, std::string rhs)
-        {
-            return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
-        }
-    };
-
-
     template <>
     struct Implementation<BotManager>
     {
@@ -49,8 +40,8 @@ namespace paludis
     template <>
     struct Implementation<Bot> : public CommandHandlerBase<Implementation<Bot> >
     {
-        typedef std::unordered_map<std::string, Client::ptr> ClientMap;
-        typedef std::unordered_map<std::string, Channel::ptr> ChannelMap;
+        typedef std::unordered_map<std::string, Client::ptr, cistring::hasher, cistring::is_equal> ClientMap;
+        typedef std::unordered_map<std::string, Channel::ptr, cistring::hasher, cistring::is_equal> ChannelMap;
         typedef std::map<std::string, Value> SettingsMap;
 
         Bot *bot;
@@ -316,7 +307,7 @@ void Implementation<Bot>::handle_message(std::string line)
     if (bang != std::string::npos)
     {
         std::string nick = m.source.raw.substr(0, bang);
-        ClientMap::iterator c = _clients.find(lowercase(nick));
+        ClientMap::iterator c = _clients.find(nick);
         if (c != _clients.end())
             m.source.client = c->second;
 
@@ -469,12 +460,12 @@ Bot::ClientIterator Bot::end_clients()
 
 Bot::ClientIterator Bot::find_client_it(std::string nick)
 {
-    return second_iterator(_imp->_clients.find(lowercase(nick)));
+    return second_iterator(_imp->_clients.find(nick));
 }
 
 Client::ptr Bot::find_client(std::string nick)
 {
-    Implementation<Bot>::ClientMap::iterator it = _imp->_clients.find(lowercase(nick));
+    Implementation<Bot>::ClientMap::iterator it = _imp->_clients.find(nick);
     if (it == _imp->_clients.end())
         return Client::ptr();
     return it->second;
@@ -488,7 +479,7 @@ std::pair<Bot::ClientIterator, bool> Bot::add_client(Client::ptr c)
     if (!_imp->_me && c->nick() == nick())
         _imp->_me = c;
 
-    std::pair<Implementation<Bot>::ClientMap::iterator, bool> res = _imp->_clients.insert(make_pair(lowercase(c->nick()), c));
+    std::pair<Implementation<Bot>::ClientMap::iterator, bool> res = _imp->_clients.insert(make_pair(c->nick(), c));
     if (res.second)
     {
         Message m(this, "new_client", sourceinfo::Internal, c);
@@ -505,7 +496,7 @@ unsigned long Bot::remove_client(Client::ptr c)
     Message m(this, "client_remove", sourceinfo::Internal, c);
     CommandRegistry::get_instance()->dispatch(&m);
 
-    return _imp->_clients.erase(lowercase(c->nick()));
+    return _imp->_clients.erase(c->nick());
 }
 
 // Channel stuff
@@ -522,13 +513,12 @@ Bot::ChannelIterator Bot::end_channels()
 
 Bot::ChannelIterator Bot::find_channel_it(std::string name)
 {
-    return second_iterator(_imp->_channels.find(lowercase(name)));
+    return second_iterator(_imp->_channels.find(name));
 }
 
 Channel::ptr Bot::find_channel(std::string name)
 {
-    std::string lowername = lowercase(name);
-    Implementation<Bot>::ChannelMap::iterator it = _imp->_channels.find(lowername);
+    Implementation<Bot>::ChannelMap::iterator it = _imp->_channels.find(name);
     if (it == _imp->_channels.end())
         return Channel::ptr();
     return it->second;
@@ -537,14 +527,14 @@ Channel::ptr Bot::find_channel(std::string name)
 std::pair<Bot::ChannelIterator, bool> Bot::add_channel(Channel::ptr c)
 {
     Context ctx("Adding channel " + c->name());
-    std::pair<Implementation<Bot>::ChannelMap::iterator, bool> res = _imp->_channels.insert(make_pair(lowercase(c->name()), c));
+    std::pair<Implementation<Bot>::ChannelMap::iterator, bool> res = _imp->_channels.insert(make_pair(c->name(), c));
     return make_pair(second_iterator(res.first), res.second);
 }
 
 unsigned long Bot::remove_channel(Channel::ptr c)
 {
     Context ctx("Removing channel " + c->name());
-    return _imp->_channels.erase(lowercase(c->name()));
+    return _imp->_channels.erase(c->name());
 }
 
 void Bot::remove_channel(Bot::ChannelIterator c)
