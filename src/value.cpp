@@ -1,7 +1,7 @@
 #include "value.h"
 
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <memory>
 
 #include <paludis/util/private_implementation_pattern-impl.hh>
@@ -101,7 +101,7 @@ namespace paludis
     template <>
     struct Implementation<KeyValueArray>
     {
-        std::map<std::string, Value> _map;
+        std::unordered_map<std::string, Value> _map;
     };
 }
 
@@ -544,7 +544,7 @@ bool KeyValueArray::erase(std::string s)
 
 KeyValueArray::iterator KeyValueArray::erase(KeyValueArray::iterator it)
 {
-    return _imp->_map.erase(it.underlying_iterator<std::map<std::string,Value>::iterator>());
+    return _imp->_map.erase(it.underlying_iterator<std::unordered_map<std::string,Value>::iterator>());
 }
 
 void KeyValueArray::clear()
