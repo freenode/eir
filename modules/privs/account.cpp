@@ -6,8 +6,10 @@ using namespace eir;
 
 struct AccountPrivilege : CommandHandlerBase<AccountPrivilege>, Module
 {
-    Value & priv_entries() { return GlobalSettingsManager::get_instance()->get("privileges"); }
-    Value & priv_types() { return GlobalSettingsManager::get_instance()->get("privilege_types"); }
+    Value * _cache_priv_entries;
+    Value * _cache_priv_types;
+    Value & priv_entries() { if (!_cache_priv_entries) _cache_priv_entries = &GlobalSettingsManager::get_instance()->get("privileges"); return *_cache_priv_entries; }
+    Value & priv_types() { if (!_cache_priv_types) _cache_priv_types = &GlobalSettingsManager::get_instance()->get("privilege_types"); return *_cache_priv_types; }
 
     void calculate_account_privileges(const Message *m)
     {
@@ -24,6 +26,7 @@ struct AccountPrivilege : CommandHandlerBase<AccountPrivilege>, Module
     CommandHolder calc_handler;
 
     AccountPrivilege()
+        : _cache_priv_entries(0), _cache_priv_types(0)
     {
         calc_handler = add_handler(filter_command_type("calculate_client_privileges", sourceinfo::Internal),
                                     &AccountPrivilege::calculate_account_privileges);
