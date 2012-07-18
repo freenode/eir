@@ -33,7 +33,11 @@ namespace paludis
     struct Implementation<CommandRegistry>
     {
         typedef std::multimap<std::string, HandlerMapEntry> HandlerMap;
-        HandlerMap _handlers[3];
+        std::vector<HandlerMap> _handlers;
+
+        Implementation() : _handlers(3)
+        {
+        }
 
         void try_dispatch(const HandlerMapEntry & he, const Message *m, bool fatal_errors)
         {
