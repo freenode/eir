@@ -116,6 +116,8 @@ our @handlers;
             # IRC event handlers
             Eir::CommandRegistry::add_handler(Eir::Filter->new({command => '367',type => Eir::Source::RawIrc}),\&irc_367,1),
             Eir::CommandRegistry::add_handler(Eir::Filter->new({command => '368', type => Eir::Source::RawIrc}),\&irc_368,1),
+            Eir::CommandRegistry::add_handler(Eir::Filter->new({command => '728',type => Eir::Source::RawIrc}),\&irc_728,1),
+            Eir::CommandRegistry::add_handler(Eir::Filter->new({command => '729', type => Eir::Source::RawIrc}),\&irc_729,1),
             Eir::CommandRegistry::add_handler(Eir::Filter->new({command => 'JOIN',type => Eir::Source::RawIrc}),\&irc_join,1),
             Eir::CommandRegistry::add_handler(Eir::Filter->new({command => 'mode_change',type => Eir::Source::Internal}),\&irc_mode,1),
             Eir::CommandRegistry::add_handler(Eir::Filter->new({command => 'PRIVMSG', type => Eir::Source::RawIrc}),\&cmd_btcomment),
