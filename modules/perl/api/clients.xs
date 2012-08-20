@@ -12,6 +12,9 @@ Client::host()
 string
 Client::nuh()
 
+string
+Client::account()
+
 int
 Client::has_privilege(...)
 CODE:
