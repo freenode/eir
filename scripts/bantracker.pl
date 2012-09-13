@@ -562,7 +562,7 @@ sub nag_expired {
       my ($i,$mask,$action,$type,$nagged)=@$row[0,1,8,10,11];
       my $state='inactive';
       for my $ban (@{$heap{$channel}{$type .'_list'}}) {
-       if (irclc($ban) eq $mask) {
+       if ($ban eq $mask) {
          $state='active';
        }
       }
