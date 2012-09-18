@@ -442,7 +442,7 @@ sub cmd_btcomment {
   # bail out if we've been called by the PRIVMSG hook and the destination is a channel
   return if $source->{'type'} & Eir::Source::RawIrc &&  substr($source->{destination},0,1) eq '#';
 
-  my $sender=$source->{'raw'};
+  my $sender=irclc($source->{'raw'});
   my $nick=$source->{'name'};
   my @args = @{$message->args};
   if ($source->{'type'} & Eir::Source::RawIrc) {
