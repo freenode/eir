@@ -6,6 +6,7 @@
 #include "modules.h"
 #include "command.h"
 
+#include <unistd.h>
 #include "exceptions.h"
 
 #include <signal.h>
