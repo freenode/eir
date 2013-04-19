@@ -107,6 +107,9 @@ sub patchqueue {
     elsif (( $id ) = ($url =~ qr|^https?://paste.pound-python.org/(?:show\|raw)/(\d+)|)) {
         $saneurl = "https://paste.pound-python.org/raw/$id/"
     }
+    elsif (( $id ) = ($url =~ qr|^http?://bpaste.net/(?:show\|raw)/(\d+)|)) {
+        $saneurl = "http://bpaste.net/raw/$id/";
+    }
 
     if ($saneurl) {
         my $ua = LWP::UserAgent->new(ssl_opts => { verify_hostname => 0 });;
