@@ -105,7 +105,7 @@ sub patchqueue {
         $saneurl = "https://raw.github.com/gist/$id";
     }
     elsif (( $id ) = ($url =~ qr|^https?://paste.pound-python.org/(?:show\|raw)/(\d+)|)) {
-        $saneurl = "https://paste.pound-python.org/raw/$id/"
+        $saneurl = "http://paste.pound-python.org/raw/$id/"
     }
     elsif (( $id ) = ($url =~ qr|^http?://bpaste.net/(?:show\|raw)/(\d+)|)) {
         $saneurl = "http://bpaste.net/raw/$id/";
