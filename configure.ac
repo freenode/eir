@@ -48,6 +48,14 @@ AC_HELP_STRING([--with-datadir=DIR],
      AC_SUBST([DATADIR])]
 )
 
+AC_ARG_ENABLE([warnings],
+        [AS_HELP_STRING([--enable-warnings],[Enable warnings.])],
+        [enable_warnings=$enableval],
+        [enable_warnings="no"])
+
+AS_IF([test "x$enable_warnings" != "xno"],
+[WARNINGS_CFLAGS="-Wall -Werror -Wextra"])
+AC_SUBST(WARNINGS_CFLAGS)
 
 AC_ARG_ENABLE([perl],
         [AS_HELP_STRING([--disable-perl],[Disable building perl scripting module.])],

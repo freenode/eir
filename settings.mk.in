@@ -2,6 +2,8 @@ ENABLE_PERL = @ENABLE_PERL@
 PERL_CFLAGS = @PERL_CFLAGS@
 PERL_LIBS = @PERL_LIBS@
 
+WARNINGS_CFLAGS = @WARNINGS_CFLAGS@
+
 # Really we want these uppercase, but autoconf will always set the lowercase one
 prefix          = @prefix@
 exec_prefix     = @exec_prefix@
@@ -16,4 +18,4 @@ MODDIR = @MODDIR@
 ETCDIR = @ETCDIR@
 EIR_DATADIR = @DATADIR@
 
-CXXFLAGS += -DMODDIR=\"$(MODDIR)\" -DETCDIR=\"$(ETCDIR)\" -DDATADIR=\"$(EIR_DATADIR)\"
+CXXFLAGS += $(WARNINGS_CFLAGS) -DMODDIR=\"$(MODDIR)\" -DETCDIR=\"$(ETCDIR)\" -DDATADIR=\"$(EIR_DATADIR)\"

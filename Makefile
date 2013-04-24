@@ -1,4 +1,4 @@
-CXXFLAGS = -O0 -fno-inline-functions -ggdb3 -I. -Wall -Werror -Wextra -pedantic -std=c++0x
+CXXFLAGS = -O0 -fno-inline-functions -ggdb3 -I. -pedantic -std=c++0x
 
 SUBDIRS = \
 	  paludis/util \
