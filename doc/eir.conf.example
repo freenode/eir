@@ -1,26 +1,26 @@
-modload "modules/storage/json.so"
+modload "storage/json.so"
 default_storage json
 
-modload "modules/core/ping.so"
-modload "modules/core/nickserv.so"
-modload "modules/core/channel.so"
-modload "modules/whoami.so"
-modload "modules/core/join_channels.so"
-modload "modules/core/die.so"
-modload "modules/core/mode.so"
-modload "modules/core/error.so"
-modload "modules/userlist.so"
-modload "modules/logs/stderr.so"
-modload "modules/logs/channel.so"
-modload "modules/help.so"
+modload "core/ping.so"
+modload "core/nickserv.so"
+modload "core/channel.so"
+modload "whoami.so"
+modload "core/join_channels.so"
+modload "core/die.so"
+modload "core/mode.so"
+modload "core/error.so"
+modload "userlist.so"
+modload "logs/stderr.so"
+modload "logs/channel.so"
+modload "help.so"
 
 server 127.0.0.2 6667 eir
 
 set command_chars .
 
-modload modules/privileges.so
-modload modules/privs/hostmask.so
-modload modules/privs/account.so
+modload privileges.so
+modload privs/hostmask.so
+modload privs/account.so
 
 #privilege host *!*@127.0.0.2 admin
 privilege account spb admin
@@ -32,7 +32,7 @@ log stderr - raw info admin command warning
 
 log channel #eir admin command warning
 
-modload "modules/perl/perl.so"
+modload "perl/perl.so"
 
 # Use one or the other of these two blocks, not both
 
