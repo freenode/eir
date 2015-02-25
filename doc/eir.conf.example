@@ -32,7 +32,7 @@ log stderr - raw info admin command warning
 
 log channel #eir admin command warning
 
-modload "perl/perl.so"
+modload "perl.so"
 
 # Use one or the other of these two blocks, not both
 
