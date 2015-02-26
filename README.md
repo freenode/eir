@@ -10,12 +10,14 @@ Installation
 
 If you just want to know how to build and install it, do the following
 
-- git submodule init
-- git submodule update
-- autoconf
-- ./configure --prefix=SOMEWHERE
-- make
-- make install
+```
+git submodule init
+git submodule update
+autoconf
+./configure --prefix=SOMEWHERE
+make
+make install
+```
 
 Then go to SOMEWHERE/etc, and write eir.conf. There is an example config file
 installed.
