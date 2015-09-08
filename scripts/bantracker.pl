@@ -279,7 +279,9 @@ sub irc_mode {
        @{$heap{$destination}{$type . '_list'}} = grep { $_ ne $args[2] } @{$heap{$destination}{$type . '_list'}};
       }
       for my $row (db_query($heap{query}{prepare_remove_ban}, [ $destination,  $args[2] || '', $type ])) {
-       my $text="(\0039REM\003) ". describe_ban(@$row) . " It was removed by \002$sender\002 on \002" . scalar gmtime() . "\002";
+       my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = gmtime();
+       my $time = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $year + 1900, $mon + 1, $mday + 1, $hour, $min, $sec);
+       my $text="(\0039REM\003) ". describe_ban(@$row) . " It was removed by \002$sender\002 on \002$time\002";
        my $setter=${$row}[4];
        my $i=${$row}[0];
        db_update($heap{query}{remove_ban}, [ $sender, $i ]);
