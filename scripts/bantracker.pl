@@ -813,6 +813,6 @@ sub db_update {
 sub irclc {
   # converts a string to lower case, using rfc1459 casemapping
   my $s=shift;
-  $s=~tr/A-Z[]\^/a-z{}|~/;
+  $s=~tr/A-Z[]\\^/a-z{}|~/;
   return $s;
 }
