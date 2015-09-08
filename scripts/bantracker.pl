@@ -763,7 +763,7 @@ sub describe_ban {
   } else {
     $text .= ' and';
   }
-  $text .= " had an expiry date of \002$actionDate.\002";
+  $text .= " had an expiry date of \002$actionDateZ.\002";
   if ($heap{'settings'}{$channel}{'urlprefix'}) {
     my $uChannel=$channel;
     $uChannel =~ s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg;
