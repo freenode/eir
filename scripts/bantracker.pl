@@ -678,7 +678,7 @@ sub update_ban {
       return 'No such record.';
     }
     my $row=shift @results;
-    if (irclc($data[0]) eq ${$row}[4] || irclc($data[0]) =~ $heap{'settings'}{${$row}[3]}{'admins'}) {
+    if (irclc($data[0]) eq ${$row}[4] || $data[0] =~ $heap{'settings'}{${$row}[3]}{'admins'}) {
       my $i=${$row}[0];
       if ($newtime && $newreason) {
        $query=$heap{query}{update_time_reason};
