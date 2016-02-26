@@ -62,20 +62,22 @@ namespace
         "\002check\002. Displays a list of users in \037voicebot_channel\037 who would be voiced by the \002voice\002 "
         "command, and a list of those unvoiced users who would not be voiced.";
     const char *help_match =
-        "\002match <mask>|<nick>\002. Displays the DNV list entries that match the given argument. If the nickname "
+        "\002match (mask | nick)\002. Displays the DNV list entries that match the given argument. If the nickname "
         "of a currently visible user is given, entries matching that user are shown. Otherwise, it is interpreted as "
         "a hostmask.";
     const char *help_add =
         "\002add <mask> [time] <reason>\002. Adds a DNV entry <mask>, expiring in <time>, with comment <reason>.\n"
-        "If \037time\037 is not specified, the default_voice_expiry setting is used. \037time\037 may "
-        "be zero, in which case the entry will not expire. \037reason\037 may be empty.";
+        "If \037time\037 is not specified, the default_voice_expiry setting is used. \037time\037 must be in seconds, "
+        "and preceeded by a ~. \037time\037 may be zero, in which case the entry will not expire. \037reason\037 "
+        "may be empty.";
     const char *help_remove =
         "\002remove <mask>\002. Removes all entries from the DNV list that match the given mask.\n"
         "Note that 'remove *' will clear the list.";
     const char *help_edit =
         "\002edit <mask> [time] [reason]\002. Edits the expiry time and/or comment of an existing DNV entry. If "
         "\037time\037 is given but \037reason\037 is not, then only the expiry will be changed. Similarly if "
-        "\037reason\037 is given but \037time\037 is not, then the expiry will be left unchanged.";
+        "\037reason\037 is given but \037time\037 is not, then the expiry will be left unchanged. \037time\037 must be "
+        "in seconds and preceeded by a ~.";
 
 
     Value voiceentry(std::string bot, std::string mask, std::string setter, std::string reason,
