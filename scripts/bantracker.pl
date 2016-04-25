@@ -536,7 +536,7 @@ sub cmd_help {
   my ($message) = @_;
   my @args = @{$message->args};
   return if (scalar @args > 0);
-  $message->reply('For bantracker documentation see http://freenode.net/eir.shtml');
+  $message->reply('For bantracker documentation see https://github.com/freenode/eir/blob/master/doc/bantracker/operators-guide.txt');
 }
 
 #
