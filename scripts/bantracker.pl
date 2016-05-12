@@ -309,7 +309,7 @@ sub cmd_btquery {
   my ($message) = @_;
   my $source=$message->source();
   my $command=$message->command();
-  my $sender=$source->{'raw'};
+  my $sender=irclc($source->{'raw'});
   my $destination=$source->{'destination'};
   my $client=$message->source()->{'client'};
   my @args = @{$message->args};
@@ -370,7 +370,7 @@ sub cmd_btset {
   our %heap;
   my ($message) = @_;
   my $source=$message->source();
-  my $sender=$source->{'raw'};
+  my $sender=irclc($source->{'raw'});
   my $destination=$source->{'destination'};
   my @args = @{$message->args};
   if (scalar @args < 2) {
