@@ -309,7 +309,7 @@ sub cmd_btquery {
   my ($message) = @_;
   my $source=$message->source();
   my $command=$message->command();
-  my $sender=irclc($source->{'raw'});
+  my $sender=$source->{'raw'};
   my $destination=$source->{'destination'};
   my $client=$message->source()->{'client'};
   my @args = @{$message->args};
@@ -343,7 +343,7 @@ sub cmd_btquery {
     my $state='inactive';
     my @results=db_query($query, \@placeholders);
     for my $row (@results) {
-      next unless ($sender eq ${$row}[4] || $sender =~ $heap{'settings'}{lc(${$row}[3])}{'admins'} || $sender =~ $heap{'settings'}{lc(${$row}[3])}{'query'} || $client->has_privilege('bantracker') );
+      next unless (irclc($sender) eq ${$row}[4] || $sender =~ $heap{'settings'}{lc(${$row}[3])}{'admins'} || $sender =~ $heap{'settings'}{lc(${$row}[3])}{'query'} || $client->has_privilege('bantracker') );
       my $mask=${$row}[1];
       my $channel=${$row}[3];
       my $type=${$row}[10];
@@ -370,7 +370,7 @@ sub cmd_btset {
   our %heap;
   my ($message) = @_;
   my $source=$message->source();
-  my $sender=irclc($source->{'raw'});
+  my $sender=$source->{'raw'};
   my $destination=$source->{'destination'};
   my @args = @{$message->args};
   if (scalar @args < 2) {
