@@ -51,3 +51,13 @@ TIME SPECIFICATION
  ~4h1m4s   For 4 hours, 1 minute and 4 seconds from the time set.
  ~48h      For 48 hours from the time set, (can also use ~2d).
  ~14d      For 2 weeks (or 14 days) from the time set.
+
+ACTIONS
+
+ The time specification can be prefixed with a single character to dictate the action that will be taken when the ban expires:
+
+'#' Report the expired ban to the report channel only, or do nothing if there is no report channel
+'@' Remove the ban if the bot has operator status, or report the ban as above
+'%' Try and obtain operator status using ChanServ and remove the ban. If this is not possible no action will be taken.
+
+
