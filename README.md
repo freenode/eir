@@ -19,11 +19,24 @@ make
 make install
 ```
 
+To install on FreeBSD, you will need `g++` and `gmake`, so something like this:
+```
+# if not already available do the following:
+sudo pkg install gcc48 gmake
+git submodule init
+git submodule update
+autoconf
+./configure --prefix=SOMEWHERE
+CXX=g++48 gmake
+gmake install
+
+```
+
 Then go to SOMEWHERE/etc, and write eir.conf. There is an example config file
 installed.
 
 Scripts
 =======
 
-Eir comes with a few perl script modules, including Bantracker.pl, and a module 
+Eir comes with a few perl script modules, including Bantracker.pl, and a module
 for sasl-auth login. You will want to copy these to your install location
