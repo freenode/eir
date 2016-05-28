@@ -10,6 +10,9 @@
 
 #include <unistd.h>
 #include <sys/socket.h>
+#ifdef __FreeBSD__
+#  include <netinet/in.h>
+#endif
 #include <sys/select.h>
 #include <sys/types.h>
 #include <sys/time.h>

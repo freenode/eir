@@ -22,4 +22,8 @@ eir_SOURCES = bot.cpp \
 	    value.cpp \
 
 eir_LDFLAGS = -Wl,-export-dynamic -Wl,-rpath,$(LIBDIR)
-eir_LIBRARIES = -ldl paludis/util/paludisutil
+ifeq ($(shell uname),FreeBSD)
+	eir_LIBRARIES = paludis/util/paludisutil
+else
+	eir_LIBRARIES = -ldl paludis/util/paludisutil
+endif
