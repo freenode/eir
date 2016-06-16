@@ -1,63 +1,81 @@
+GENERAL USAGE
+
+Commands may be sent via private message, or prefixed with ! in channels.
+
+Commands submitted in channel will be replied to in channel (not private).
+
 COMMANDS
 
-These may be sent in PM to the bot, or in channel by prefixing them with !
-Note if you use the commands in channel the reply will be sent to the channel.
+btinfo <index|nickname|#channel>
 
-btinfo (index|nick|#channel)
+  btinfo <index> returns entries matching <index>
+  btinfo <nickname> returns entries set by <nickname>
+  btinfo <#channel> returns entries set on <#channel>
 
-  This will show you information about one ban if
-  btinfo index is used.
+btcheck <#channel> <nickname|fullmask>
 
-  However, if btinfo nick is used, then it will show all the
-  active bans set by the nick, and how many bans the nick has set in total.
+  Returns entries set on #channel matching <nickname> or <fullmask>
 
-  If btinfo #channel is used, the it will return a list of all the recorded bans
-  set in a channel (warning, this may be a long list).
+btpending <#channel|nickname>
 
-btcheck #channel (nick|fullMask)
+  Returns uncommented (pending) entries set on <#channel>, or set by <nickname>.
 
-  This will return a list of active bans on the #channel that match the user
-  either by nick or full mask (nick will use the bot's internal list)
+btexpired <#channel>
 
-btpending (#channel|nick)
+  Returns expired entries set on <#channel>
 
-  This command will list all of the bans that are both active and uncommented
-  for the #channel or set by the nick.
+btset <index> <[[action]~[timespec]] [comment]>
 
-btexpired #channel
+  Sets the action, expiry time and/or comment for an existing entry.
+ 
+  One of [timespec] or [comment], or both (in order) is required.
+ 
+  [action] may only be specified with a [timespec], not without.
 
- This command will list all of the bans in #channel that are active and
- expired.
+  Examples:
 
+    btset 43221 Trolling
+    btset 43221 ~48h
+    btset 43221 ~48h Trolling
+ 
+  For details on [timespec], see TIME SPECIFICATION section below
+  For details on [action], see ACTIONS section below.
+  
+COMMENTS
 
-btset index [~time]|[reason]
-
-  Sets the ban expire time and/or the reason for the ban by index.
-
-REASONS
-
- When you set a ban, the bot will PM you requesting a comment on the ban. Simply
- reply to the comment, whatever you send will be recorded. If you have set more
- than one ban you will be promted for each in turn.
-
- If you wish to extend the default ban time (channel dependent, typically 24 hours),
- type this when you enter your comment: ~time comment - e.g. "~14d Trolling".
+For each new ban added in a channel (with +b), the bantracker bot will private
+message the user who set the ban, asking for a comment (reason) to be added.
+ 
+The content of the reply to that message is saved, and then visible in btinfo
+results. If more than one ban was set, you will be prompted for a comment for
+each in turn.
+  
+The default expiry time of the ban (channel dependent, typically 24 hours) can
+be changed when adding a [comment], by prefixing it with a ~[timespec]. For
+example: "~14d Trolling"
 
 TIME SPECIFICATION
 
- When commenting or using the btset command times can be specified in days, hours, minutes, seconds or any combination.
+When adding a comment or using the btset command, times can be specified in 
+[w]eeks, [d]ays, [h]ours, [m]inutes, [s]econds or in any combination together.
 
- ~1h       For 1 hour from the time set.
- ~4h1m4s   For 4 hours, 1 minute and 4 seconds from the time set.
- ~48h      For 48 hours from the time set, (can also use ~2d).
- ~14d      For 2 weeks (or 14 days) from the time set.
+Examples:
+
+  ~1h       1 hour from the time it is set.
+  ~4h1m4s   4 hours, 1 minute and 4 seconds from the time it is set.
+  ~48h      48 hours from the time it is set. (Equivalent to ~2d).
+  ~14d      14 days from the time it is set.
+  ~2w       2 weeks from the time it is set. (Equivalent to ~14d)
 
 ACTIONS
 
- The time specification can be prefixed with a single character to dictate the action that will be taken when the ban expires:
+Expiry time specifications (timespec) can optionally be prefixed
+with a single character that sets the action that should be taken
+when that ban entry expires.
 
-'#' Report the expired ban to the report channel only, or do nothing if there is no report channel
-'@' Remove the ban if the bot has operator status, or report the ban as above
-'%' Try and obtain operator status using ChanServ and remove the ban. If this is not possible no action will be taken.
-
-
+  # - Reports the expired ban to the report channel only, or does nothing if a
+      report channel is not set.
+  @ - Removes the ban if the bot has operator status, or report the ban (as above)
+      if it does not.
+  % - Bot attempts to gain operator status using ChanServ and remove the ban. Takes
+      no further action if this cannot be done.
