@@ -441,12 +441,16 @@ sub cmd_btcomment {
   our %heap;
   my ($message) = @_;
   my $source=$message->source();
+  my @args = @{$message->args};
+
   # bail out if we've been called by the PRIVMSG hook and the destination is a channel
   return if $source->{'type'} & Eir::Source::RawIrc &&  substr($source->{destination},0,1) eq '#';
 
+  # If the user is using the "help" command, don't treat that as a ban comment
+  return if lc($args[0]) eq 'help';
+
   my $sender=irclc($source->{'raw'});
   my $nick=$source->{'name'};
-  my @args = @{$message->args};
   if ($source->{'type'} & Eir::Source::RawIrc) {
     @args=split /\s+/,$args[0];
   }
