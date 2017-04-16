@@ -322,7 +322,7 @@ sub cmd_btquery {
     $query=$heap{query}{$command .'_channel'};
     @placeholders= ( irclc($1) );
     if ($command eq 'btcheck') {
-      if ($args[1]=~/@/) {
+      if ($args[1]=~/[%@\$]/) {
         push (@placeholders, irclc($args[1]) );
       } else {
         push (@placeholders, irclc($args[1]) . "!%")
