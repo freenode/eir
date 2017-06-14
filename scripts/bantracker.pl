@@ -266,7 +266,7 @@ sub irc_mode {
        request_ban_comment($banid,$nick);
       }
       ;
-      my $text="(\0034NEW\003) \002$type\002\[$banid\] was set";
+      my $text="(\0039NEW\003) \002$type\002\[$banid\] was set";
       if ($args[2]) {
        $text .= " on \002$args[2]\002";
       }
@@ -281,7 +281,7 @@ sub irc_mode {
       for my $row (db_query($heap{query}{prepare_remove_ban}, [ $destination,  $args[2] || '', $type ])) {
        my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = gmtime();
        my $time = sprintf("%04d-%02d-%02d %02d:%02d:%02dZ", $year + 1900, $mon + 1, $mday, $hour, $min, $sec);
-       my $text="(\0039REM\003) ". describe_ban(@$row) . " It was removed by \002$sender\002 on \002$time\002";
+       my $text="(\0034REM\003) ". describe_ban(@$row) . " It was removed by \002$sender\002 on \002$time\002";
        my $setter=${$row}[4];
        my $i=${$row}[0];
        db_update($heap{query}{remove_ban}, [ $sender, $i ]);
