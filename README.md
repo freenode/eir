@@ -21,6 +21,19 @@ make
 make install
 ```
 
+To install on FreeBSD, you will need `g++` and `gmake`, so something like this:
+```
+# if not already available do the following:
+sudo pkg install gcc6 gmake
+git submodule init
+git submodule update
+autoconf
+./configure --prefix=SOMEWHERE
+CXX=g++6 gmake
+gmake install
+
+```
+
 Then go to SOMEWHERE/etc, and write eir.conf. There is an example config file
 installed.
 
