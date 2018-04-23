@@ -8,7 +8,9 @@ other projects as well.
 Installation
 ============
 
-If you just want to know how to build and install it, do the following
+If you just want to know how to build and install it, do the following after
+making sure you have the obvious pre-reqs (`build-essential`, `libperl-dev`)
+installed:
 
 ```
 git submodule init

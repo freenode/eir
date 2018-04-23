@@ -322,10 +322,10 @@ sub cmd_btquery {
     $query=$heap{query}{$command .'_channel'};
     @placeholders= ( irclc($1) );
     if ($command eq 'btcheck') {
-      if ($args[1]=~/@/) {
-        push (@placeholders, irclc($args[1]) );
+      if ($args[1]=~/[%@\$]/) {
+        push (@placeholders, $args[1] );
       } else {
-        push (@placeholders, irclc($args[1]) . "!%")
+        push (@placeholders, $args[1] . "!%")
       }
     }
   } elsif ($args[0] =~ /^(\d+)/ && $command eq 'btinfo') {
@@ -370,7 +370,7 @@ sub cmd_btset {
   our %heap;
   my ($message) = @_;
   my $source=$message->source();
-  my $sender=$source->{'raw'};
+  my $sender=irclc($source->{'raw'});
   my $destination=$source->{'destination'};
   my @args = @{$message->args};
   if (scalar @args < 2) {
