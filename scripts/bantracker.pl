@@ -720,7 +720,7 @@ sub calc_time {
   # and return a time in seconds
   my $spec=shift @_;
   my $time=0;
-  while ($spec =~ /^~?(\d+)([dhmsw]?)/) {
+  while ($spec =~ /^~?(\d+)([dhmswy]?)/) {
     if ($2 eq 'm') {
       $time+=$1*60;
     } elsif ($2 eq 'h') {
@@ -729,6 +729,8 @@ sub calc_time {
       $time+=$1*86400;
     } elsif ($2 eq 'w') {
       $time+=$1*604800;
+    } elsif ($2 eq 'y') {
+      $time+=$1*31557600
     } elsif ($2 eq 's') {
       $time+=$1;
     } else {
