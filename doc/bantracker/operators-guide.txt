@@ -57,7 +57,7 @@ example: "~14d Trolling"
 TIME SPECIFICATION
 
 When adding a comment or using the btset command, times can be specified in 
-[y]ears, [w]eeks, [d]ays, [h]ours, [m]inutes, [s]econds or in any combination together.
+[y]ears, [M]onths, [w]eeks, [d]ays, [h]ours, [m]inutes, [s]econds or in any combination together.
 
 Examples:
 
