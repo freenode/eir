@@ -98,13 +98,18 @@ namespace paludis
             _pass = pass;
         }
 
-        CommandHolder _001_handler, nick_in_use_handler;
+        CommandHolder _001_handler, nick_in_use_handler, _nick_handler;
 
         void handle_001(const Message *m)
         {
             _nick = m->source.destination;
             _registered = true;
             nick_in_use_handler = 0;
+        }
+
+        void handle_nick(const Message *m) {
+            if (m->source.name == m->bot->nick())
+                _nick = m->source.destination;
         }
 
         void handle_433(const Message *)
@@ -157,6 +162,8 @@ namespace paludis
                                          &Implementation<Bot>::rehash);
             _001_handler = add_handler(filter_command_type("001", sourceinfo::RawIrc).from_bot(bot),
                                         &Implementation<Bot>::handle_001);
+            _nick_handler = add_handler(filter_command_type("NICK", sourceinfo::RawIrc).from_bot(bot),
+                                        &Implementation<Bot>::handle_nick);
             nick_in_use_handler = add_handler(filter_command_type("433", sourceinfo::RawIrc).from_bot(bot),
                                         &Implementation<Bot>::handle_433);
             throttle_handler = add_handler(filter_command_type("throttle", sourceinfo::ConfigFile).from_bot(bot),
