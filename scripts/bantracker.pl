@@ -484,6 +484,7 @@ sub btsync {
   our %heap;
   my $channels=$bot->Channels();
   for my $channel (keys %$channels) {
+    $channel=irclc($channel);
     next unless $heap{'settings'}{$channel}{'enabled'};
     undef %{$heap{$channel}};
     if ($heap{'settings'}{$channel}{'frequency'}) {
@@ -550,6 +551,7 @@ sub nag_expired {
   my $channels=$bot->Channels();
   my $target;
   for my $channel (keys %$channels) {
+    $channel=irclc($channel);
     my $chanserv=0;
     my @modes;
     next unless ($heap{'settings'}{$channel}{'enabled'} && $heap{'settings'}{$channel}{'frequency'});
