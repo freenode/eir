@@ -283,8 +283,8 @@ void ChannelHandler::handle_quit(const Message *m)
         return;
 
     for (Client::ChannelIterator chi = c->begin_channels(), che = c->end_channels();
-            chi != che; ++chi)
-        c->leave_chan(*chi);
+            chi != che; )
+        c->leave_chan(*chi++);
 
     b->remove_client(c);
 
